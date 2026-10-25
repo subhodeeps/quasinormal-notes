@@ -1,0 +1,11 @@
+// The categories and the tags under the byline of a post (_plugins/post-topics-top.rb). The block
+// is Chirpy's own markup from the post's footer, which keeps its look; only the spacing changes,
+// since a header needs less than a footer.
+.post-topics {
+  margin-top: 1rem;
+
+  // Chirpy's mb-3 is !important, so the smaller gap has to be as well
+  > div:first-child {
+    margin-bottom: 0.5rem !important;
+  }
+}
