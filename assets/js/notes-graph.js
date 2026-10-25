@@ -36,15 +36,15 @@
  *
  * The Graph tab is the full picture, inspired by Obsidian's Graph view and Foam's Graph Visualization.
  *
- * - Every tag has a node of its own, a small disc in the muted text colour
- *   with a warm glow (--graph-tag-glow, amber in the dark theme, and in the light theme a stronger
- *   orange, with an eggshell disc inside a ring of that colour; see --graph-tag, -halo and -ring), sized by the number of its notes and joined to them by dotted
- *   lines. Tags thus need
- *   no line between every two notes that share them, which grew as the square of the number of
- *   notes and left out the broadest tags, and a tag such as black-holes becomes a hub that the
- *   notes on that subject gather around. Hovering a tag node shows the tag and its number of
- *   notes, and a click on it opens the tag's page (tag_url in _plugins/notes-graph.rb), in two
- *   steps as for a note.
+ * - Every tag has a node of its own, sized by the number of its notes and joined to them by
+ *   dotted lines. The node is a disc in the muted text colour with an amber glow in the dark
+ *   theme, and an eggshell disc in an orange ring in the light theme (--graph-tag,
+ *   --graph-tag-glow, -halo, -ring and -weak in _sass/amore). A line between every two notes
+ *   that share a tag would grow as the square of the number of notes and would leave out the
+ *   broadest tags, so the notes on a subject gather around the node of their tag instead, and
+ *   a tag such as black-holes becomes a hub. Hovering over a tag node shows the tag and its
+ *   number of notes, and a click opens the tag's page (tag_url in _plugins/notes-graph.rb) in
+ *   two steps, as for a note.
  * - A first click on a note or a tag selects it: the graph stops turning, and the node keeps
  *   its title and its highlight after the pointer moves on. A second click opens its page, and
  *   a click on empty space or Escape clears the selection. The right panel, which holds still,
@@ -60,17 +60,17 @@
  *   layout stays as it is. Every entry of the legend that is in view sits on a pill, all of them
  *   while nothing is filtered, and the entries the filter leaves out fade. The
  *   last button in the corner of the graph clears the filter and the selected tag at once.
- * - A click on Tags only turns the graph into a map of the subjects. It hides the notes and
- *   their links and joins two tags by a line when they share at least two notes. Every line is
- *   thin, and the number of shared notes shows in its style, from a dotted line for two notes
- *   and a dashed one for three to a solid one for four or more, which takes on the amber of the
- *   tags' glow, one step for each note, and gets a halo of its own from five notes (tagLine).
- *   A key to the steps fades in at the lower left of the graph while the map is on. The tags keep the places they have among their notes. A tag
- *   on more than TAG_HUB notes, such as black-holes, would join almost every other tag, so it
- *   draws no line, and a tag without a partner that shares two notes has none either. Both
- *   stay in view, a little faded (--graph-tag-weak), and a click on any tag still opens its page, so the map
- *   also works as a table of contents. The category and stage filters then choose the tags of
- *   those notes, and a click on Tag or on the clear button brings the notes back.
+ * - A click on Tags only shows the tag map. It hides the notes and their links, and it joins
+ *   two tags by a thin line when they share at least two notes. The line is dotted for two
+ *   shared notes, dashed for three and solid for four or more, with a halo from five (tagLine),
+ *   and from four notes it turns from slate toward the amber of the glow, one step for each
+ *   note. A key to the steps fades in at the lower left of the graph. The tags keep their
+ *   places among the notes. A tag on more than TAG_HUB notes, such as black-holes, would join
+ *   almost every other tag, so it has no line, and neither has a tag without a partner that
+ *   shares two notes. Both stay in view, a little faded (--graph-tag-weak), and a click on any
+ *   tag still opens its page, so the map also works as a table of contents. The category and
+ *   stage filters choose the tags of those notes, and a click on Tag or on the clear button
+ *   brings the notes back.
  * - It shows every note and every edge in three dimensions and in perspective, and it turns
  *   slowly, so that the depth reads without any interaction. Notes farther back fade a little,
  *   a second cue for depth, and nodes are drawn from back to front.
