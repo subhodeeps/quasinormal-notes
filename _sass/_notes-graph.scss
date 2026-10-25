@@ -189,6 +189,19 @@
         border-color: var(--text-muted-color);
       }
     }
+
+    // On a phone the buttons shrink with the key, and sit as close to the corner
+    @media (max-width: 576px) {
+      top: 0.4rem;
+      right: 0.4rem;
+      gap: 0.25rem;
+
+      button {
+        width: 1.65rem;
+        height: 1.65rem;
+        font-size: 0.65rem;
+      }
+    }
   }
 
   // The legend, with the credit to Obsidian and Foam below it, both on the left
