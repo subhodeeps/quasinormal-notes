@@ -64,7 +64,7 @@
  *   thin, and the number of shared notes shows in its style, from a dotted line for two notes
  *   and a dashed one for three to a solid one for four or more, which takes on the amber of the
  *   tags' glow, one step for each note, and gets a halo of its own from five notes (tagLine).
- *   A key to the steps sits in the legend while the map is on. The tags keep the places they have among their notes. A tag
+ *   A key to the steps fades in at the lower left of the graph while the map is on. The tags keep the places they have among their notes. A tag
  *   on more than TAG_HUB notes, such as black-holes, would join almost every other tag, so it
  *   draws no line, and a tag without a partner that shares two notes has none either. Both
  *   stay in view, a little faded (WEAK), and a click on any tag still opens its page, so the map
@@ -454,21 +454,7 @@
             '<span class="tag-key"></span>Tag</button></li>' +
             '<li><button type="button" data-filter="tagmap" aria-pressed="false" ' +
             'title="Show only the tags, joined when they share at least two notes">' +
-            `${tagMapKey}Tags only</button></li>` +
-            '<li class="legend-scale" hidden title="The number of notes that two tags share">' +
-            [2, 3, 4, 5, 6]
-              .map((n) => {
-                const line = tagLine(n);
-                const tint = Math.round(line.tint * 100);
-                return (
-                  `<svg viewBox="0 0 24 8" aria-hidden="true"${line.halo ? ' class="halo"' : ''}>` +
-                  `<line x1="2" y1="4" x2="22" y2="4" stroke-linecap="round" stroke-width="1.4" ` +
-                  `stroke-dasharray="${line.dash.join(' ')}" ` +
-                  `style="stroke:color-mix(in srgb, var(--graph-tag-glow) ${tint}%, var(--graph-node))"/></svg>${n}`
-                );
-              })
-              .join('') +
-            ' shared notes</li>'
+            `${tagMapKey}Tags only</button></li>`
           : '') +
         (stages.length > 1
           ? '<li class="legend-break" aria-hidden="true"></li>' +
@@ -479,6 +465,32 @@
               )
               .join('')
           : '');
+    }
+
+    // The key to the lines of the tag map: a small card in the lower left corner of the graph,
+    // which fades in while the map is on. It has a sample of each line, from two to six shared
+    // notes, drawn from the same table as the lines (tagLine), and a hairline from slate to amber
+    const scale = big && tagNodes.length ? document.createElement('div') : null;
+    if (scale) {
+      scale.className = 'notes-graph-scale';
+      scale.setAttribute('aria-hidden', 'true');
+      scale.innerHTML =
+        '<span class="scale-title">Shared notes</span><span class="scale-steps">' +
+        [2, 3, 4, 5, 6]
+          .map((n) => {
+            const line = tagLine(n);
+            const tint = Math.round(line.tint * 100);
+            return (
+              `<span class="step"><svg viewBox="0 0 24 8"${line.halo ? ' class="halo"' : ''}>` +
+              `<line x1="2" y1="4" x2="22" y2="4" stroke-linecap="round" stroke-width="1.4" ` +
+              `stroke-dasharray="${line.dash.join(' ')}" ` +
+              `style="stroke:color-mix(in srgb, var(--graph-tag-glow) ${tint}%, var(--graph-node))"/></svg>` +
+              `<b>${n}</b></span>`
+            );
+          })
+          .join('') +
+        '</span><span class="scale-bar"></span>';
+      canvas.parentElement.append(scale);
     }
 
     const ctx = canvas.getContext('2d');
@@ -577,7 +589,7 @@
         b.classList.toggle('on', inView);
         b.classList.toggle('off', !inView);
       });
-      legend?.querySelector('.legend-scale')?.toggleAttribute('hidden', !tagsOnly);
+      scale?.classList.toggle('on', tagsOnly);
       shown = new Set(nodes.filter(isShown).map((n) => n.id));
       if (hover && !shown.has(hover.id)) hover = null;
       if (selected && !shown.has(selected.id)) selected = null;
