@@ -1,7 +1,7 @@
 ---
 title: "Remote Login to an Arch Linux ThinkPad from macOS"
 short_title: "Remote Login to Arch" # in the note graph
-description: "Remote access from a Mac to an Arch Linux ThinkPad over Tailscale: a terminal over SSH, the desktop over VNC, Sunshine and Moonlight for 3D plots and video, and file transfer."
+description: "Remote access from a Mac to an Arch Linux ThinkPad over Tailscale: a terminal over SSH, the desktop over VNC, Sunshine and Moonlight for 3D plots and video, file transfer and the clipboard."
 date: 2026-10-22 00:00:00 +0530
 categories: [Code Carpentry, Guides]
 tags: [linux, arch-linux, macos, ssh, tailscale, vnc, remote-desktop]
@@ -11,7 +11,7 @@ pin: false
 
 This post describes how we set up remote access from a Mac to an Arch Linux ThinkPad, with a terminal over SSH and the full desktop over VNC. The setup is free for personal use and has no session time limit, and all traffic stays encrypted between our own machines. For our own devices, it covers what we would otherwise use AnyDesk or TeamViewer for. For graphics-heavy work, such as interactive 3D plots in Jupyter or Mathematica notebooks, we add a high-performance mode that streams the desktop as video using Sunshine and Moonlight.
 
-The setup uses Tailscale for networking, Tailscale SSH for authentication, TigerVNC's Wayland server (`w0vncserver`) for desktop sharing, and the Screen Sharing app included with macOS. Section 13 describes the high-performance mode, and Section 14 covers file transfer between the two machines. Where the desktop environment matters, the examples assume KDE Plasma on Wayland.
+The setup uses Tailscale for networking, Tailscale SSH for authentication, TigerVNC's Wayland server (`w0vncserver`) for desktop sharing, and the Screen Sharing app included with macOS. Section 13 describes the high-performance mode, Section 14 covers file transfer between the two machines, and Section 15 the clipboard. Where the desktop environment matters, the examples assume KDE Plasma on Wayland.
 
 ## 1. Overview
 
@@ -766,6 +766,76 @@ scp thinkpad:~/results/plot.png ~/Downloads/
 
 `scp -r` copies entire directories, which makes this the simpler method for results and datasets. For large transfers, `rsync` over the same alias works better, because it resumes an interrupted transfer and skips the files that have not changed. For its options, see the [[2026-07-06-transfer-files-ubuntu-arch|rsync guide]].
 
+## 15. Sharing the clipboard
+
+Neither Tailscale SSH nor Moonlight, as far as we know, copies the clipboard from one machine to the other, so we use three small methods that suit different situations. Moonlight types the Mac's clipboard text on the ThinkPad. Two shell functions send the clipboard through SSH, in either direction. A terminal escape sequence copies text from a shell on the ThinkPad to the Mac's clipboard. Section 15.4 mentions the shared clipboard of Screen Sharing for the VNC session.
+
+### 15.1 Moonlight: typing the clipboard
+
+We copy the text on the Mac, click into the stream so that it has keyboard focus, and press `Control-Option-Shift-V` (Section 13.5). Moonlight then types the text on the ThinkPad as keystrokes, into whichever window has focus. This works for text only, and a very long text or an unusual character might not arrive intact. Moonlight has no counterpart for the other direction that we know of, so for text from the ThinkPad to the Mac we use Section 15.2 or 15.3.
+
+### 15.2 Through SSH
+
+The KDE session on the ThinkPad runs on Wayland, where the program `wl-copy` writes to the clipboard and `wl-paste` reads it. On the ThinkPad, we install both, which come in one package:
+
+```bash
+sudo pacman -S --needed wl-clipboard
+```
+
+A command that we start with `ssh` does not belong to the desktop session, so it does not know where the session's clipboard is. We therefore give it the two variables that name the session's socket. On the Mac, we add the following to `~/.zshrc`, next to the functions of Sections 7.2 and 13.5:
+
+```bash
+_tp_wl='WAYLAND_DISPLAY=wayland-0 XDG_RUNTIME_DIR=/run/user/$(id -u)'
+
+tp-copy() {   # the Mac's clipboard to the ThinkPad's
+    pbpaste | ssh thinkpad "$_tp_wl wl-copy >/dev/null 2>&1"
+}
+
+tp-paste() {  # the ThinkPad's clipboard to the Mac's
+    ssh thinkpad "$_tp_wl wl-paste -n" | pbcopy
+}
+```
+
+After `source ~/.zshrc`, `tp-copy` replaces the ThinkPad's clipboard with the Mac's, and `tp-paste` does the reverse. The name `wayland-0` is the usual one for KDE Plasma. To check it, run on the ThinkPad:
+
+```bash
+ls /run/user/$(id -u)
+```
+
+The listing should contain `wayland-0`. The option `-n` of `wl-paste` leaves out the newline that it would otherwise append, and the redirection after `wl-copy` lets the SSH command return, since `wl-copy` keeps a background process that holds the clipboard. `wl-copy` also needs a compositor that implements a data-control protocol, which KDE Plasma should provide in its recent versions. If `wl-copy` reports a missing protocol, the compositor is the cause, and we use Section 15.3 instead.
+
+In place of `pbpaste`, any command that prints text can feed the pipe, for example `ls | ssh thinkpad "$_tp_wl wl-copy"`. KDE's clipboard manager, Klipper, keeps a history of what we copy, so a password sent this way stays in that history until we clear it.
+
+### 15.3 Copying from a terminal on the ThinkPad
+
+Many terminals accept the escape sequence OSC 52, which sets the clipboard of the machine that the terminal runs on. When we send it from a shell on the ThinkPad, through SSH, the clipboard of the Mac changes. iTerm2, kitty, WezTerm and Ghostty support it, and Terminal.app does not. iTerm2 also asks us to allow it, under Settings → General → Selection, with **Applications in terminal may access clipboard**. To test it, run in an SSH session on the ThinkPad, outside `tmux`:
+
+```bash
+printf '\033]52;c;%s\a' \
+    "$(printf 'hello from the ThinkPad' | base64 -w0)"
+```
+
+A paste on the Mac should now give `hello from the ThinkPad`. Inside `tmux`, the line
+
+```text
+set -g set-clipboard on
+```
+
+in `~/.tmux.conf` on the ThinkPad lets the copy mode of `tmux` set the clipboard of the Mac in the same way, and programs such as `vim` can use OSC 52 too. This direction only copies, so a paste from the Mac to the ThinkPad still goes through Section 15.1 or 15.2.
+
+### 15.4 Screen Sharing
+
+The Screen Sharing app of the Mac has a shared-clipboard setting in its Edit menu, which could carry the clipboard through the VNC session of Section 7. We have not tested whether `w0vncserver` accepts it on Wayland, so we try it with a short text before we rely on it. If it works, we need none of the other methods for that session.
+
+### 15.5 Checks
+
+To confirm that each method works, we try the following.
+
+- Copy a short text on the Mac, run `tp-copy`, and paste it into a text field on the ThinkPad.
+- Copy a short text on the ThinkPad, run `tp-paste`, and paste it on the Mac.
+- Run the `printf` line of Section 15.3 in an SSH session and paste on the Mac.
+- Press `Control-Option-Shift-V` in a Moonlight stream with a text field in focus on the ThinkPad.
+
 ## References
 
 - [w0vncserver manual (TigerVNC)](https://man.archlinux.org/man/w0vncserver.1.en)
@@ -778,3 +848,4 @@ scp thinkpad:~/results/plot.png ~/Downloads/
 - [Sunshine v0.20.0 release notes](https://github.com/LizardByte/Sunshine/releases/tag/v0.20.0), the release in which Sunshine began treating Tailscale's address range as LAN
 - [Moonlight](https://moonlight-stream.org/)
 - [Taildrop](https://tailscale.com/docs/features/taildrop)
+- [wl-clipboard](https://github.com/bugaevc/wl-clipboard)
