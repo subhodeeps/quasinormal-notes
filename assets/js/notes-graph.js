@@ -21,8 +21,7 @@
  * - The layout is flat. Each node drifts a few pixels around its place, slowly and out of step
  *   with the others, so that the graph is not frozen (SWAY). The drift stops while the pointer
  *   rests on a node, while the graph is out of view or the page hidden, and for a reader whose
- *   system asks for less motion. The Home page keeps the graph still (data-drift in
- *   _includes/notes-graph.html).
+ *   system asks for less motion (data-drift in _includes/notes-graph.html).
  * - On a post, the post and the notes it links to or from appear at full strength. The notes
  *   one link further away, and the notes that share a primary tag with the post, appear
  *   faintly (FAR). They give the wider context without asking for attention. On other pages

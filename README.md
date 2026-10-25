@@ -279,7 +279,7 @@ A link to a note that does not exist renders as muted text, and the build prints
 - Solid lines are links, and nodes are solid discs that hide the lines behind them.
 - On a post, under the heading "Connections", the post and the notes it links to or from appear at full strength. The notes one link further away, and the notes that share a primary tag with the post, appear faintly. Dotted lines join the post to the notes that share a primary tag with it, where no link joins them already.
 - On other pages, under "Note Graph", the panel shows every note with its links, and no dotted lines.
-- The layout is flat, and the panel has no legend. On every page but the Home page, each node drifts a few pixels (2.5 to 5 px, with a period of 6 to 10 seconds) around its place. The drift stops while the pointer rests on a node, while the graph is out of view or the page is hidden, and when the system asks for less motion. The include marks the pages with `data-drift` (`_includes/notes-graph.html`). Hovering over a node shows its title, and a click opens the note.
+- The layout is flat, and the panel has no legend. On every page, each node drifts a few pixels (2.5 to 5 px, with a period of 6 to 10 seconds) around its place. The drift stops while the pointer rests on a node, while the graph is out of view or the page is hidden, and when the system asks for less motion. The include marks the pages with `data-drift` (`_includes/notes-graph.html`). Hovering over a node shows its title, and a click opens the note.
 - The colours are the `--graph-*` variables in `_sass/amore/`, set for each theme. A new top-level category needs a `--graph-node-<category>` colour.
 - Chirpy hides the right panel below a width of 1200px.
 
