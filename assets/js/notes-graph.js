@@ -119,7 +119,7 @@
   const SETTLE = 3000; // steps at that strength before the Graph tab draws, so the graph starts at rest
   const HOLD = 120; // frames the simulation stays at full strength after a pull, so the graph springs back
   const [ZOOM_MIN, ZOOM_MAX] = [0.5, 4];
-  const SWAY = [1.2, 2.6]; // px: the range of the amplitudes of the drift in the right panel
+  const SWAY = [2.5, 5]; // px: the range of the amplitudes of the drift in the right panel
   const FAR = 0.4; // opacity of the notes and edges that the panel draws faintly
   const HIDDEN = 0.06; // opacity of the notes that the legend's filter leaves out
   const TAG_HUB = 15; // a tag on more notes than this draws no line on the tag map (TAG_HUB_LIMIT in _plugins/notes-graph.rb)
@@ -532,7 +532,7 @@
       for (const n of nodes) {
         const r = seeded(`sway|${n.id}`);
         const amp = () => SWAY[0] + r() * (SWAY[1] - SWAY[0]);
-        const speed = () => (2 * Math.PI) / (9 + r() * 7); // a period of 9 to 16 seconds
+        const speed = () => (2 * Math.PI) / (6 + r() * 4); // a period of 6 to 10 seconds
         sway.set(n, { ax: amp(), ay: amp(), wx: speed(), wy: speed(), px: r() * 2 * Math.PI, py: r() * 2 * Math.PI });
       }
     }
