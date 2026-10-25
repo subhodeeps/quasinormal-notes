@@ -28,16 +28,16 @@ The script is idempotent. It skips installed components and updates the gems. `R
 
 ```shell
 source .venv/bin/activate   # put the local toolchain on PATH
-bash tools/run.sh           # serve at http://127.0.0.1:4000 with live reload
+bash tools/run.sh           # serve at http://127.0.0.1:4000, or the next free port
 deactivate                  # restore the shell
 ```
 
 | Command | Effect |
 | --- | --- |
-| `bash tools/run.sh` | Serves the site at http://127.0.0.1:4000 with live reload. |
+| `bash tools/run.sh` | Serves the site at http://127.0.0.1:4000 with live reload. If port 4000 or the live reload port 35729 is taken, for example by an SSH tunnel to the preview on another machine, it takes the next free port and prints the address. `-P PORT` sets the first port to try. |
 | `bash tools/run.sh -p` | Serves the site in production mode. |
 | `bash tools/run.sh -d` | Serves the stubs, drafts and private notes alongside the posts. |
-| `bash tools/stop.sh` | Stops the server, for example one left running in another terminal. |
+| `bash tools/stop.sh` | Stops the Jekyll server of this repository, whatever its port, for example one left running in another terminal. Other programs on the same ports, such as an SSH tunnel, keep running. |
 | `bash tools/new-note.sh name [title]` | Creates a private note, `_drafts/private/YYYY-MM-DD-name.md`, named as Foam names notes, with the front matter of the Foam template. |
 | `bash tools/test.sh` | Builds the site in a temporary folder and checks it with html-proofer. The preview in `_site/` stays as it is. |
 
