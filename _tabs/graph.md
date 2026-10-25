@@ -6,7 +6,7 @@ order: 3
 panel_graph: false # the page shows the whole graph, so the right panel leaves it out
 ---
 
-This graph shows every note on the site, each coloured by its category. Two notes are joined by a solid line when one of them links to the other. Every tag appears as a small grey circle with a soft glow, joined to its notes by faint dotted lines, so that the notes on one subject gather around their tags, and a tag of a single note hangs from that note alone.
+This graph shows every note on the site, each coloured by its category. Two notes are joined by a solid line when one of them links to the other. Every tag appears as a small grey circle with a warm amber glow, joined to its notes by faint dotted lines, so that the notes on one subject gather around their tags, and a tag of a single note hangs from that note alone.
 
 {% include notes-graph.html page=true %}
 

@@ -134,7 +134,7 @@
     height: 0;
   }
 
-  // The key for the tag nodes of the Graph tab: a disc in the muted text colour with a faint
+  // The key for the tag nodes of the Graph tab: a disc in the muted text colour with a warm
   // glow, as the graph draws them
   .tag-key {
     display: inline-block;
@@ -143,7 +143,7 @@
     margin-right: 0.3rem;
     border-radius: 50%;
     background: var(--text-muted-color);
-    box-shadow: 0 0 4px var(--text-muted-color);
+    box-shadow: 0 0 5px 1px var(--graph-tag-glow, #d39b3c);
   }
 
   // On the Graph tab, each category, each stage and the tag key are buttons that filter the

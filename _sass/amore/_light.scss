@@ -148,6 +148,7 @@ $tint: 0.3;
   --graph-node-personal: #{p.$plum-main};
   --graph-edge: #{p.$slate-light};
   --graph-edge-faint: #{p.alpha(p.$slate-main, 0.55)};
+  --graph-tag-glow: #{p.$amber-main};
   --graph-current: #{$accent};
 
 

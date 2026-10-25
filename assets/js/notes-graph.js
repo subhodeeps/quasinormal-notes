@@ -37,7 +37,7 @@
  * The Graph tab is the full picture, inspired by Obsidian's Graph view and Foam's Graph Visualization.
  *
  * - Every tag has a node of its own, a small disc in the muted text colour
- *   with a faint glow, sized by the number of its notes and joined to them by dotted
+ *   with a warm amber glow (--graph-tag-glow), sized by the number of its notes and joined to them by dotted
  *   lines. Tags thus need
  *   no line between every two notes that share them, which grew as the square of the number of
  *   notes and left out the broadest tags, and a tag such as black-holes becomes a hub that the
@@ -101,7 +101,7 @@
   const TAG_LENGTH = 60;
   const TAG_LENGTH_3D = 80; // on the Graph tab, where weak, long tag springs give a rounder, even spread
   const MEMBER_LENGTH = 45; // from a note to a tag node, on the Graph tab
-  const TAG_GLOW = 9; // px: the blur of the faint glow around a tag node
+  const TAG_GLOW = 14; // px: the blur of the warm glow around a tag node
   const ITERATIONS = 400;
   const HIT = 9; // px: how close the pointer must be to a node
   const HIT_TOUCH = 18; // px: the same, for a finger
@@ -486,6 +486,7 @@
         faint: get('--graph-edge-faint', 'rgba(194, 201, 209, 0.45)'),
         current: get('--graph-current', '#67428a'),
         tag: get('--text-muted-color', '#768594'),
+        glow: get('--graph-tag-glow', '#d39b3c'),
         text: get('--text-color', '#28313d'),
         bg: get('--main-bg', '#ffffff'),
         font: css.fontFamily || 'sans-serif',
@@ -708,9 +709,9 @@
       if (hover) label(hover);
     }
 
-    // A tag node: a disc in the muted text colour with a faint glow of the same colour. A disc of
-    // the background colour goes first, so that the node hides the lines behind it, and a ring
-    // marks it while the pointer rests on it
+    // A tag node: a disc in the muted text colour with a warm glow around it. A disc of the
+    // background colour goes first, so that the node hides the lines behind it, and a ring marks
+    // it while the pointer rests on it
     function tagNode(n, x, y, faded, weakTag) {
       const r = radius(n);
       const disc = (grow) => {
@@ -723,11 +724,12 @@
       disc(1);
       ctx.fill();
       ctx.save();
-      ctx.shadowColor = colours.tag;
+      ctx.shadowColor = colours.glow;
       ctx.shadowBlur = TAG_GLOW * (big ? proj.get(n).f * Math.sqrt(turn.zoom) : 1);
-      ctx.globalAlpha = alpha * 0.55; // the glow: the disc's own shadow, kept faint
-      ctx.fillStyle = colours.tag;
+      ctx.globalAlpha = alpha * 0.9; // the glow: the shadow of a disc in the glow colour, laid on twice
+      ctx.fillStyle = colours.glow;
       disc(0);
+      ctx.fill();
       ctx.fill();
       ctx.restore();
       ctx.globalAlpha = alpha;
