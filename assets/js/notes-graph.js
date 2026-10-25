@@ -18,7 +18,11 @@
  *
  * The right panel is a quiet map of where a note sits, beside the text it accompanies.
  *
- * - The layout is flat and holds still, since motion or depth would compete with the text.
+ * - The layout is flat. Each node drifts a few pixels around its place, slowly and out of step
+ *   with the others, so that the graph is not frozen (SWAY). The drift stops while the pointer
+ *   rests on a node, while the graph is out of view or the page hidden, and for a reader whose
+ *   system asks for less motion. The Home page keeps the graph still (data-drift in
+ *   _includes/notes-graph.html).
  * - On a post, the post and the notes it links to or from appear at full strength. The notes
  *   one link further away, and the notes that share a primary tag with the post, appear
  *   faintly (FAR). They give the wider context without asking for attention. On other pages
@@ -47,7 +51,7 @@
  *   two steps, as for a note.
  * - A first click on a note or a tag selects it: the graph stops turning, and the node keeps
  *   its title and its highlight after the pointer moves on. A second click opens its page, and
- *   a click on empty space or Escape clears the selection. The right panel, which holds still,
+ *   a click on empty space or Escape clears the selection. The right panel, which has no depth,
  *   opens a note on the first click. The tag nodes
  *   keep the colour neutral, since colour stands for the category of a note, and their glow
  *   sets them apart from the notes.
@@ -115,6 +119,7 @@
   const SETTLE = 3000; // steps at that strength before the Graph tab draws, so the graph starts at rest
   const HOLD = 120; // frames the simulation stays at full strength after a pull, so the graph springs back
   const [ZOOM_MIN, ZOOM_MAX] = [0.5, 4];
+  const SWAY = [1.2, 2.6]; // px: the range of the amplitudes of the drift in the right panel
   const FAR = 0.4; // opacity of the notes and edges that the panel draws faintly
   const HIDDEN = 0.06; // opacity of the notes that the legend's filter leaves out
   const TAG_HUB = 15; // a tag on more notes than this draws no line on the tag map (TAG_HUB_LIMIT in _plugins/notes-graph.rb)
@@ -520,6 +525,18 @@
     // m: how the 3D view is turned, a rotation matrix; px, py: how far it is moved, in px
     let turn = { m: rotX(PITCH), zoom: 1, px: 0, py: 0 };
     const proj = new Map(); // node -> where it is drawn: x, y, depth z and perspective factor f
+    // The drift of the panel: for each node, the amplitude, the angular speed and the phase of a
+    // slow oscillation in x and in y, drawn from the node's name so that every visit looks the same
+    const sway = !big && canvas.dataset.drift === 'true' ? new Map() : null;
+    if (sway) {
+      for (const n of nodes) {
+        const r = seeded(`sway|${n.id}`);
+        const amp = () => SWAY[0] + r() * (SWAY[1] - SWAY[0]);
+        const speed = () => (2 * Math.PI) / (9 + r() * 7); // a period of 9 to 16 seconds
+        sway.set(n, { ax: amp(), ay: amp(), wx: speed(), wy: speed(), px: r() * 2 * Math.PI, py: r() * 2 * Math.PI });
+      }
+    }
+    let clock = 0; // seconds of drift so far
     const dpr = () => window.devicePixelRatio || 1;
     // For a tag node, the radius of its disc, which grows with the number of its notes
     const radius = (n) =>
@@ -638,7 +655,12 @@
     // z grows away from the viewer
     function project() {
       if (!big) {
-        for (const n of nodes) proj.set(n, { x: n.x * view.scale + view.ox, y: n.y * view.scale + view.oy, z: 0, f: 1 });
+        for (const n of nodes) {
+          const s = sway?.get(n);
+          const dx = s ? s.ax * Math.sin(s.wx * clock + s.px) : 0;
+          const dy = s ? s.ay * Math.sin(s.wy * clock + s.py) : 0;
+          proj.set(n, { x: n.x * view.scale + view.ox + dx, y: n.y * view.scale + view.oy + dy, z: 0, f: 1 });
+        }
         return;
       }
       const m = turn.m;
@@ -1111,6 +1133,43 @@
       draw();
     }).observe(canvas);
     document.fonts.ready.then(draw); // the labels use the page's web font
+
+    // The drift of the panel graph: a frame about every 33 ms, only while the graph is in view, the
+    // page is visible and the pointer is not on a node, and not at all if the reader wants less motion
+    if (sway) {
+      const calm = window.matchMedia('(prefers-reduced-motion: reduce)');
+      let inView = true;
+      let last = 0;
+      let swayFrame = null;
+      const swayTick = (now) => {
+        swayFrame = null;
+        if (!inView || document.hidden || calm.matches) {
+          last = 0;
+          return;
+        }
+        if (!last) last = now;
+        if (now - last >= 33) {
+          if (!hover) {
+            clock += (now - last) / 1000;
+            draw();
+          }
+          last = now;
+        }
+        swayFrame = requestAnimationFrame(swayTick);
+      };
+      const swayStart = () => {
+        if (!swayFrame) swayFrame = requestAnimationFrame(swayTick);
+      };
+      if ('IntersectionObserver' in window) {
+        new IntersectionObserver((entries) => {
+          inView = entries[entries.length - 1].isIntersecting;
+          if (inView) swayStart();
+        }).observe(canvas);
+      }
+      document.addEventListener('visibilitychange', swayStart);
+      calm.addEventListener?.('change', swayStart);
+      swayStart();
+    }
 
     const recolour = () => {
       readColours();

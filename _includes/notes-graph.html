@@ -16,6 +16,7 @@
       aria-label="{% if current %}Notes linked to this one{% else %}All notes and the links between them{% endif %}"
       data-src="{{ '/assets/data/notes-graph.json' | relative_url }}"
       data-current="{{ current }}"
+      {% unless include.page or page.layout == 'home' %}data-drift="true"{% endunless %}
       {% if include.page %}tabindex="0"{% endif %}
     ></canvas>
     {% if include.page %}
