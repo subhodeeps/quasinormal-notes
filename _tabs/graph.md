@@ -6,15 +6,13 @@ order: 3
 panel_graph: false # the page shows the whole graph, so the right panel leaves it out
 ---
 
-This graph shows every note on the site, each coloured by its category. Two notes are joined by a solid line when one of them links to the other. Every tag appears as a small circle with a warm glow, joined to its notes by faint dotted lines, so that the notes on one subject gather around their tags, and a tag of a single note hangs from that note alone. <span class="in-dark">In this theme the circles are gray with an amber glow.</span><span class="in-light">In this theme the circles are eggshell, with an orange ring and an orange glow.</span>
+This graph shows every note on the site, coloured by its category. A solid line joins two notes when one links to the other, and each tag is a small glowing circle, <span class="in-dark">gray with an amber glow</span><span class="in-light">eggshell with an orange ring and glow</span>, with dotted lines to its notes.
 
 {% include notes-graph.html page=true %}
 
-The graph turns slowly in three dimensions, and you can also move it by hand. Dragging empty space moves it across the page, and dragging a note pulls that note, which stretches its links and draws its neighbours along. To turn the graph yourself, drag with the Shift key or the right mouse button held down, or with two fingers on a phone. To zoom in and out, scroll over the graph, pinch it on a phone, or press + or −. The buttons in the corner of the graph zoom as well, they reset the view and stop or start the turning, and once you have clicked on the graph, the arrow keys move it too.
+The graph turns slowly by itself, and you are welcome to play with it. Drag to move it, drag with Shift held down to turn it, scroll to zoom, and click a note or a tag once to select it and a second time to open it.
 
-Hovering over a note shows its title, and hovering over a tag circle shows the name of the tag and the number of its notes. A first click on a note or a tag stops the graph and keeps its name and highlight in view while you look around, and a second click opens the note or the page of that tag, while a click on empty space or the Escape key clears the highlight. On a phone or a tablet, a tap works like a click.
-
-In the legend below the graph, a click on a category shows only the notes of that category, further clicks add or remove categories, and a click on Tag hides or shows the tags. A click on Tags only hides the notes and their links, and it joins two tags by a thin line when they share at least two notes, so that the graph becomes a map of the subjects. The line is dotted for two shared notes, dashed for three, and solid for four or more, and from there it turns from slate to amber, one step for each note, as the key in the corner of the graph shows. Every tag stays in view and opens its page on a second click, and a tag without such a partner, as well as the tags of more than fifteen notes, has no line and appears a little fainter. A click on Tag brings the notes back. All the entries of the legend that are in view start out highlighted, except Tags only, which is highlighted only while it is on, and after a click only the chosen ones stay highlighted. The last button in the corner of the graph, below the play button, clears the filters and the selection at once, and like the reset button above it, it sets the graph turning again.
+The legend below the graph filters the notes by category, and Tags only shows the tags on their own, joined by a line when they share at least two notes. The buttons in the corner of the graph zoom, reset the view, pause the turning and clear the filters.
 
 ## The idea behind the graph
 
