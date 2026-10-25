@@ -148,11 +148,11 @@ $tint: 0.3;
   --graph-node-personal: #{p.$plum-main};
   --graph-edge: #{p.$slate-light};
   --graph-edge-faint: #{p.alpha(p.$slate-main, 0.55)};
-  // The tag nodes: a gray disc is too dull on white, so the light theme draws them hollow, as
-  // a ring in the glow colour on the page's background, with a more saturated orange than the
-  // palette's amber (too pale for a glow on white), a third pass of the halo, and tags without
-  // a line that are less faded than in the dark theme
-  --graph-tag: var(--main-bg);
+  // The tag nodes: a gray disc is too dull on white, so the light theme fills them with
+  // eggshell inside a ring in the glow colour, with a more saturated orange than the palette's
+  // amber (too pale for a glow on white), a third pass of the halo, and tags without a line
+  // that are less faded than in the dark theme
+  --graph-tag: #f0ead6;
   --graph-tag-glow: #e8890c;
   --graph-tag-halo: 3;
   --graph-tag-ring: 1.8;

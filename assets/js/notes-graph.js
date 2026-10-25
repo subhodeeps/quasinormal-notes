@@ -38,7 +38,7 @@
  *
  * - Every tag has a node of its own, a small disc in the muted text colour
  *   with a warm glow (--graph-tag-glow, amber in the dark theme, and in the light theme a stronger
- *   orange, with a hollow disc inside a ring of that colour; see --graph-tag, -halo and -ring), sized by the number of its notes and joined to them by dotted
+ *   orange, with an eggshell disc inside a ring of that colour; see --graph-tag, -halo and -ring), sized by the number of its notes and joined to them by dotted
  *   lines. Tags thus need
  *   no line between every two notes that share them, which grew as the square of the number of
  *   notes and left out the broadest tags, and a tag such as black-holes becomes a hub that the
