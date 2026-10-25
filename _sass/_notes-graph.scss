@@ -22,6 +22,17 @@
   touch-action: manipulation;
 }
 
+// Text that describes only one theme, such as the colours of the tag nodes on the Graph tab. The
+// themes in _sass/amore say which of the two is shown, so the text follows the toggle and the
+// system setting alike; without them, the light text shows
+.in-light {
+  display: var(--show-in-light, inline);
+}
+
+.in-dark {
+  display: var(--show-in-dark, none);
+}
+
 // The Graph tab (_tabs/graph.md): the whole graph, wide on a desktop and tall on a phone
 .notes-graph-page {
   margin: 1.5rem 0; // the instructions follow the graph, so it needs room below as above

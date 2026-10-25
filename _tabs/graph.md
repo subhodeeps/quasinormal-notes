@@ -6,7 +6,7 @@ order: 3
 panel_graph: false # the page shows the whole graph, so the right panel leaves it out
 ---
 
-This graph shows every note on the site, each coloured by its category. Two notes are joined by a solid line when one of them links to the other. Every tag appears as a small circle with a warm glow, gray and amber in the dark theme and an eggshell disc in a ring of orange in the light theme, joined to its notes by faint dotted lines, so that the notes on one subject gather around their tags, and a tag of a single note hangs from that note alone.
+This graph shows every note on the site, each coloured by its category. Two notes are joined by a solid line when one of them links to the other. Every tag appears as a small circle with a warm glow, joined to its notes by faint dotted lines, so that the notes on one subject gather around their tags, and a tag of a single note hangs from that note alone. <span class="in-dark">In this theme the circles are gray with an amber glow.</span><span class="in-light">In this theme the circles are eggshell, with an orange ring and an orange glow.</span>
 
 {% include notes-graph.html page=true %}
 
