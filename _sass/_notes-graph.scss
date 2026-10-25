@@ -1,4 +1,4 @@
-// The note graph in the right panel and the backlinks under posts (_plugins/notes-graph.rb)
+// The note graph and the backlinks in the right panel (_plugins/notes-graph.rb)
 
 // In the panel's "access" block, it takes Chirpy's section border, indent and spacing
 #notes-graph {
@@ -314,36 +314,30 @@
   }
 }
 
-// "Linked from", between the post and its footer
-.backlinks {
-  margin-top: 3rem;
-  padding-top: 1.5rem;
-  border-top: 1px solid var(--main-border-color);
+// "Linked from", in the right panel below the graph, with the panel's own indent and spacing. The
+// links take the text colour, as those of Chirpy's lists in the panel do.
+#panel-wrapper .backlinks {
+  padding-right: 1rem;
 
-  h2 {
-    margin: 0 0 0.75rem;
-    font-size: 0.875rem;
-    font-weight: 600;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-    color: var(--text-muted-color);
-  }
-
-  ul {
-    margin: 0;
-    padding: 0;
-    list-style: none;
-  }
-
-  li {
+  .panel-heading {
     margin-bottom: 0.5rem;
   }
 
-  .backlink-description {
-    display: block;
-    font-size: 0.875rem;
-    color: var(--text-muted-color);
+  a {
+    color: inherit;
+
+    &:hover {
+      color: var(--link-color);
+    }
   }
+}
+
+// The post's footer keeps only the categories, the tags and the licence: the notes related by tag
+// and the links to the older and the newer post are left out, since the graph and "Linked from"
+// in the panel show how a note belongs to the others
+#related-posts,
+.post-navigation {
+  display: none;
 }
 
 // A wikilink to a note that does not exist yet

@@ -10,7 +10,7 @@
 #    Code blocks and inline code are left alone, so `[[ -f x ]]` in a shell snippet stays as it is.
 # 2. Every link from one note to another (wikilink, .md link or ordinary /posts/... link) is
 #    recorded. Each post gets the notes that link to it, rendered from _includes/backlinks.html
-#    before the post's footer.
+#    in the right panel, below the graph.
 # 3. assets/data/notes-graph.json holds the posts (nodes) and their links and shared tags
 #    (edges), for the graph in the right panel and on the Graph tab (_includes/notes-graph.html,
 #    _tabs/graph.md, assets/js/notes-graph.js). A tag edge lists the tags the two notes share.
@@ -42,7 +42,6 @@ module NotesGraph
     | (?<mdlink>\]\(\s*<?(?<href>[^)\s>]+?)>?(?<title>\s+"[^"]*")?\s*\))
   /mx
 
-  TAIL_MARKER = '<div class="post-tail-wrapper'
   ACCESS_MARKER = '<div class="access">' # the panel's "Recently Updated" and "Trending Tags"
   TAG_HUB_LIMIT = 15 # a tag on more posts than this is too general to draw edges for
 
@@ -174,15 +173,6 @@ module NotesGraph
     output.sub(marker) { marker + html }
   end
 
-  def insert_before(output, markers, html, where)
-    marker = markers.find { |m| output.include?(m) }
-    unless marker
-      Jekyll.logger.warn 'Notes:', "no #{markers.join(' or ')} in #{where}; the theme's markup may have changed"
-      return output
-    end
-    output.sub(marker) { html + marker }
-  end
-
   class Generator < Jekyll::Generator
     priority :low
 
@@ -214,23 +204,17 @@ module NotesGraph
   end
 end
 
-# The backlinks, before the post's footer
-Jekyll::Hooks.register :posts, :post_render do |post|
-  next if Array(post.data['backlinks']).empty?
-
-  html = NotesGraph.render_include(post.site, 'backlinks.html', post)
-  post.output = NotesGraph.insert_before(post.output, [NotesGraph::TAIL_MARKER], html, post.relative_path)
-end
-
 # The graph, as the first section of the right panel's "access" block, above "Recently Updated".
 # Inside that block it takes Chirpy's panel styles, and the block stays the panel's only child
 # on pages without a table of contents, which is what keeps it sticky (.access:only-child). On a
 # post, _plugins/post-panel.rb leaves out "Recently Updated", so the graph comes first and
-# Chirpy's "Contents" follows the block.
+# Chirpy's "Contents" follows the block. A post that other notes link to gets "Linked from" below
+# the graph.
 Jekyll::Hooks.register [:pages, :documents], :post_render do |doc|
   next unless doc.output_ext == '.html' && doc.output&.include?('id="panel-wrapper"')
   next if doc.data['panel_graph'] == false # the Graph tab, which shows the graph itself
 
   html = NotesGraph.render_include(doc.site, 'notes-graph.html', doc)
+  html += NotesGraph.render_include(doc.site, 'backlinks.html', doc) unless Array(doc.data['backlinks']).empty?
   doc.output = NotesGraph.prepend_to(doc.output, NotesGraph::ACCESS_MARKER, html, doc.relative_path)
 end

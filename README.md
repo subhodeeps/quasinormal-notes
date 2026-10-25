@@ -254,7 +254,7 @@ If a theme update changes the markup of the cards, the build warns and the page 
 
 ## Linking Notes
 
-Posts link to each other in the manner of a Zettelkasten, with backlinks and a graph of the notes. `_plugins/notes-graph.rb` builds both at build time and leaves Chirpy's layouts unchanged.
+Posts link to each other in the manner of a Zettelkasten, with backlinks and a graph of the notes. `_plugins/notes-graph.rb` builds both at build time and leaves Chirpy's layouts unchanged. "Linked from" sits in the right panel below the graph, and the footer of a post hides Chirpy's "Related Notes" and the links to the older and the newer post (`_sass/_notes-graph.scss`).
 
 ### Writing links
 
