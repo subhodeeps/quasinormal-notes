@@ -38,6 +38,7 @@ deactivate                  # restore the shell
 | `bash tools/run.sh -p` | Serves the site in production mode. |
 | `bash tools/run.sh -d` | Serves the stubs, drafts and private notes alongside the posts. |
 | `bash tools/stop.sh` | Stops the Jekyll server of this repository, whatever its port, for example one left running in another terminal. Other programs on the same ports, such as an SSH tunnel, keep running. |
+| `bash tools/push-to-thinkpad.sh` | Pushes the commits of the site and of `_drafts` over SSH to the checkouts on the ThinkPad, where the preview runs, and restarts that preview when a plugin, a configuration file or the `Gemfile` changed. It does not touch GitHub, whose `main` deploys the site. `--setup` adds the remotes once, `--dry-run` shows what would happen, and `--publish` also pushes to GitHub. |
 | `bash tools/new-note.sh name [title]` | Creates a private note, `_drafts/private/YYYY-MM-DD-name.md`, named as Foam names notes, with the front matter of the Foam template. |
 | `bash tools/test.sh` | Builds the site in a temporary folder and checks it with html-proofer. The preview in `_site/` stays as it is. |
 
@@ -317,7 +318,7 @@ New files:
 | `_data/locales/en.yml` | Chirpy's strings that differ: "Related Notes" in place of "Further Reading" for the posts that share tags with a post. Jekyll merges the file with the theme's. |
 | `_bibliography/` | The master BibTeX file and the style of the citations |
 | `tools/bib/` | JHEP.bst, the script that compares `_plugins/jhep.rb` with it, and test entries |
-| `tools/` | The toolchain setup (`setup.sh`), the scripts behind some figures, and Chirpy's `run.sh` and `test.sh` with changes |
+| `tools/` | The toolchain setup (`setup.sh`), the push to the ThinkPad's preview (`push-to-thinkpad.sh`), the scripts behind some figures, and Chirpy's `run.sh` and `test.sh` with changes |
 | `tools/archive/` | Earlier versions of customisations, kept for reuse and not built: the note graph with dotted lines between notes that share a tag (`notes-graph-pairwise-tags/`) |
 | `_includes/` | Home page hero, footer (copyright line and quotation), backlinks, note graph, scripts that posts include (`code/`) |
 | `assets/js/notes-graph.js` | Drawing and interaction of the note graph |
