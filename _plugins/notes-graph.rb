@@ -17,7 +17,7 @@
 #    Each node also carries its primary tags, the one to three tags that say what the note is
 #    about: primary_tags in its front matter, or else its first two tags. The right panel
 #    draws a tag edge only for a shared primary tag. The Graph tab draws no tag edges: it gives
-#    every tag on two or more notes a node of its own, joined to its notes, and opens the tag's
+#    every tag a node of its own, joined to its notes, and opens the tag's
 #    page on a click. For this, the file also maps each tag to the URL of its page, as
 #    jekyll-archives builds it.
 #

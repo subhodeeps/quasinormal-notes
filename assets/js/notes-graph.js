@@ -36,7 +36,7 @@
  *
  * The Graph tab is the full picture, inspired by Obsidian's Graph view and Foam's Graph Visualization.
  *
- * - Every tag on two or more notes has a node of its own, a small disc in the muted text colour
+ * - Every tag has a node of its own, a small disc in the muted text colour
  *   with a faint glow, sized by the number of its notes and joined to them by dotted
  *   lines. Tags thus need
  *   no line between every two notes that share them, which grew as the square of the number of
@@ -59,6 +59,14 @@
  *   layout stays as it is. Every entry of the legend that is in view sits on a pill, all of them
  *   while nothing is filtered, and the entries the filter leaves out fade. The
  *   last button in the corner of the graph clears the filter and the selected tag at once.
+ * - A click on Tags only turns the graph into a map of the subjects. It hides the notes and
+ *   their links and joins two tags by a line when they share at least two notes, as heavy as
+ *   the number of notes they share. The tags keep the places they have among their notes. A tag
+ *   on more than TAG_HUB notes, such as black-holes, would join almost every other tag, so it
+ *   draws no line, and a tag without a partner that shares two notes has none either. Both
+ *   stay in view, a little faded (WEAK), and a click on any tag still opens its page, so the map
+ *   also works as a table of contents. The category and stage filters then choose the tags of
+ *   those notes, and a click on Tag or on the clear button brings the notes back.
  * - It shows every note and every edge in three dimensions and in perspective, and it turns
  *   slowly, so that the depth reads without any interaction. Notes farther back fade a little,
  *   a second cue for depth, and nodes are drawn from back to front.
@@ -105,6 +113,8 @@
   const [ZOOM_MIN, ZOOM_MAX] = [0.5, 4];
   const FAR = 0.4; // opacity of the notes and edges that the panel draws faintly
   const HIDDEN = 0.06; // opacity of the notes that the legend's filter leaves out
+  const TAG_HUB = 15; // a tag on more notes than this draws no line on the tag map (TAG_HUB_LIMIT in _plugins/notes-graph.rb)
+  const WEAK = 0.5; // opacity of a tag without a line on the tag map
 
   document.querySelectorAll('.notes-graph').forEach((section) => {
     fetch(section.querySelector('canvas').dataset.src)
@@ -235,13 +245,13 @@
     };
   }
 
-  // The Graph tab: the notes and their links, and a node for every tag on two or more notes,
+  // The Graph tab: the notes and their links, and a node for every tag, including a tag of one note,
   // joined to each of its notes by a member edge, in place of the edges between notes that share
   // a tag
   function withTags(data) {
     const members = new Map();
     for (const n of data.nodes) for (const tag of n.tags || []) members.set(tag, [...(members.get(tag) || []), n.id]);
-    const tags = [...members].filter(([, ids]) => ids.length > 1);
+    const tags = [...members];
     return {
       nodes: [
         ...data.nodes,
@@ -362,6 +372,25 @@
       neighbours.get(b.id).add(a.id);
     }
 
+    // The tag map: a line between two tags that share at least two notes, as heavy as the number
+    // of notes they share. A tag without a line, a hub or a tag that shares no two notes with
+    // another, is weak and is drawn fainter. The notes of a tag are its neighbours, since only
+    // member edges meet a tag
+    const tagNodes = nodes.filter((n) => n.kind === 'tag');
+    const tagEdges = [];
+    const partners = new Map(tagNodes.map((n) => [n.id, new Set()]));
+    tagNodes.forEach((a, i) => {
+      for (const b of tagNodes.slice(i + 1)) {
+        if (a.count > TAG_HUB || b.count > TAG_HUB) continue;
+        const shared = [...neighbours.get(a.id)].filter((id) => neighbours.get(b.id).has(id)).length;
+        if (shared < 2) continue;
+        tagEdges.push([a, b, shared]);
+        partners.get(a.id).add(b.id);
+        partners.get(b.id).add(a.id);
+      }
+    });
+    const weak = new Set(tagNodes.filter((n) => !partners.get(n.id).size).map((n) => n.id));
+
     // Legend: the categories in view and, in the local preview, the stages of the notes, each a
     // button that filters the graph, and a button that hides or shows the tags. The stages sit on
     // a row of their own; a solid disc marks the published notes, and a dot in a dashed ring, as
@@ -378,6 +407,10 @@
       '</svg>';
     const solid =
       '<svg class="ring" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="5.6" fill="currentColor"/></svg>';
+    const tagMapKey =
+      '<svg class="ring" viewBox="0 0 16 16" aria-hidden="true">' +
+      '<line x1="4" y1="12" x2="12" y2="4" stroke="currentColor" stroke-width="1.3"/>' +
+      '<circle cx="4" cy="12" r="2.6" fill="currentColor"/><circle cx="12" cy="4" r="2.6" fill="currentColor"/></svg>';
     const button = (group, value, key, title) =>
       `<li><button type="button" class="on" data-filter="${group}" data-value="${value}" aria-pressed="false" ` +
       `title="${title}">${key}${value}</button></li>`;
@@ -391,7 +424,10 @@
           .join('') +
         (nodes.some((n) => n.kind === 'tag')
           ? '<li><button type="button" class="on" data-filter="tags" aria-pressed="true" title="Hide or show the tags">' +
-            '<span class="tag-key"></span>Tag</button></li>'
+            '<span class="tag-key"></span>Tag</button></li>' +
+            '<li><button type="button" data-filter="tagmap" aria-pressed="false" ' +
+            'title="Show only the tags, joined when they share at least two notes">' +
+            `${tagMapKey}Tags only</button></li>`
           : '') +
         (stages.length > 1
           ? '<li class="legend-break" aria-hidden="true"></li>' +
@@ -415,12 +451,18 @@
     // its notes does
     const filters = { category: new Set(), stage: new Set() };
     let showTags = true;
+    let tagsOnly = false; // the tag map: no notes, and the tags joined by the notes they share
     let shown = new Set(nodes.map((n) => n.id));
     const passes = (n) =>
       (!filters.category.size || filters.category.has(n.category)) &&
       (!filters.stage.size || filters.stage.has(stageOf(n)));
     const isShown = (n) =>
-      n.kind === 'tag' ? showTags && [...neighbours.get(n.id)].some((id) => passes(byId.get(id))) : passes(n);
+      n.kind === 'tag'
+        ? (showTags || tagsOnly) && [...neighbours.get(n.id)].some((id) => passes(byId.get(id)))
+        : !tagsOnly && passes(n);
+    // What lights up with the node in focus: the notes and tags it is joined to, and on the tag
+    // map, the tags it shares notes with
+    const adjacent = (id) => (tagsOnly ? partners.get(id) || new Set() : neighbours.get(id));
     let view = { scale: 1, ox: 0, oy: 0, cx: 0, cy: 0, cz: 0, r: 0 }; // r > 0 once the 3D view fits
     // m: how the 3D view is turned, a rotation matrix; px, py: how far it is moved, in px
     let turn = { m: rotX(PITCH), zoom: 1, px: 0, py: 0 };
@@ -460,8 +502,12 @@
       const pressed = event.target.closest('button[data-filter]');
       if (!pressed) return;
       const { filter: group, value } = pressed.dataset;
-      if (group === 'tags') {
-        showTags = !showTags;
+      if (group === 'tagmap') {
+        tagsOnly = !tagsOnly;
+        if (tagsOnly) showTags = true;
+      } else if (group === 'tags') {
+        if (tagsOnly) tagsOnly = false; // back to the notes, with their tags
+        else showTags = !showTags;
       } else if (filters[group].has(value)) {
         filters[group].delete(value);
       } else {
@@ -475,6 +521,12 @@
     // that the filter leaves out fades (off)
     function refilter() {
       legend?.querySelectorAll('button[data-filter]').forEach((b) => {
+        if (b.dataset.filter === 'tagmap') {
+          // A mode and not a filter: a pill while it is on, and none otherwise
+          b.setAttribute('aria-pressed', String(tagsOnly));
+          b.classList.toggle('on', tagsOnly);
+          return;
+        }
         const tags = b.dataset.filter === 'tags';
         const set = filters[b.dataset.filter];
         const pressed = tags ? showTags : set.has(b.dataset.value);
@@ -555,10 +607,27 @@
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       // The note or tag under the pointer is highlighted with its neighbours, and otherwise the
       // selected tag
-      const lit = focus() ? neighbours.get(focus().id) : null;
+      const lit = focus() ? adjacent(focus().id) : null;
       const dim = (id) => focus() && id !== focus().id && !lit.has(id);
 
-      for (const [a, b, e] of springs) {
+      if (tagsOnly) {
+        // The tag map: a solid line for each pair of tags, heavier for more shared notes
+        for (const [a, b, shared] of tagEdges) {
+          if (!shown.has(a.id) || !shown.has(b.id)) continue;
+          const [ax, ay] = screen(a);
+          const [bx, by] = screen(b);
+          const f = focus();
+          const glow = f && (a === f || b === f);
+          ctx.globalAlpha = (f && !glow ? 0.25 : 1) * depth((proj.get(a).z + proj.get(b).z) / 2);
+          ctx.strokeStyle = glow ? colours.tag : colours.edge;
+          ctx.lineWidth = (0.6 + 0.7 * Math.min(shared, 8)) * (big ? 1.25 : 1);
+          ctx.beginPath();
+          ctx.moveTo(ax, ay);
+          ctx.lineTo(bx, by);
+          ctx.stroke();
+        }
+      }
+      for (const [a, b, e] of tagsOnly ? [] : springs) {
         if (!shown.has(a.id) || !shown.has(b.id)) continue;
         const [ax, ay] = screen(a);
         const [bx, by] = screen(b);
@@ -585,9 +654,10 @@
       for (const n of order) {
         const [x, y] = screen(n);
         if (n.kind === 'tag') {
-          if (shown.has(n.id)) tagNode(n, x, y, dim(n.id));
+          if (shown.has(n.id)) tagNode(n, x, y, dim(n.id), tagsOnly && weak.has(n.id) && n !== focus());
           continue;
         }
+        if (tagsOnly) continue; // the tag map has no notes, not even faint ones
         const hidden = !shown.has(n.id); // left out by the legend's filter: a faint dot, no ring
         ctx.beginPath();
         ctx.arc(x, y, radius(n), 0, 2 * Math.PI);
@@ -641,13 +711,13 @@
     // A tag node: a disc in the muted text colour with a faint glow of the same colour. A disc of
     // the background colour goes first, so that the node hides the lines behind it, and a ring
     // marks it while the pointer rests on it
-    function tagNode(n, x, y, faded) {
+    function tagNode(n, x, y, faded, weakTag) {
       const r = radius(n);
       const disc = (grow) => {
         ctx.beginPath();
         ctx.arc(x, y, r + grow, 0, 2 * Math.PI);
       };
-      const alpha = (faded ? 0.3 : 1) * depth(proj.get(n).z);
+      const alpha = (faded ? 0.3 : weakTag ? WEAK : 1) * depth(proj.get(n).z);
       ctx.globalAlpha = 1;
       ctx.fillStyle = colours.bg;
       disc(1);
@@ -678,7 +748,7 @@
       const [x, y] = screen(n);
       ctx.font = `${big ? '600 13px' : '12px'} ${colours.font}`;
       const w = canvas.clientWidth;
-      const text = n.kind === 'tag' ? `${n.title} · ${n.count} notes` : short(n.title, 42);
+      const text = n.kind === 'tag' ? `${n.title} · ${n.count} ${n.count === 1 ? 'note' : 'notes'}` : short(n.title, 42);
       const tw = ctx.measureText(text).width;
       const lx = clamp(x - tw / 2, 2, w - tw - 2);
       const ly = y - radius(n) - 6 < 12 ? y + radius(n) + 14 : y - radius(n) - 6;
@@ -917,11 +987,12 @@
           draw();
         },
         spin: () => setSpin(!spinning),
-        // Clear the legend's filter and the selected tag, and show the tags again
+        // Clear the legend's filter and the selected tag, and show the notes and the tags again
         clear: () => {
           filters.category.clear();
           filters.stage.clear();
           showTags = true;
+          tagsOnly = false;
           selected = null;
           restartSpin();
           refilter();
