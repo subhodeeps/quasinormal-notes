@@ -60,8 +60,11 @@
  *   while nothing is filtered, and the entries the filter leaves out fade. The
  *   last button in the corner of the graph clears the filter and the selected tag at once.
  * - A click on Tags only turns the graph into a map of the subjects. It hides the notes and
- *   their links and joins two tags by a line when they share at least two notes, as heavy as
- *   the number of notes they share. The tags keep the places they have among their notes. A tag
+ *   their links and joins two tags by a line when they share at least two notes. Every line is
+ *   thin, and the number of shared notes shows in its style, from a dotted line for two notes
+ *   and a dashed one for three to a solid one for four or more, which takes on the amber of the
+ *   tags' glow, one step for each note, and gets a halo of its own from five notes (tagLine).
+ *   A key to the steps sits in the legend while the map is on. The tags keep the places they have among their notes. A tag
  *   on more than TAG_HUB notes, such as black-holes, would join almost every other tag, so it
  *   draws no line, and a tag without a partner that shares two notes has none either. Both
  *   stay in view, a little faded (WEAK), and a click on any tag still opens its page, so the map
@@ -125,6 +128,30 @@
 
   const slugify = (s) => s.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-');
   const clamp = (v, lo, hi) => Math.min(Math.max(v, lo), hi);
+
+  // A colour between two CSS colours in hex, t of the way from a to b; a colour in another
+  // notation is returned unmixed, the nearer of the two
+  const rgb = (c) => {
+    const m = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.exec(c.trim());
+    if (!m) return null;
+    const h = m[1].length === 3 ? [...m[1]].map((x) => x + x).join('') : m[1];
+    return [0, 2, 4].map((i) => parseInt(h.slice(i, i + 2), 16));
+  };
+  const mix = (a, b, t) => {
+    const [p, q] = [rgb(a), rgb(b)];
+    return p && q ? `rgb(${p.map((v, i) => Math.round(v + (q[i] - v) * t)).join(', ')})` : t < 0.5 ? a : b;
+  };
+
+  // How the tag map draws a line for the number of notes two tags share: two notes are dotted
+  // slate, three dashed, and from four a solid line that is warmer by a quarter of the way to the
+  // glow colour for each note, with a halo from five. The legend's key draws the same steps
+  const TAG_LINE = { first: 2, last: 6, halo: 5 };
+  const tagLine = (shared) => ({
+    dash: shared <= 2 ? [0.1, 4.5] : shared === 3 ? [5, 4] : [],
+    tint: clamp((shared - TAG_LINE.first) / (TAG_LINE.last - TAG_LINE.first), 0, 1),
+    alpha: shared <= 2 ? 0.8 : shared === 3 ? 0.85 : 0.95,
+    halo: shared >= TAG_LINE.halo
+  });
 
   // 3 x 3 rotation matrices, stored by rows: about the vertical axis y and the horizontal axis x
   const rotY = (a) => [Math.cos(a), 0, Math.sin(a), 0, 1, 0, -Math.sin(a), 0, Math.cos(a)];
@@ -372,8 +399,8 @@
       neighbours.get(b.id).add(a.id);
     }
 
-    // The tag map: a line between two tags that share at least two notes, as heavy as the number
-    // of notes they share. A tag without a line, a hub or a tag that shares no two notes with
+    // The tag map: a line between two tags that share at least two notes (its style says how
+    // many, see tagLine). A tag without a line, a hub or a tag that shares no two notes with
     // another, is weak and is drawn fainter. The notes of a tag are its neighbours, since only
     // member edges meet a tag
     const tagNodes = nodes.filter((n) => n.kind === 'tag');
@@ -427,7 +454,21 @@
             '<span class="tag-key"></span>Tag</button></li>' +
             '<li><button type="button" data-filter="tagmap" aria-pressed="false" ' +
             'title="Show only the tags, joined when they share at least two notes">' +
-            `${tagMapKey}Tags only</button></li>`
+            `${tagMapKey}Tags only</button></li>` +
+            '<li class="legend-scale" hidden title="The number of notes that two tags share">' +
+            [2, 3, 4, 5, 6]
+              .map((n) => {
+                const line = tagLine(n);
+                const tint = Math.round(line.tint * 100);
+                return (
+                  `<svg viewBox="0 0 24 8" aria-hidden="true"${line.halo ? ' class="halo"' : ''}>` +
+                  `<line x1="2" y1="4" x2="22" y2="4" stroke-linecap="round" stroke-width="1.4" ` +
+                  `stroke-dasharray="${line.dash.join(' ')}" ` +
+                  `style="stroke:color-mix(in srgb, var(--graph-tag-glow) ${tint}%, var(--graph-node))"/></svg>${n}`
+                );
+              })
+              .join('') +
+            ' shared notes</li>'
           : '') +
         (stages.length > 1
           ? '<li class="legend-break" aria-hidden="true"></li>' +
@@ -536,6 +577,7 @@
         b.classList.toggle('on', inView);
         b.classList.toggle('off', !inView);
       });
+      legend?.querySelector('.legend-scale')?.toggleAttribute('hidden', !tagsOnly);
       shown = new Set(nodes.filter(isShown).map((n) => n.id));
       if (hover && !shown.has(hover.id)) hover = null;
       if (selected && !shown.has(selected.id)) selected = null;
@@ -612,21 +654,33 @@
       const dim = (id) => focus() && id !== focus().id && !lit.has(id);
 
       if (tagsOnly) {
-        // The tag map: a solid line for each pair of tags, heavier for more shared notes
+        // The tag map: a thin line for each pair of tags, in the style of its number of notes
+        const scale = big ? 1.25 : 1;
+        ctx.lineCap = 'round';
         for (const [a, b, shared] of tagEdges) {
           if (!shown.has(a.id) || !shown.has(b.id)) continue;
           const [ax, ay] = screen(a);
           const [bx, by] = screen(b);
           const f = focus();
-          const glow = f && (a === f || b === f);
-          ctx.globalAlpha = (f && !glow ? 0.25 : 1) * depth((proj.get(a).z + proj.get(b).z) / 2);
-          ctx.strokeStyle = glow ? colours.tag : colours.edge;
-          ctx.lineWidth = (0.6 + 0.7 * Math.min(shared, 8)) * (big ? 1.25 : 1);
+          const lit = f && (a === f || b === f);
+          const line = tagLine(shared);
+          ctx.globalAlpha = (f && !lit ? 0.25 : lit ? 1 : line.alpha) * depth((proj.get(a).z + proj.get(b).z) / 2);
+          ctx.strokeStyle = mix(colours.node, colours.glow, line.tint);
+          ctx.lineWidth = (lit ? 1.8 : 1.2) * scale;
+          ctx.setLineDash(line.dash.map((d) => d * scale));
+          ctx.save();
+          if (line.halo && !(f && !lit)) {
+            ctx.shadowColor = colours.glow;
+            ctx.shadowBlur = 7 * scale;
+          }
           ctx.beginPath();
           ctx.moveTo(ax, ay);
           ctx.lineTo(bx, by);
           ctx.stroke();
+          ctx.restore();
         }
+        ctx.lineCap = 'butt';
+        ctx.setLineDash([]);
       }
       for (const [a, b, e] of tagsOnly ? [] : springs) {
         if (!shown.has(a.id) || !shown.has(b.id)) continue;
