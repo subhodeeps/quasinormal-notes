@@ -318,7 +318,7 @@ New files:
 | `_data/locales/en.yml` | Chirpy's strings that differ: "Related Notes" in place of "Further Reading" for the posts that share tags with a post. Jekyll merges the file with the theme's. |
 | `_bibliography/` | The master BibTeX file and the style of the citations |
 | `tools/bib/` | JHEP.bst, the script that compares `_plugins/jhep.rb` with it, and test entries |
-| `tools/` | The toolchain setup (`setup.sh`), the push to the ThinkPad's preview (`push-to-thinkpad.sh`), the scripts behind some figures, and Chirpy's `run.sh` and `test.sh` with changes |
+| `tools/` | The toolchain setup (`setup.sh`), the push to the ThinkPad's preview (`push-to-thinkpad.sh`), the slate colors, the flat look and the Nerd Font icons of the calibre web page as a style sheet for the Stylus extension (`calibre-slate.user.css`) with the script that writes its icons (`calibre-nerd-icons.py`), the scripts behind some figures, and Chirpy's `run.sh` and `test.sh` with changes |
 | `tools/archive/` | Earlier versions of customisations, kept for reuse and not built: the note graph with dotted lines between notes that share a tag (`notes-graph-pairwise-tags/`) |
 | `_includes/` | Home page hero, footer (copyright line and quotation), backlinks, note graph, scripts that posts include (`code/`) |
 | `assets/js/notes-graph.js` | Drawing and interaction of the note graph |
