@@ -42,6 +42,18 @@ footer.site-footer {
     figcaption {
       margin-top: 0.25rem;
       opacity: 0.8;
+
+      // The title of the book links to the scan at the Internet Archive; it keeps the colour of the
+      // credit and takes the accent on hover
+      a {
+        color: inherit;
+        text-decoration: underline dotted;
+        text-underline-offset: 0.2em;
+
+        &:hover {
+          color: var(--link-color);
+        }
+      }
     }
   }
 
