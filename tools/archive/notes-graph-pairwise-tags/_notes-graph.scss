@@ -1,0 +1,172 @@
+// The note graph in the right panel and the backlinks under posts (_plugins/notes-graph.rb)
+
+// In the panel's "access" block, it takes Chirpy's section border, indent and spacing
+#notes-graph {
+  padding-right: 1rem;
+
+  .panel-heading {
+    margin-bottom: 0.5rem;
+  }
+}
+
+// The panel leaves out Chirpy's "Trending Tags", so that the graph has the room. The tags
+// are still on the Tags page, under each post, and in the search page's suggestions.
+#panel-wrapper .access > section:has(.post-tag) {
+  display: none;
+}
+
+.notes-graph-canvas {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  touch-action: manipulation;
+}
+
+// The Graph tab (_tabs/graph.md): the whole graph, wide on a desktop and tall on a phone
+.notes-graph-page {
+  margin: 1.5rem 0; // the instructions follow the graph, so it needs room below as above
+
+  .notes-graph-stage {
+    position: relative;
+  }
+
+  .notes-graph-canvas {
+    touch-action: none; // a drag turns the graph instead of scrolling the page
+    aspect-ratio: 4 / 3;
+    max-height: 75vh;
+    border: 1px solid var(--main-border-color);
+    border-radius: 0.75rem;
+    // A faint dot grid, like graph paper, behind the notes
+    background-image: radial-gradient(var(--main-border-color) 1px, transparent 1px);
+    background-size: 22px 22px;
+    background-position: center;
+
+    @media (max-width: 576px) {
+      aspect-ratio: 1 / 1;
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--link-color);
+      outline-offset: 2px;
+    }
+  }
+
+  // Zoom, reset and spin, in the top right corner of the graph
+  .notes-graph-controls {
+    position: absolute;
+    top: 0.6rem;
+    right: 0.6rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+
+    button {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 2rem;
+      height: 2rem;
+      padding: 0;
+      font-size: 0.8rem;
+      color: var(--text-muted-color);
+      background: var(--main-bg);
+      border: 1px solid var(--main-border-color);
+      border-radius: 50%;
+      transition: color 0.15s, border-color 0.15s;
+
+      &:hover,
+      &:focus-visible {
+        color: var(--text-color);
+        border-color: var(--text-muted-color);
+      }
+    }
+  }
+
+  // The legend, with the credit to Obsidian at the end of the same line
+  .notes-graph-footer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.25rem 1rem;
+    margin-top: 0.75rem;
+  }
+
+  .notes-graph-legend {
+    margin: 0;
+    font-size: 0.875rem;
+  }
+
+  .notes-graph-credit {
+    margin: 0;
+    font-size: 0.875rem;
+    color: var(--text-muted-color);
+  }
+}
+
+.notes-graph-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 0.75rem;
+  margin: 0.25rem 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.75rem;
+  color: var(--text-muted-color);
+
+  .dot {
+    display: inline-block;
+    width: 0.5rem;
+    height: 0.5rem;
+    margin-right: 0.3rem;
+    border-radius: 50%;
+  }
+
+  // The key for the dashed ring of drafts, stubs and private notes: a dot with a dashed ring,
+  // drawn as in the graph (an inline SVG from assets/js/notes-graph.js)
+  .ring {
+    width: 0.9rem;
+    height: 0.9rem;
+    margin-right: 0.25rem;
+    vertical-align: -0.15rem;
+  }
+}
+
+// "Linked from", between the post and its footer
+.backlinks {
+  margin-top: 3rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--main-border-color);
+
+  h2 {
+    margin: 0 0 0.75rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--text-muted-color);
+  }
+
+  ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  li {
+    margin-bottom: 0.5rem;
+  }
+
+  .backlink-description {
+    display: block;
+    font-size: 0.875rem;
+    color: var(--text-muted-color);
+  }
+}
+
+// A wikilink to a note that does not exist yet
+.wikilink-missing {
+  color: var(--text-muted-color);
+  border-bottom: 1px dashed var(--text-muted-color);
+  cursor: help;
+}

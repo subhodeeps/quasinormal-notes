@@ -1,0 +1,38 @@
+<!-- The note graph in the right panel, added by _plugins/notes-graph.rb and drawn by
+     assets/js/notes-graph.js from assets/data/notes-graph.json. On a post it shows the post's
+     neighbourhood; elsewhere, all the notes. With page=true, it draws the full-width graph of
+     the Graph tab (_tabs/graph.md). -->
+{% if page.collection == 'posts' %}{% assign current = page.slug %}{% endif %}
+{% if include.page %}
+<section class="notes-graph notes-graph-page">
+{% else %}
+<section id="notes-graph" class="notes-graph">
+  <h2 class="panel-heading">{% if current %}Connections{% else %}Note Graph{% endif %}</h2>
+{% endif %}
+  <div class="notes-graph-stage">
+    <canvas
+      class="notes-graph-canvas"
+      role="img"
+      aria-label="{% if current %}Notes linked to this one{% else %}All notes and the links between them{% endif %}"
+      data-src="{{ '/assets/data/notes-graph.json' | relative_url }}"
+      data-current="{{ current }}"
+      {% if include.page %}tabindex="0"{% endif %}
+    ></canvas>
+    {% if include.page %}
+    <div class="notes-graph-controls">
+      <button type="button" data-graph="zoom-in" aria-label="Zoom in" title="Zoom in"><i class="fas fa-plus"></i></button>
+      <button type="button" data-graph="zoom-out" aria-label="Zoom out" title="Zoom out"><i class="fas fa-minus"></i></button>
+      <button type="button" data-graph="reset" aria-label="Reset the view" title="Reset the view"><i class="fas fa-rotate-left"></i></button>
+      <button type="button" data-graph="spin" aria-label="Stop turning" title="Stop turning"><i class="fas fa-pause"></i></button>
+    </div>
+    {% endif %}
+  </div>
+  {% comment %} The legend is on the Graph tab only; the panel stays quiet (see assets/js/notes-graph.js) {% endcomment %}
+  {% if include.page %}
+  <div class="notes-graph-footer">
+    <ul class="notes-graph-legend"></ul>
+    <p class="notes-graph-credit">Inspired by Obsidian's <a href="https://obsidian.md/help/plugins/graph" target="_blank" rel="noopener">Graph view</a> plugin</p>
+  </div>
+  {% endif %}
+  <script defer src="{{ '/assets/js/notes-graph.js' | relative_url }}"></script>
+</section>
