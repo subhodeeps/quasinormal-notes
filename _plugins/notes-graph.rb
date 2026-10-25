@@ -16,7 +16,14 @@
 #    _tabs/graph.md, assets/js/notes-graph.js). A tag edge lists the tags the two notes share.
 #    Each node also carries its primary tags, the one to three tags that say what the note is
 #    about: primary_tags in its front matter, or else its first two tags. The right panel
-#    draws a tag edge only for a shared primary tag, and the Graph tab draws them all.
+#    draws a tag edge only for a shared primary tag. The Graph tab draws no tag edges: it gives
+#    every tag on two or more notes a node of its own, joined to its notes, and opens the tag's
+#    page on a click. For this, the file also maps each tag to the URL of its page, as
+#    jekyll-archives builds it.
+#
+# The version before the tag nodes, with dotted lines between every two notes that share a tag
+# on the Graph tab as well, is kept in tools/archive/notes-graph-pairwise-tags/, with a README
+# that says how to restore it.
 #
 # The theme's layouts are not changed: the links are rewritten in the Markdown before it is
 # rendered, and the backlinks and the graph are added to the rendered pages, next to markers
@@ -116,7 +123,15 @@ module NotesGraph
     (explicit.empty? ? Array(doc.data['tags']).first(2) : explicit).first(3)
   end
 
-  def graph(posts, links)
+  # The URL of a tag's page, as jekyll-archives builds it from its permalink and slug mode
+  def tag_url(site, tag)
+    config = site.config['jekyll-archives'] || {}
+    permalink = config.dig('permalinks', 'tag') || '/tag/:name/'
+    slug = Jekyll::Utils.slugify(tag, mode: config['slug_mode'])
+    "#{site.config['baseurl']}#{permalink.sub(':name', slug)}"
+  end
+
+  def graph(site, posts, links)
     nodes = posts.map do |doc|
       { id: doc.data['slug'], title: plain(doc.data['short_title'] || doc.data['title']), url: doc.url,
         category: category_of(doc), stage: NoteStage.stage(doc), tags: Array(doc.data['tags']),
@@ -141,7 +156,7 @@ module NotesGraph
     end
     shared.each { |(a, b), tags| edges << { source: a, target: b, kind: 'tag', weight: tags.size, tags: tags } }
 
-    { nodes: nodes, edges: edges }
+    { nodes: nodes, edges: edges, tags: by_tag.keys.sort.to_h { |tag| [tag, tag_url(site, tag)] } }
   end
 
   def render_include(site, name, page)
@@ -191,7 +206,7 @@ module NotesGraph
       end
 
       json = Jekyll::PageWithoutAFile.new(site, site.source, 'assets/data', 'notes-graph.json')
-      json.content = JSON.generate(NotesGraph.graph(posts, links))
+      json.content = JSON.generate(NotesGraph.graph(site, posts, links))
       json.data['layout'] = nil
       json.data['sitemap'] = false
       site.pages << json

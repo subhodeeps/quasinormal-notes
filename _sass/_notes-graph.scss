@@ -82,13 +82,12 @@
     }
   }
 
-  // The legend, with the credit to Obsidian at the end of the same line
+  // The legend, with the credit to Obsidian and Foam below it, both on the left
   .notes-graph-footer {
     display: flex;
-    flex-wrap: wrap;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: 0.25rem 1rem;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
     margin-top: 0.75rem;
   }
 
@@ -99,6 +98,7 @@
 
   .notes-graph-credit {
     margin: 0;
+    text-align: left; // flush left and ragged right, under the legend
     font-size: 0.875rem;
     color: var(--text-muted-color);
   }
@@ -108,6 +108,12 @@
   display: flex;
   flex-wrap: wrap;
   gap: 0.25rem 0.75rem;
+
+  // The entries that are buttons, on the Graph tab, have padding for their pressed pill, so the
+  // gap between them shrinks by as much
+  &:has(button) {
+    gap: 0.25rem 0.25rem;
+  }
   margin: 0.25rem 0 0;
   padding: 0;
   list-style: none;
@@ -120,6 +126,59 @@
     height: 0.5rem;
     margin-right: 0.3rem;
     border-radius: 50%;
+  }
+
+  // The stages of the notes, in the local preview, start a row of their own
+  .legend-break {
+    flex-basis: 100%;
+    height: 0;
+  }
+
+  // The key for the tag nodes of the Graph tab: a disc in the muted text colour with a faint
+  // glow, as the graph draws them
+  .tag-key {
+    display: inline-block;
+    width: 0.5rem;
+    height: 0.5rem;
+    margin-right: 0.3rem;
+    border-radius: 50%;
+    background: var(--text-muted-color);
+    box-shadow: 0 0 4px var(--text-muted-color);
+  }
+
+  // On the Graph tab, each category, each stage and the tag key are buttons that filter the
+  // graph (assets/js/notes-graph.js). Every entry in view sits on a filled pill, all of them
+  // while nothing is filtered, and the entries the filter leaves out lose the pill and fade
+  button {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.1rem 0.5rem;
+    border-radius: 999px;
+    font: inherit;
+    color: inherit;
+    background: none;
+    border: 0;
+    cursor: pointer;
+    transition: opacity 0.15s, color 0.15s, background-color 0.15s;
+
+    &:hover {
+      color: var(--text-color);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--link-color);
+      outline-offset: 2px;
+      border-radius: 0.2rem;
+    }
+
+    &.off {
+      opacity: 0.4;
+    }
+
+    &.on {
+      color: var(--text-color);
+      background: var(--main-border-color);
+    }
   }
 
   // The key for the dashed ring of drafts, stubs and private notes: a dot with a dashed ring,

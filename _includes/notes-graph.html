@@ -24,6 +24,7 @@
       <button type="button" data-graph="zoom-out" aria-label="Zoom out" title="Zoom out"><i class="fas fa-minus"></i></button>
       <button type="button" data-graph="reset" aria-label="Reset the view" title="Reset the view"><i class="fas fa-rotate-left"></i></button>
       <button type="button" data-graph="spin" aria-label="Stop turning" title="Stop turning"><i class="fas fa-pause"></i></button>
+      <button type="button" data-graph="clear" aria-label="Clear the filters and the selection" title="Clear the filters and the selection"><i class="fas fa-filter-circle-xmark"></i></button>
     </div>
     {% endif %}
   </div>
@@ -31,7 +32,7 @@
   {% if include.page %}
   <div class="notes-graph-footer">
     <ul class="notes-graph-legend"></ul>
-    <p class="notes-graph-credit">Inspired by Obsidian's <a href="https://obsidian.md/help/plugins/graph" target="_blank" rel="noopener">Graph view</a> plugin</p>
+    <p class="notes-graph-credit">Inspired by Obsidian's <a href="https://obsidian.md/help/plugins/graph" target="_blank" rel="noopener">Graph view</a> plugin and Foam's <a href="https://docs.foam.md/features/graph-view/" target="_blank" rel="noopener">Graph Visualization</a></p>
   </div>
   {% endif %}
   <script defer src="{{ '/assets/js/notes-graph.js' | relative_url }}"></script>
