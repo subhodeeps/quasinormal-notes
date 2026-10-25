@@ -335,9 +335,10 @@
 // The post's footer keeps only the categories, the tags and the licence: the notes related by tag
 // and the links to the older and the newer post are left out, since the graph and "Linked from"
 // in the panel show how a note belongs to the others
+// (!important, since Chirpy's markup gives the navigation Bootstrap's d-flex, which has it too)
 #related-posts,
 .post-navigation {
-  display: none;
+  display: none !important;
 }
 
 // A wikilink to a note that does not exist yet
