@@ -314,7 +314,7 @@ New files:
 | --- | --- |
 | `_sass/amore/` | Colours of the light and dark themes |
 | `_sass/_*.scss` | Home page hero, tiles and card colours, sort buttons of category and tag pages, enlarged figures, ringdown, code font, note graph, folded boxes, APS captions and tables, references, display equations, heading sizes, footer |
-| `_plugins/` | Home page hero and tiles, footer, note links and graph, the right panel of posts, the categories and tags under the byline (`post-topics-top.rb`), stubs, drafts and private notes, references in the JHEP style, inline code without line breaks, page titles, no browser cache in the local preview (`posts-lastmod-hook.rb` comes from Chirpy) |
+| `_plugins/` | Home page hero and tiles, footer, note links and graph, the right panel of posts, the categories and tags under the byline (`post-topics-top.rb`, with `_sass/_post-topics.scss` for the head and `_sass/_post-footer.scss` for the foot of a post), stubs, drafts and private notes, references in the JHEP style, inline code without line breaks, page titles, no browser cache in the local preview (`posts-lastmod-hook.rb` comes from Chirpy) |
 | `_data/locales/en.yml` | Chirpy's strings that differ: "Related Notes" in place of "Further Reading" for the posts that share tags with a post. Jekyll merges the file with the theme's. |
 | `_bibliography/` | The master BibTeX file and the style of the citations |
 | `tools/bib/` | JHEP.bst, the script that compares `_plugins/jhep.rb` with it, and test entries |

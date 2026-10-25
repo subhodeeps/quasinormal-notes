@@ -1,0 +1,24 @@
+// The foot of a post: the share buttons and nothing else. The categories and the tags are under
+// the byline (_plugins/post-topics-top.rb), the licence line is left out, the double rule under
+// the buttons goes (the site footer keeps its own rule), and the gaps shrink. Only Chirpy's
+// classes are targeted, and a rule that Chirpy sets as !important is overridden as one.
+.post-tail-wrapper {
+  margin-top: 2.5rem;
+  border-bottom: 0;
+
+  .license-wrapper {
+    display: none;
+  }
+
+  // Without the licence, the buttons stay at the right
+  .post-tail-bottom {
+    justify-content: flex-end !important;
+    margin-top: 0 !important; // Chirpy's mt-5
+    padding-bottom: 0 !important; // and pb-2
+  }
+}
+
+// Chirpy puts 3rem above everything in the tail of a page, the footer included
+#tail-wrapper > footer.site-footer {
+  margin-top: 1.5rem;
+}

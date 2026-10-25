@@ -29,8 +29,9 @@
 /* Note graph in the right panel, backlinks under posts */
 @use 'notes-graph';
 
-/* The categories and the tags under the byline of a post */
+/* The head of a post (byline, categories, tags) and its foot (the share buttons) */
 @use 'post-topics';
+@use 'post-footer';
 
 /* Long code blocks folded under a summary (<details class="code-fold">) */
 @use 'code-fold';
