@@ -209,7 +209,8 @@
     height: 0.5rem;
     margin-right: 0.3rem;
     border-radius: 50%;
-    background: var(--text-muted-color);
+    background: var(--graph-tag, var(--text-muted-color));
+    border: calc(var(--graph-tag-ring, 0) * 1px) solid var(--graph-tag-glow, #d39b3c);
     box-shadow: 0 0 5px 1px var(--graph-tag-glow, #d39b3c);
   }
 

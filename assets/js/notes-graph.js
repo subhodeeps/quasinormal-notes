@@ -37,8 +37,8 @@
  * The Graph tab is the full picture, inspired by Obsidian's Graph view and Foam's Graph Visualization.
  *
  * - Every tag has a node of its own, a small disc in the muted text colour
- *   with a warm glow (--graph-tag-glow, amber in the dark theme and a stronger orange in the light
- *   theme, with a thin ring of the same colour, --graph-tag-halo and -ring), sized by the number of its notes and joined to them by dotted
+ *   with a warm glow (--graph-tag-glow, amber in the dark theme, and in the light theme a stronger
+ *   orange, with a hollow disc inside a ring of that colour; see --graph-tag, -halo and -ring), sized by the number of its notes and joined to them by dotted
  *   lines. Tags thus need
  *   no line between every two notes that share them, which grew as the square of the number of
  *   notes and left out the broadest tags, and a tag such as black-holes becomes a hub that the
@@ -539,6 +539,7 @@
         faint: get('--graph-edge-faint', 'rgba(194, 201, 209, 0.45)'),
         current: get('--graph-current', '#67428a'),
         tag: get('--text-muted-color', '#768594'),
+        tagFill: get('--graph-tag', get('--text-muted-color', '#768594')),
         glow: get('--graph-tag-glow', '#d39b3c'),
         halo: parseFloat(get('--graph-tag-halo', '2')), // passes of the glow
         ring: parseFloat(get('--graph-tag-ring', '0')), // px, a ring in the glow colour
@@ -801,7 +802,7 @@
       for (let i = 0; i < colours.halo; i++) ctx.fill();
       ctx.restore();
       ctx.globalAlpha = alpha;
-      ctx.fillStyle = colours.tag;
+      ctx.fillStyle = colours.tagFill;
       disc(0);
       ctx.fill();
       if (colours.ring > 0) {
