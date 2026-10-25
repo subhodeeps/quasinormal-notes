@@ -6,13 +6,13 @@ order: 3
 panel_graph: false # the page shows the whole graph, so the right panel leaves it out
 ---
 
-This graph shows every note on the site, coloured by its category. A solid line joins two notes when one links to the other, and each tag is a small glowing circle, <span class="in-dark">gray with an amber glow</span><span class="in-light">eggshell with an orange ring and glow</span>, with dotted lines to its notes.
+This graph shows every note on the site, coloured by its category. Two notes are joined by a solid line when one of them links to the other. Each tag is a small circle, <span class="in-dark">grey with an amber glow</span><span class="in-light">eggshell with an orange ring and an orange glow</span>, joined to its notes by dotted lines.
 
 {% include notes-graph.html page=true %}
 
-The graph turns slowly by itself, and you are welcome to play with it. Drag to move it, drag with Shift held down to turn it, scroll to zoom, and click a note or a tag once to select it and a second time to open it.
+The graph turns slowly by itself, and you are welcome to play with it. You can drag it to move it, hold Shift while you drag to turn it, and scroll to zoom. A first click on a note or a tag selects it, and a second click opens its page.
 
-The legend below the graph filters the notes by category, and Tags only shows the tags on their own, joined by a line when they share at least two notes. The buttons in the corner of the graph zoom, reset the view, pause the turning and clear the filters.
+A click on a category in the legend below the graph shows only the notes of that category, and a click on Tags only shows the tags on their own, joined by a line when they share at least two notes. With the buttons in the corner of the graph, you can zoom, reset the view, pause the turning and clear the filters.
 
 ## The idea behind the graph
 
