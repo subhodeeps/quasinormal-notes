@@ -235,6 +235,7 @@ exclude:
   - "package*.json"
   - old_theme_backup # pre-Chirpy files kept for reference, not published
   - _drafts/assets # images that drafts show, which Jekyll would otherwise read as posts (_plugins/draft-files.rb)
+  - .venv # the local toolchain: Jekyll never builds it, but its file watcher would watch it, and on Linux the symlink .venv/python/lib64 to lib stops the watcher (tools/setup.sh)
 
 jekyll-archives:
   enabled: [categories, tags]

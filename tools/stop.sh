@@ -6,10 +6,18 @@
 
 root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
 
+# The working folder of a process: /proc on Linux, lsof on macOS
+cwd_of() {
+  if [ -e "/proc/$1/cwd" ]; then
+    readlink "/proc/$1/cwd"
+  else
+    lsof -a -p "$1" -d cwd -Fn 2>/dev/null | sed -n 's/^n//p'
+  fi
+}
+
 pids=""
 for pid in $(pgrep -f 'jekyll (s|serve)( |$)'); do
-  cwd="$(lsof -a -p "$pid" -d cwd -Fn 2>/dev/null | sed -n 's/^n//p')"
-  [ "$cwd" = "$root" ] && pids="$pids $pid"
+  [ "$(cwd_of "$pid")" = "$root" ] && pids="$pids $pid"
 done
 
 if [ -z "$pids" ]; then
