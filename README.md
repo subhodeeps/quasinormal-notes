@@ -282,13 +282,14 @@ A link to a note that does not exist renders as muted text, and the build prints
 - The colours are the `--graph-*` variables in `_sass/amore/`, set for each theme. A new top-level category needs a `--graph-node-<category>` colour.
 - Chirpy hides the right panel below a width of 1200px.
 
-**Note Graph tab** (`_tabs/graph.md`), inspired by Obsidian's [Graph view](https://obsidian.md/help/plugins/graph).
+**Note Graph tab** (`_tabs/graph.md`), inspired by Obsidian's [Graph view](https://obsidian.md/help/plugins/graph) and Foam's [Graph Visualization](https://docs.foam.md/features/graph-view/).
 
-- The tab shows every note, every link and every shared tag in three dimensions, and the graph turns slowly. Notes farther back fade a little. The graph opens as large as the canvas allows through a full turn, with its longest extent across the screen and an even spread of notes.
+- The tab shows every note and every link in three dimensions, and the graph turns slowly. Every tag on two or more notes has a node of its own, a small disc in the muted text colour with a faint glow, sized by the number of its notes and joined to them by dotted lines. Hovering a tag node shows the tag. A first click on a note or a tag selects it: the graph stops turning, and the node keeps its title and its highlight. A second click opens its page, and a click on empty space or Escape clears the selection. The right panel opens a note on the first click. The JSON maps each tag to the URL of its page (`tag_url` in `_plugins/notes-graph.rb`). Notes farther back fade a little. The graph opens as large as the canvas allows through a full turn, with its longest extent across the screen and an even spread of notes.
 - With a mouse, a drag on empty space moves the graph, and a drag on a node pulls the note. Its links stretch and take its colour, its neighbours follow, and the graph springs back after the pull. Shift-drag or right-drag turns the graph all the way round.
-- On a touch screen, one finger moves the graph or pulls a note, and two fingers zoom and turn it. The first tap on a node shows its title, and the second opens the note.
-- The scroll wheel, a pinch, the + and − keys and the corner buttons zoom. The arrow keys move the graph.
-- The legend of the colours sits below the graph, with the credit to Obsidian. In the local preview, it also explains the dashed ring of drafts, stubs and private notes.
+- On a touch screen, one finger moves the graph or pulls a note, and two fingers zoom and turn it. A tap works like a click, so the first tap on a node selects it and the second opens it.
+- The scroll wheel, a pinch, the + and − keys and the corner buttons zoom. The arrow keys move the graph. Below the buttons that zoom, reset the view and start or stop the turning, a last button clears the legend's filter and the selected tag. Both reset buttons set the graph turning again, unless the reader's system asks for reduced motion.
+- The legend of the colours sits below the graph, with the credit to Obsidian and Foam below it, on the left. A click on a category shows only its notes, with the tags they share, and further clicks add or remove categories. Every entry of the legend that is in view sits on a filled pill, all of them while nothing is filtered, and the entries the filter leaves out lose the pill and fade. A click on Tag hides or shows the tag nodes. In the local preview, a second row of the legend filters by stage, Published, Draft, To Write and Private, with a solid disc for the published notes and a dot in a dashed ring for the others. A note is shown when it passes both rows, so Physics and Draft together show the physics drafts.
+- Until 25 October 2026, the tab drew a dotted line between every two notes that share a tag, as the right panel still does for primary tags. That version is kept in `tools/archive/notes-graph-pairwise-tags/`, whose README says how to restore it.
 - Phones and narrow windows have no right panel and see the graph here. The right panel leaves out its graph on this page (`panel_graph: false`).
 
 The header of `assets/js/notes-graph.js` explains the design of both views: the forces, the starting view, the depth cues and the rules of the side panel.
@@ -317,6 +318,7 @@ New files:
 | `_bibliography/` | The master BibTeX file and the style of the citations |
 | `tools/bib/` | JHEP.bst, the script that compares `_plugins/jhep.rb` with it, and test entries |
 | `tools/` | The toolchain setup (`setup.sh`), the scripts behind some figures, and Chirpy's `run.sh` and `test.sh` with changes |
+| `tools/archive/` | Earlier versions of customisations, kept for reuse and not built: the note graph with dotted lines between notes that share a tag (`notes-graph-pairwise-tags/`) |
 | `_includes/` | Home page hero, footer (copyright line and quotation), backlinks, note graph, scripts that posts include (`code/`) |
 | `assets/js/notes-graph.js` | Drawing and interaction of the note graph |
 | `assets/js/home-tiles.js` | Packing of the tiles on the home page |
