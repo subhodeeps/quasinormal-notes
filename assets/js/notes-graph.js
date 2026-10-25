@@ -37,7 +37,8 @@
  * The Graph tab is the full picture, inspired by Obsidian's Graph view and Foam's Graph Visualization.
  *
  * - Every tag has a node of its own, a small disc in the muted text colour
- *   with a warm amber glow (--graph-tag-glow), sized by the number of its notes and joined to them by dotted
+ *   with a warm glow (--graph-tag-glow, amber in the dark theme and a stronger orange in the light
+ *   theme, with a thin ring of the same colour, --graph-tag-halo and -ring), sized by the number of its notes and joined to them by dotted
  *   lines. Tags thus need
  *   no line between every two notes that share them, which grew as the square of the number of
  *   notes and left out the broadest tags, and a tag such as black-holes becomes a hub that the
@@ -67,7 +68,7 @@
  *   A key to the steps fades in at the lower left of the graph while the map is on. The tags keep the places they have among their notes. A tag
  *   on more than TAG_HUB notes, such as black-holes, would join almost every other tag, so it
  *   draws no line, and a tag without a partner that shares two notes has none either. Both
- *   stay in view, a little faded (WEAK), and a click on any tag still opens its page, so the map
+ *   stay in view, a little faded (--graph-tag-weak), and a click on any tag still opens its page, so the map
  *   also works as a table of contents. The category and stage filters then choose the tags of
  *   those notes, and a click on Tag or on the clear button brings the notes back.
  * - It shows every note and every edge in three dimensions and in perspective, and it turns
@@ -117,7 +118,6 @@
   const FAR = 0.4; // opacity of the notes and edges that the panel draws faintly
   const HIDDEN = 0.06; // opacity of the notes that the legend's filter leaves out
   const TAG_HUB = 15; // a tag on more notes than this draws no line on the tag map (TAG_HUB_LIMIT in _plugins/notes-graph.rb)
-  const WEAK = 0.5; // opacity of a tag without a line on the tag map
 
   document.querySelectorAll('.notes-graph').forEach((section) => {
     fetch(section.querySelector('canvas').dataset.src)
@@ -540,6 +540,9 @@
         current: get('--graph-current', '#67428a'),
         tag: get('--text-muted-color', '#768594'),
         glow: get('--graph-tag-glow', '#d39b3c'),
+        halo: parseFloat(get('--graph-tag-halo', '2')), // passes of the glow
+        ring: parseFloat(get('--graph-tag-ring', '0')), // px, a ring in the glow colour
+        weak: parseFloat(get('--graph-tag-weak', '0.5')), // opacity of a tag without a line
         text: get('--text-color', '#28313d'),
         bg: get('--main-bg', '#ffffff'),
         font: css.fontFamily || 'sans-serif',
@@ -784,7 +787,7 @@
         ctx.beginPath();
         ctx.arc(x, y, r + grow, 0, 2 * Math.PI);
       };
-      const alpha = (faded ? 0.3 : weakTag ? WEAK : 1) * depth(proj.get(n).z);
+      const alpha = (faded ? 0.3 : weakTag ? colours.weak : 1) * depth(proj.get(n).z);
       ctx.globalAlpha = 1;
       ctx.fillStyle = colours.bg;
       disc(1);
@@ -792,16 +795,20 @@
       ctx.save();
       ctx.shadowColor = colours.glow;
       ctx.shadowBlur = TAG_GLOW * (big ? proj.get(n).f * Math.sqrt(turn.zoom) : 1);
-      ctx.globalAlpha = alpha * 0.9; // the glow: the shadow of a disc in the glow colour, laid on twice
+      ctx.globalAlpha = alpha * 0.9; // the glow: the shadow of a disc in the glow colour, laid on as often as the theme asks
       ctx.fillStyle = colours.glow;
       disc(0);
-      ctx.fill();
-      ctx.fill();
+      for (let i = 0; i < colours.halo; i++) ctx.fill();
       ctx.restore();
       ctx.globalAlpha = alpha;
       ctx.fillStyle = colours.tag;
       disc(0);
       ctx.fill();
+      if (colours.ring > 0) {
+        ctx.strokeStyle = colours.glow;
+        ctx.lineWidth = colours.ring * (big ? 1.25 : 1);
+        ctx.stroke();
+      }
       if (n === hover || n === selected) {
         ctx.strokeStyle = colours.tag;
         ctx.lineWidth = 1.5;

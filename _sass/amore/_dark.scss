@@ -154,6 +154,9 @@ $tint: 0.14;
   --graph-edge: #{p.$slate-main};
   --graph-edge-faint: #{p.alpha(p.$slate-main, 0.45)};
   --graph-tag-glow: #{p.$amber-main};
+  --graph-tag-halo: 2; // passes of the glow around a tag node
+  --graph-tag-ring: 0; // px: a ring in the glow colour on the disc
+  --graph-tag-weak: 0.5; // opacity of a tag without a line on the tag map
   --graph-current: #{$accent};
 
   /* Cards of the home page (_sass/_note-cards.scss): the share of the note's colour in the tint */
