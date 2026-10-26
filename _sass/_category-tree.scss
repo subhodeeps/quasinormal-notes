@@ -228,3 +228,11 @@ details[open] > summary > .category-chevron {
   border-radius: 1rem;
   font-size: 0.8rem;
 }
+
+// On a phone the counts of the Categories tab ("1 category, 1 post") are left out, so that the
+// names have the room
+@media (max-width: 575.98px) {
+  .categories .font-weight-light {
+    display: none;
+  }
+}

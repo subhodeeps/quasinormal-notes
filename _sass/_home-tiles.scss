@@ -129,9 +129,19 @@
     display: none;
   }
 
+  // On a phone every tile is a short one: one column, no excerpt, and the counts of a category
+  // card ("4 categories · 78 posts") left out
   @media (max-width: 575.98px) {
     grid-template-columns: 1fr;
     grid-auto-rows: auto;
+
+    .tile-excerpt {
+      display: none;
+    }
+
+    .tile-category .post-meta .me-auto {
+      display: none;
+    }
 
     .tile-wide,
     .tile-tall,
