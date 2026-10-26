@@ -235,4 +235,23 @@ details[open] > summary > .category-chevron {
   .categories .font-weight-light {
     display: none;
   }
+
+  // and the names a step smaller
+  .categories {
+    .card-header > span > a {
+      font-size: 1.02rem;
+    }
+
+    .list-group-item.category-folder {
+      padding: 0.5rem 0.75rem 0.5rem 1rem;
+
+      .category-row > a {
+        font-size: 0.95rem;
+      }
+
+      .category-tree .category-row > a {
+        font-size: 0.9rem;
+      }
+    }
+  }
 }

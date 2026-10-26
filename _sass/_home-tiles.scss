@@ -143,6 +143,23 @@
       display: none;
     }
 
+    // A little smaller type, and less padding
+    .card .card-body {
+      padding: 0.7rem 0.85rem 0.6rem;
+
+      .card-title {
+        font-size: 0.92rem;
+      }
+
+      .card-text p {
+        font-size: 0.82rem;
+      }
+
+      .post-meta {
+        font-size: 0.7rem;
+      }
+    }
+
     .tile-wide,
     .tile-tall,
     .tile-large {
