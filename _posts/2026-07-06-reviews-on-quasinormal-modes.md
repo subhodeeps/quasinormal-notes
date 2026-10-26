@@ -17,16 +17,13 @@ math: true
 
 ![Quasinormal Mode Ringdown](/assets/images/ringdownl2s2.png "For Whom The Bell Tolls: Quasinormal Mode Ringdown"){: width="400" }
 
-These are all the reviews on quasinormal modes that I know of! For lecture notes on black holes and general relativity, see [[2026-07-06-lecture-notes]].
+These are all the reviews on quasinormal modes that I know of, along with some lecture notes and the book chapters, which I gathered in one place while writing my thesis. They differ wildly in their style, motivation and pedagogy, but they are all pretty fun to read, and I hope that at least one of them suits the way you like to learn. For lecture notes on black holes and general relativity, see [[2026-07-06-lecture-notes]].
 
-> I would recommend the following five reviews as a starting point.
->
-> - [S. L. Detweiler (1979)](#Detweiler:1979jra), *Black holes and gravitational waves: perturbation analysis*
-> - [E. Berti, V. Cardoso and A. O. Starinets (2009)](#Berti:2009kk), *Quasinormal modes of black holes and black branes*
-> - [P. Pani (2013)](#Pani:2013pma), *Advanced methods in black-hole perturbation theory*
-> - [V. Cardoso, S. Biswas and S. Sarkar (2025)](#Cardoso:2025npr), *The physics of black holes and their environments: consequences for gravitational wave science*
-> - [E. Berti et al. (2026)](#Berti:2025hly), *Black hole spectroscopy: from theory to experiment*
-{: .prompt-review }
+<blockquote class="prompt-review" markdown="1">
+I would recommend the following seven as a starting point.
+
+{% bibliography --template bib-box --query @*[keywords ~= qnm-start] %}
+</blockquote>
 
 ## Reviews
 
