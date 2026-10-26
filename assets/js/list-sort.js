@@ -199,6 +199,7 @@
       show([...holder.children]);
     };
 
-    if (own.length > 1) buttons(grid, 'home-sort', apply, 'newest');
+    // The buttons sort the tiles of all pages, so they show whatever this page holds
+    buttons(grid, 'home-sort', apply, 'newest');
   }
 })();
