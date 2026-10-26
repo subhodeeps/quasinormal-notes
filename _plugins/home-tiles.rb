@@ -17,7 +17,11 @@
 # Depends on Chirpy's cards (`<article class="card-wrapper card">` with `post-preview`). If
 # they are missing, the hook prints a build warning and leaves the list as Chirpy renders it.
 #
-# Hooks: :pages, :post_render; :site, :pre_render and :post_write. Styles: _sass/_home-tiles.scss
+# The number of posts a page follows from `paginate` in _config.yml (HomeTiles.per_page), so that
+# the pages hold even numbers of tiles and the last page no fewer than three posts.
+#
+# Hooks: :site, :post_read (before jekyll-paginate); :pages, :post_render; :site, :pre_render and
+# :post_write. Styles: _sass/_home-tiles.scss
 # and _sass/_note-cards.scss. Needs NoteStage from draft-category.rb and CategoryTree.
 
 require 'cgi'
@@ -34,6 +38,7 @@ module HomeTiles
   EXCERPT = { 'tile-tall' => 90, 'tile-wide' => 150, 'tile-large' => 150 }.freeze # words of the opening
   BLOCK = /\A\s*<(?:pre|details|blockquote|figure|table|div|ul|ol|h[1-6])\b/ # ends the opening run
   DATA = 'assets/data/home-tiles.json' # the tiles of all pages, for the sort buttons
+  STEPS = [0, 2, -2, 4, 6].freeze # tried in turn around the preferred number of posts a page
   PAGES = {} # page number -> its tiles, collected during the build
 
   module_function
@@ -57,6 +62,19 @@ module HomeTiles
       <div class="pin ms-1"><i class="fas fa-thumbtack fa-fw"></i></div></div>
       </div></div></a></article>
     HTML
+  end
+
+  # The number of posts a page of the home list: the first even number, from the preferred one
+  # (`paginate` in _config.yml) and then 2 more, 2 fewer, 4 and 6 more, with which the last page is
+  # full or holds at least three posts. Every page but the last then holds an even number of tiles,
+  # and the first one too, with the cards of the pinned categories, when there are two of them.
+  # @param count [Integer] the posts of the list
+  # @param preferred [Integer]
+  # @return [Integer]
+  def per_page(count, preferred)
+    base = [preferred + preferred % 2, 2].max
+    STEPS.map { |step| base + step }.select(&:positive?)
+         .find { |size| (count % size).zero? || count % size >= 3 } || base
   end
 
   # @param html [String, nil]
@@ -164,6 +182,13 @@ Jekyll::Hooks.register :pages, :post_render do |page|
   script = %(<script defer src="#{site.baseurl}/assets/js/home-tiles.js"></script>) # closes the gaps
   grid = %(<div class="home-tiles" data-all="#{site.baseurl}/#{HomeTiles::DATA}">)
   page.output = "#{page.output[0...start]}#{grid}#{categories}#{page.output[start...stop]}</div>#{script}#{page.output[stop..]}"
+end
+
+# The number of posts a page (HomeTiles.per_page), before jekyll-paginate builds the pages
+Jekyll::Hooks.register :site, :post_read do |site|
+  HomeTiles.instance_variable_set(:@preferred, site.config['paginate'].to_i) unless HomeTiles.instance_variable_get(:@preferred)
+  count = site.posts.docs.count { |post| !post.data['hidden'] }
+  site.config['paginate'] = HomeTiles.per_page(count, HomeTiles.instance_variable_get(:@preferred))
 end
 
 Jekyll::Hooks.register :site, :pre_render do

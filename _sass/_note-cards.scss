@@ -14,3 +14,20 @@
   outline: 1.5px dashed var(--note);
   outline-offset: -1.5px;
 }
+
+// Square corners on every card of the list, and on hover a slight lift, as in Material's elevation
+#post-list .card-wrapper.card,
+#post-list .post-preview.note-card {
+  border-radius: 0;
+}
+
+#post-list .post-preview.note-card {
+  transition: box-shadow 150ms ease;
+
+  &:hover {
+    box-shadow:
+      inset 3px 0 0 var(--note),
+      inset 0 0 0 1px var(--main-border-color),
+      0 3px 10px rgb(0 0 0 / 18%);
+  }
+}

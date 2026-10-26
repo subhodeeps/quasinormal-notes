@@ -2,12 +2,13 @@
  * Close the gaps in the grid of tiles on the home page (_plugins/home-tiles.rb).
  *
  * The grid packs its tiles densely, so gaps remain only near its end, and where they fall
- * depends on the number of columns, which changes with the width of the window. After each
- * layout, this script reads where every tile landed and fixes the tiles in place, so that a
- * change to one tile cannot move the others. It then fills each empty cell, from the bottom
- * row up: it widens the tile to the left of the cell, or else lengthens the tile above it, or
- * else widens the tile to its right towards it. The grid then ends in a straight edge at
- * every width. On a phone the tiles stand in one column, and there is nothing to fill.
+ * depends on the number of columns, which changes with the width of the window. Before each
+ * layout, the script shrinks one or two of the last tiles that are not pinned, or else widens the
+ * last small squares, so that the number of cells is a multiple of the columns (balance). It then reads where every tile landed and fixes
+ * the tiles in place, so that a change to one tile cannot move the others, and fills each empty
+ * cell that remains, from the bottom row up: it widens the tile to the left of the cell, or else
+ * lengthens the tile above it, or else widens the tile to its right towards it. The grid then ends
+ * in a straight edge at every width. On a phone the tiles stand in one column, and there is nothing to fill.
  *
  * A wide tile that is lengthened to two rows gets the class tile-grown, which shows the
  * opening of the post that the plugin puts in it (_sass/_home-tiles.scss), so that the
@@ -20,6 +21,45 @@
   const grid = document.querySelector('#post-list .home-tiles');
   if (!grid) return;
 
+  // Cells of each size, and its next smaller size
+  const CELLS = { 'tile-small': 1, 'tile-wide': 2, 'tile-tall': 2, 'tile-large': 4 };
+  const SMALLER = { 'tile-large': 'tile-wide', 'tile-wide': 'tile-small', 'tile-tall': 'tile-small' };
+  const setSize = (tile, size) => {
+    tile.classList.remove(...Object.keys(CELLS));
+    tile.classList.add(size);
+  };
+
+  // Brings the number of cells to a multiple of the columns, so that the grid can close without a
+  // stretched tile: first by shrinking the last tiles that are not pinned (a large tile becomes
+  // wide, two cells fewer; a wide or tall one a small square, one fewer), and if that is not
+  // enough, by widening the last small squares to wide tiles (one cell more each), those that are
+  // not pinned first. Every tile keeps a regular size. Each keeps its own size in data-size, and every layout starts from it.
+  function balance(tiles, cols) {
+    tiles.forEach((tile) => {
+      tile.dataset.size ??= Object.keys(CELLS).find((size) => tile.classList.contains(size)) || 'tile-small';
+      setSize(tile, tile.dataset.size);
+    });
+    let extra = tiles.reduce((sum, tile) => sum + CELLS[tile.dataset.size], 0) % cols;
+    for (const tile of [...tiles].reverse()) {
+      if (!extra) break;
+      const size = tile.dataset.size;
+      if (tile.classList.contains('tile-pinned') || !SMALLER[size]) continue;
+      const saved = CELLS[size] - CELLS[SMALLER[size]];
+      if (saved > extra) continue;
+      setSize(tile, SMALLER[size]);
+      extra -= saved;
+    }
+    // The small squares that are not pinned first, then the pinned ones, the category cards
+    let missing = (cols - extra) % cols;
+    const small = [...tiles].reverse().filter((tile) => tile.classList.contains('tile-small'));
+    const pinned = (tile) => tile.classList.contains('tile-pinned');
+    for (const tile of [...small.filter((t) => !pinned(t)), ...small.filter(pinned)]) {
+      if (!missing) break;
+      setSize(tile, 'tile-wide');
+      missing -= 1;
+    }
+  }
+
   function pack() {
     // the sort buttons may have put other tiles in the grid, so take the ones it holds now
     const tiles = [...grid.querySelectorAll(':scope > .tile')];
@@ -31,6 +71,7 @@
     const style = getComputedStyle(grid);
     const cols = style.gridTemplateColumns.split(' ').length;
     if (cols < 2) return;
+    balance(tiles, cols);
 
     // Where each tile landed, in cells
     const box = grid.getBoundingClientRect();
