@@ -188,7 +188,11 @@ end
 Jekyll::Hooks.register :site, :post_read do |site|
   HomeTiles.instance_variable_set(:@preferred, site.config['paginate'].to_i) unless HomeTiles.instance_variable_get(:@preferred)
   count = site.posts.docs.count { |post| !post.data['hidden'] }
-  site.config['paginate'] = HomeTiles.per_page(count, HomeTiles.instance_variable_get(:@preferred))
+  # Chirpy counts the pinned posts in the page size, so the first page needs room for them and
+  # for at least four other posts, or the sort buttons would have nothing to sort
+  pinned = site.posts.docs.count { |post| post.data['pin'] }
+  preferred = [HomeTiles.instance_variable_get(:@preferred), pinned + 4].max
+  site.config['paginate'] = HomeTiles.per_page(count, preferred)
 end
 
 Jekyll::Hooks.register :site, :pre_render do
