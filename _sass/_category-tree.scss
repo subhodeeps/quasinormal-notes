@@ -68,14 +68,39 @@ details[open] > summary > .category-chevron {
   }
 }
 
-// The secondaries on the tab sit in Chirpy's list-group items, which bring their own padding
-.categories .list-group-item.category-folder {
-  padding-top: 0.45rem;
-  padding-bottom: 0.45rem;
+// The Categories tab, in the type and spacing of the explorer of a category page: names at 1.1rem
+// on 1.5rem lines, icons at full size, and the chevrons of the secondaries under the folder of
+// their primary category, so that the levels read as a tree
+.categories {
+  .card-header > span > a {
+    font-size: 1.15rem;
+  }
 
-  > .category-row,
-  > details > .category-row {
-    padding: 0;
+  .card-header > span > i,
+  .category-folder i {
+    font-size: 1rem;
+  }
+
+  .list-group-item.category-folder {
+    padding: 0.6rem 1rem 0.6rem 1.25rem;
+    line-height: 1.5rem;
+
+    > .category-row,
+    > details > .category-row {
+      padding: 0;
+    }
+
+    .category-row > a {
+      font-size: 1.1rem;
+    }
+
+    .category-tree .category-row {
+      padding: 0.45rem 0 0;
+
+      > a {
+        font-size: 1.05rem;
+      }
+    }
   }
 }
 
@@ -135,9 +160,15 @@ details[open] > summary > .category-chevron {
   line-height: 1.6rem;
 }
 
-// The thumbtack of a pinned category (_data/categories.yml), after its counts
-.category-pin {
-  margin-left: 0.4rem;
+// The thumbtack of a pinned category (_data/categories.yml), small and muted after its counts, as
+// a mark and not a button
+.categories .category-pin,
+.category-tree .category-pin {
+  margin-left: 0.5rem;
+  font-size: 0.7rem;
+  opacity: 0.7;
+  transform: rotate(30deg);
+  vertical-align: 0.05rem;
 }
 
 // Paths of a post's categories, one after the other
