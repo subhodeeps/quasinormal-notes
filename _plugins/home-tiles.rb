@@ -2,8 +2,11 @@
 #
 # Post list of the home page as bands and tiles, and the data for the sort buttons.
 #
-# Pinned posts stay full-width bands. The other posts become a grid of tiles whose size follows
-# the length of the post without its code (HomeTiles.size). Every card takes the colour of its
+# The post list becomes a grid of tiles whose size follows the length of the post without its
+# code (HomeTiles.size). The grid of the first page opens with the pinned categories of
+# _data/categories.yml (HomeTiles.category_tile: name, description, counts, and a link to its
+# page) and the pinned posts, each marked with Chirpy's thumbtack (tile-pinned); these stay first
+# when the sort buttons reorder the rest. Every card takes the colour of its
 # subject from --graph-node-<category> (_sass/amore/) as a thin stripe, and an unpublished note
 # gets a dashed outline in that colour. The card names only the category of the note, the last
 # name of its main path (`category_paths`, _plugins/category-tree.rb); a small tile shows only
@@ -15,7 +18,7 @@
 # they are missing, the hook prints a build warning and leaves the list as Chirpy renders it.
 #
 # Hooks: :pages, :post_render; :site, :pre_render and :post_write. Styles: _sass/_home-tiles.scss
-# and _sass/_note-cards.scss. Needs NoteStage from draft-category.rb.
+# and _sass/_note-cards.scss. Needs NoteStage from draft-category.rb and CategoryTree.
 
 require 'cgi'
 require 'fileutils'
@@ -34,6 +37,27 @@ module HomeTiles
   PAGES = {} # page number -> its tiles, collected during the build
 
   module_function
+
+  # A tile for a pinned category, in the markup of Chirpy's cards, so that it takes their styles.
+  # @param site [Jekyll::Site]
+  # @param node [CategoryTree::Node]
+  # @return [String] an <article>
+  def category_tile(site, node)
+    subs = CategoryTree.children(node).map(&:name)
+    counts = [subs.empty? ? nil : CategoryTree.measure(site, subs.size, 'category_measure'),
+              CategoryTree.measure(site, CategoryTree.notes_under(node).size, 'post_measure')].compact.join(' · ')
+    colour = %(style="--note: var(--graph-node-#{slug(node.name)}, var(--graph-node))")
+    <<~HTML.delete("\n")
+      <article class="card-wrapper card tile tile-small tile-pinned tile-category">
+      <a href="#{CGI.escapeHTML(CategoryTree.url(site, node.name))}" #{colour} class="post-preview row g-0 flex-md-row-reverse note-card">
+      <div class="col-md-12"><div class="card-body d-flex flex-column">
+      <h1 class="card-title my-2 mt-md-0"><i class="far fa-folder-open fa-fw me-1"></i>#{CGI.escapeHTML(node.name)}</h1>
+      <div class="card-text content mt-0 mb-3"><p>#{CGI.escapeHTML(CategoryTree.description(node.name) || subs.join(' · '))}</p></div>
+      <div class="post-meta flex-grow-1 d-flex align-items-end"><div class="me-auto"><span>#{counts}</span></div>
+      <div class="pin ms-1"><i class="fas fa-thumbtack fa-fw"></i></div></div>
+      </div></div></a></article>
+    HTML
+  end
 
   # @param html [String, nil]
   # @return [String] the text of html without tags
@@ -115,29 +139,31 @@ Jekyll::Hooks.register :pages, :post_render do |page|
     # Only the category of the note, in place of Chirpy's list of all its categories
     name = Array(Array(post.data['category_paths']).first).last || Array(post.data['categories']).last
     card = card.sub(%r{<span class="categories">.*?</span>}m) { %(<span class="categories">#{CGI.escapeHTML(name.to_s)}</span>) }
-    next card if post.data['pin']
-
-    size = HomeTiles.size(post)
+    # A pinned post is a wide tile, title and description, whatever its length
+    size = post.data['pin'] ? 'tile-wide tile-pinned' : HomeTiles.size(post)
     card = card.sub('<article class="card-wrapper card">', %(<article class="card-wrapper card tile #{size}">))
     excerpt = HomeTiles::EXCERPT[size] && HomeTiles.excerpt(post, HomeTiles::EXCERPT[size])
     excerpt.to_s.empty? ? card : card.sub('<div class="post-meta', %(<div class="tile-excerpt">#{excerpt}</div><div class="post-meta))
   end
 
-  # The latest posts follow the pinned ones, so their tiles form one run
+  # The pinned posts and the latest ones form one run of tiles
   tiles = page.output.to_enum(:scan, HomeTiles::TILE).map { Regexp.last_match }
   next if tiles.empty?
 
-  # The tiles of this page, for the sort buttons, which sort the tiles of all pages
-  HomeTiles::PAGES[page.pager&.page || 1] = tiles.map do |tile|
+  # The tiles of this page that the sort buttons sort, those of all pages; the pinned ones stay first
+  number = page.pager&.page || 1
+  HomeTiles::PAGES[number] = tiles.reject { |tile| tile[0].include?('tile-pinned') }.map do |tile|
     post = posts[tile[0][/<a href="([^"]+)"/, 1]]
     { title: HomeTiles.plain(post&.data&.fetch('title', nil)), html: tile[0] }
   end
 
   start = tiles.first.begin(0)
   stop = tiles.last.end(0)
+  pinned = number == 1 ? CategoryTree.roots.select { |node| CategoryTree.pinned?(node.name) } : []
+  categories = pinned.map { |node| HomeTiles.category_tile(site, node) }.join
   script = %(<script defer src="#{site.baseurl}/assets/js/home-tiles.js"></script>) # closes the gaps
   grid = %(<div class="home-tiles" data-all="#{site.baseurl}/#{HomeTiles::DATA}">)
-  page.output = "#{page.output[0...start]}#{grid}#{page.output[start...stop]}</div>#{script}#{page.output[stop..]}"
+  page.output = "#{page.output[0...start]}#{grid}#{categories}#{page.output[start...stop]}</div>#{script}#{page.output[stop..]}"
 end
 
 Jekyll::Hooks.register :site, :pre_render do

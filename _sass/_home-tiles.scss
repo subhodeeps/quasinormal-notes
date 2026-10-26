@@ -1,11 +1,12 @@
 // The grid of tiles on the home page (_plugins/home-tiles.rb, assets/js/home-tiles.js).
 // Defines the tile sizes (tile-small, tile-wide, tile-tall, tile-large), the excerpt that fades out
-// towards the date, and the quiet meta line of every card on the list.
+// towards the date, the pinned categories and posts (tile-category, tile-pinned), and the quiet
+// meta line of every card on the list.
 
 #post-list .home-tiles {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(13rem, 1fr));
-  grid-auto-rows: 10.5rem;
+  grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));
+  grid-auto-rows: 9.25rem;
   grid-auto-flow: dense;
   gap: 1rem;
 
@@ -42,15 +43,19 @@
   }
 
   .card .card-body {
-    padding: 1rem 1.1rem 0.9rem;
+    padding: 0.85rem 1rem 0.75rem;
 
+    // In a full tile the description gives way, so that the title keeps both its lines
     .card-title {
-      font-size: 1.05rem;
+      flex-shrink: 0;
+      font-size: 0.98rem;
       line-height: 1.35;
       -webkit-line-clamp: 3;
     }
 
     .card-text {
+      min-height: 0;
+      overflow: hidden;
       margin-bottom: 0.5rem !important;
 
       p {
@@ -59,7 +64,7 @@
     }
 
     .post-meta {
-      font-size: 0.8rem;
+      font-size: 0.75rem;
     }
   }
 
@@ -77,8 +82,8 @@
     min-height: 0;
     margin-bottom: 0.6rem;
     overflow: hidden;
-    font-size: 0.85rem;
-    line-height: 1.55;
+    font-size: 0.8rem;
+    line-height: 1.5;
     color: var(--text-muted-color);
     mask-image: linear-gradient(to bottom, #000 35%, transparent);
 
@@ -101,7 +106,17 @@
   }
 
   .tile-large .card-title {
-    font-size: 1.3rem;
+    font-size: 1.2rem;
+  }
+
+  // A pinned category or post shows only Chirpy's thumbtack, without the word
+  .tile-pinned .pin span {
+    display: none;
+  }
+
+  .tile-category .card-title i {
+    color: var(--text-muted-color);
+    font-size: 0.85em;
   }
 
   // A small tile shows only the date, so that its title has the room
@@ -135,27 +150,5 @@
   .categories::before {
     content: '·';
     margin-right: 0.4rem;
-  }
-}
-
-// The pinned posts, folded under their heading (_plugins/home-hero.rb)
-.home-pinned {
-  > summary {
-    cursor: pointer;
-    list-style: none;
-
-    &::-webkit-details-marker {
-      display: none;
-    }
-
-    .fa-angle-right {
-      margin-left: 0.35rem;
-      font-size: 0.8em;
-      transition: transform 200ms ease;
-    }
-  }
-
-  &[open] > summary .fa-angle-right {
-    transform: rotate(90deg);
   }
 }

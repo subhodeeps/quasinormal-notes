@@ -22,8 +22,9 @@
 # picked out and reordered. post-topics-top.rb and home-tiles.rb show the paths on a post and on
 # its card (CategoryTree.trail).
 #
-# _data/categories.yml can pin a category (`pin: true`) and give it an `order` among its siblings:
-# pinned categories come first, then those with an order, then the rest by name.
+# _data/categories.yml can pin a category (`pin: true`), give it an `order` among its siblings
+# (pinned first, then by order, then by name) and a one-line `description`, which its page shows
+# under the title.
 #
 # jekyll-archives builds one page for each name, so a name has one place in the tree; a name
 # under two parents gives a build warning, and the tree keeps its first place. If Chirpy's markup
@@ -94,6 +95,13 @@ module CategoryTree
   end
 
   # @param name [String]
+  # @return [String, nil] the one-line description of the category in _data/categories.yml
+  def description(name)
+    text = @meta.dig(name, 'description')
+    text.to_s.strip.empty? ? nil : text.to_s.strip
+  end
+
+  # @param name [String]
   # @return [Boolean] whether _data/categories.yml pins the category
   def pinned?(name)
     @meta.dig(name, 'pin') == true
@@ -131,6 +139,11 @@ module CategoryTree
   # @return [Node, nil]
   def node(name)
     @nodes[name]
+  end
+
+  # @return [Array<Node>] the primary categories, in the order of rank
+  def roots
+    @nodes.values.select { |node| node.parent.nil? }.sort_by { |node| rank(node) }
   end
 
   # @param node [Node]
@@ -282,7 +295,6 @@ module CategoryTree
   # @param site [Jekyll::Site]
   # @return [String]
   def tab(site)
-    roots = @nodes.values.select { |node| node.parent.nil? }.sort_by { |node| rank(node) }
     roots.each_with_index.map do |root, i|
       subs = children(root)
       icon = subs.empty? ? 'fa-folder' : 'fa-folder-open'
@@ -360,6 +372,17 @@ module CategoryTree
     out[0...head] + " in #{CGI.escapeHTML(node.name)}" + out[head..]
   end
 
+  # The description of the category (_data/categories.yml) under the title of its page.
+  # @return [String] the page
+  def with_description(out, node)
+    text = description(node.name)
+    title = text && out.index('</h1>', out.index(PAGE))
+    return out unless title
+
+    at = title + '</h1>'.length
+    out[0...at] + %(<p class="category-description">#{CGI.escapeHTML(text)}</p>) + out[at..]
+  end
+
   # A category page with its parents in the breadcrumb. A category with subcategories becomes an
   # explorer: its subcategories as closed folders, then its own notes, as Chirpy's items. A category
   # without subcategories keeps Chirpy's list, with only its own notes, in order, and the sort
@@ -377,6 +400,7 @@ module CategoryTree
 
     out, crumbs = with_parents(out, ancestors(node), site)
     out = with_recent(out, node, site)
+    out = with_description(out, node)
     top = out.index(PAGE)
     list = out.index(LIST, top)
     close = out.index('</ul>', list)

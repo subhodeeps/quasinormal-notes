@@ -15,23 +15,8 @@
  *
  * The sort buttons above the grid (assets/js/list-sort.js) reorder the tiles, or put in the
  * tiles of other pages, and then send the event tiles:reorder, which packs the grid again.
- *
- * The script also remembers whether the reader folded the pinned posts (localStorage).
  */
 (() => {
-  // The pinned posts fold under their heading (_plugins/home-hero.rb); the browser remembers it
-  const pinned = document.querySelector('#post-list details.home-pinned');
-  if (pinned) {
-    try {
-      if (localStorage.getItem('home-pinned') === 'closed') pinned.open = false;
-    } catch {}
-    pinned.addEventListener('toggle', () => {
-      try {
-        localStorage.setItem('home-pinned', pinned.open ? 'open' : 'closed');
-      } catch {}
-    });
-  }
-
   const grid = document.querySelector('#post-list .home-tiles');
   if (!grid) return;
 

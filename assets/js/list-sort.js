@@ -21,9 +21,10 @@
  * they load the tiles of every page from assets/data/home-tiles.json (the grid's data-all, which
  * the plugin writes), sort them, and show on each page the slice of the order that falls on it,
  * with as many tiles as Chirpy puts there. "Newest" brings back the page as Chirpy built it. If
- * the file cannot be loaded, the buttons sort the tiles of the page in view. The pinned posts
- * stay where they are. After a sort, the script asks assets/js/home-tiles.js to pack the grid
- * again (the event tiles:reorder) and MathJax to typeset the excerpts of the new tiles.
+ * the file cannot be loaded, the buttons sort the tiles of the page in view. The pinned
+ * categories and posts at the start of the grid (tile-pinned) stay where they are. After a sort,
+ * the script asks assets/js/home-tiles.js to pack the grid again (the event tiles:reorder) and
+ * MathJax to typeset the excerpts of the new tiles.
  *
  * The browser keeps the choice (localStorage), one each for the tag pages, the category pages, the
  * category pages with an order and the home page, so the next page opens in the same order.
@@ -158,7 +159,9 @@
   // The home page: the tiles of all its pages
   const grid = document.querySelector('#post-list .home-tiles');
   if (grid) {
-    const own = [...grid.querySelectorAll(':scope > .tile')];
+    // The pinned categories and posts (tile-pinned) stay first, and the buttons sort the rest
+    const fixed = [...grid.querySelectorAll(':scope > .tile-pinned')];
+    const own = [...grid.querySelectorAll(':scope > .tile:not(.tile-pinned)')];
     const local = own.map((node, rank) => ({
       node,
       rank,
@@ -173,7 +176,7 @@
         .catch(() => null));
 
     const show = (nodes) => {
-      grid.replaceChildren(...nodes);
+      grid.replaceChildren(...fixed, ...nodes);
       grid.dispatchEvent(new CustomEvent('tiles:reorder'));
       if (window.MathJax?.typesetPromise) MathJax.typesetPromise([grid]).catch(() => {});
     };

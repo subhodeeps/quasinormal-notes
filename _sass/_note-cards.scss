@@ -2,8 +2,12 @@
 // dashed outline for an unpublished note. The --note variable, set inline by
 // _plugins/home-tiles.rb from --graph-node-<category>, gives the colour.
 
+// Flat, without Chirpy's drop shadow: a hairline in the border colour of the theme keeps the edge
+// of the card on a page of the same colour
 #post-list .post-preview.note-card {
-  box-shadow: inset 3px 0 0 var(--note); // flat, without Chirpy's drop shadow
+  box-shadow:
+    inset 3px 0 0 var(--note),
+    inset 0 0 0 1px var(--main-border-color);
 }
 
 #post-list .post-preview.note-card.note-unpublished {

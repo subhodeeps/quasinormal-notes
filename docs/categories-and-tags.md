@@ -36,16 +36,16 @@ A note that is equally at home in a second subject gets that path in `also_in`: 
 
 ## 5. Pinned categories and their order
 
-Categories themselves have no files, so their pins and their order sit in `_data/categories.yml`, under their names:
+Categories themselves have no files, so their pins, their order and their descriptions sit in `_data/categories.yml`, under their names:
 
 ```yaml
 Physics:
   pin: true
   order: 1
-Coding:
-  pin: true
-  order: 2
+  description: Black holes, general relativity, classical mechanics and quantum gravity.
 ```
+
+A description is one plain line. It appears under the title of the category's page and, for a pinned category, on its card on the home page, where the pinned categories and the pinned notes open the grid, each with a thumbtack.
 
 On the Categories tab, in the folders of a category page and in `ruby tools/categories.rb`, pinned categories come first and carry a thumbtack, then the categories with an `order`, then the rest alphabetically. Any category of any level can appear in the file; `order` ranks a category among its siblings only. The build warns about a name in the file that no note uses.
 

@@ -160,6 +160,16 @@ details[open] > summary > .category-chevron {
   line-height: 1.6rem;
 }
 
+// The one-line description of a category (_data/categories.yml) under the title of its page
+.category-description {
+  margin: -0.5rem 0 1rem;
+  color: var(--text-muted-color);
+
+  @media (min-width: 992px) {
+    padding-left: 0.5rem; // in line with the title, which has Chirpy's ps-lg-2
+  }
+}
+
 // The thumbtack of a pinned category (_data/categories.yml), small and muted after its counts, as
 // a mark and not a button
 .categories .category-pin,

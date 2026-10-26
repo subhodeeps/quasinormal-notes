@@ -1,6 +1,5 @@
 <!-- Figure and a line about the site, inserted above the home page's post list by _plugins/home-hero.rb -->
 {% assign hero = page.hero %}
-{% assign pinned = site.posts | where: 'pin', 'true' %}
 <section id="home-hero" aria-label="About this site">
   {% if hero.figure %}
     {% include {{ hero.figure }} alt=hero.alt %}
@@ -26,10 +25,7 @@
     {% endif %}
   </div>
 </section>
-{% comment %} With pinned posts and both headings, _plugins/home-hero.rb heads the pinned posts and the rest {% endcomment %}
-{% if pinned.size > 0 and hero.pinned_heading and hero.list_heading %}
-{% elsif pinned.size > 0 and hero.pinned_heading %}
-  <h2 class="home-list-heading px-xl-1">{{ hero.pinned_heading }}</h2>
-{% elsif hero.list_heading %}
+{% comment %} The heading of the grid, which the pinned categories and notes open (_plugins/home-tiles.rb) {% endcomment %}
+{% if hero.list_heading %}
   <h2 class="home-list-heading px-xl-1">{{ hero.list_heading }}</h2>
 {% endif %}

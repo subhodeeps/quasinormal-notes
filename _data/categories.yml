@@ -1,12 +1,30 @@
-# Pins and order of the categories on the Categories tab and the category pages
-# (_plugins/category-tree.rb). Pinned categories come first, then those with an order, then the
-# rest by name. Any category of any level can appear here, under its name. See
-# docs/categories-and-tags.md.
+# Pins, order and descriptions of the categories, used on the Categories tab, the category pages
+# and the home page (_plugins/category-tree.rb, _plugins/home-tiles.rb). Pinned categories come
+# first and get a card on the home page, then those with an order, then the rest by name. A
+# description is one plain line, shown on the category's card and under the title of its page.
+# Any category of any level can appear here, under its name. See docs/categories-and-tags.md.
 
 Physics:
   pin: true
   order: 1
+  description: Black holes, general relativity, classical mechanics and quantum gravity.
 
 Coding:
   pin: true
   order: 2
+  description: Python and Julia for scientific computing.
+
+Code Carpentry:
+  description: Tools, environments and remote access for research computing.
+
+Homelab:
+  description: A small cluster built from my laptops.
+
+Personal:
+  description: Advice and other things off the topic of the site.
+
+Black Holes:
+  description: Shadows, quasinormal modes, superradiance and black holes in their environments.
+
+Black Hole Shadows:
+  description: A series on the shadows of Schwarzschild and Kerr black holes, from geodesics to ray tracing.
