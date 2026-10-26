@@ -21,7 +21,7 @@ math: true
 <span class="aps-label">Fig. 1.</span> Ringdown waveform of a black hole (dashed) compared with that of a horizonless compact object (solid), from our own simulation after Fig. 9 of [V. Cardoso and P. Pani](#Cardoso:2019rvt), [*Living Rev. Rel.* **22** (2019) 4](https://doi.org/10.1007/s41114-019-0020-4).
 {: .aps-caption .aps-figure}
 
-These are all the reviews on quasinormal modes that I know of, along with some lecture notes and the book chapters, which I gathered in one place while writing my thesis. They differ wildly in their style, motivation and pedagogy, but they are all pretty fun to read, and I hope that at least one of them suits the way you like to learn. For lecture notes on black holes and general relativity, see [[2026-07-06-lecture-notes]].
+While writing my thesis I gathered all the reviews on quasinormal modes that I know of in one [`bib` file](https://gist.github.com/subhodeeps/e6cb99d86ec2ccea78bb51e4f7fb6d87), along with some lecture notes and the book chapters. They differ wildly in their style, motivation and pedagogy, but they are all pretty fun to read, and I hope that at least one of them proves useful to you, or perhaps tempts you to explore this subject (even) further! For lecture notes on black holes and general relativity in general, see [[2026-07-06-lecture-notes]].
 
 <details class="prompt-fold prompt-review" open markdown="1">
 <summary markdown="span">I would recommend the following resources as a starting point.</summary>
