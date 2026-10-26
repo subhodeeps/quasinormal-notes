@@ -36,5 +36,23 @@
     <p class="notes-graph-credit">Inspired by Obsidian's <a href="https://obsidian.md/help/plugins/graph" target="_blank" rel="noopener">Graph view</a> plugin and Foam's <a href="https://docs.foam.md/features/graph-view/" target="_blank" rel="noopener">Graph Visualization</a></p>
   </div>
   {% endif %}
+  {% if include.page %}
   <script defer src="{{ '/assets/js/notes-graph.js' | relative_url }}"></script>
+  {% else %}
+  {% comment %} Chirpy hides the panel below 1200 px, so a narrower screen loads no script for it {% endcomment %}
+  <script>
+    (function () {
+      var wide = window.matchMedia('(min-width: 1200px)');
+      function load() {
+        if (document.querySelector('script[data-notes-graph]')) return;
+        var script = document.createElement('script');
+        script.src = "{{ '/assets/js/notes-graph.js' | relative_url }}";
+        script.dataset.notesGraph = '';
+        document.body.append(script);
+      }
+      if (wide.matches) load();
+      else wide.addEventListener('change', function () { if (wide.matches) load(); });
+    })();
+  </script>
+  {% endif %}
 </section>

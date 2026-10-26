@@ -69,6 +69,9 @@
 /* The Tags tab in groups by subject, and the category colour and path of the Archives tab */
 @use 'tag-groups';
 
+/* A faster slide of the sidebar on phones */
+@use 'motion';
+
 /* Categories as a tree: the Categories tab, the category pages, the paths on a post */
 @use 'category-tree';
 

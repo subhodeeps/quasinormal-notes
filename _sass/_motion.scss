@@ -1,0 +1,16 @@
+// The slide of the sidebar on a phone and a tablet (below 992 px), faster than Chirpy's 0.4 s: the
+// page moves as one layer, and a shorter slide leaves less time to stutter. The sidebar is promoted
+// to its own layer in advance, which is safe, since it is fixed and holds nothing fixed itself.
+// (The page, #main-wrapper, is not promoted: a layer of its own would make it the containing block
+// of the fixed top bar.)
+@media (max-width: 991.98px) {
+  #sidebar,
+  #topbar-wrapper,
+  #main-wrapper > footer {
+    transition-duration: 0.25s;
+  }
+
+  #sidebar {
+    will-change: transform;
+  }
+}

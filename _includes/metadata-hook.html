@@ -1,10 +1,29 @@
 <!-- Chirpy's placeholder for custom <head> content (included from _includes/head.html) -->
 
-<!-- JetBrains Mono for code (_sass/_code-font.scss); Google Fonts is already preconnected by Chirpy -->
+<!-- JetBrains Mono for code (_sass/_code-font.scss), loaded without holding up the first paint:
+     the text shows in the fallback monospace font until it arrives. Google Fonts is already
+     preconnected by Chirpy. -->
 <link
-  rel="stylesheet"
+  rel="preload"
+  as="style"
   href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,700;1,400&display=swap"
+  onload="this.onload=null;this.rel='stylesheet'"
 >
+<noscript>
+  <link
+    rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,700;1,400&display=swap"
+  >
+</noscript>
+
+{% if jekyll.environment == 'production' %}
+<!-- Browsers with speculation rules (Chromium) prefetch the pages of internal links when the reader
+     is about to open one; assets/js/prefetch.js does the same for the others -->
+<script type="speculationrules">
+  {"prefetch": [{"where": {"and": [{"href_matches": "/*"}, {"not": {"href_matches": "/assets/*"}}]}, "eagerness": "moderate"}]}
+</script>
+{% endif %}
+<script defer src="{{ '/assets/js/prefetch.js' | relative_url }}"></script>
 
 <!-- A link into a folded box (<details>), such as a citation that points to the references,
      opens the box first, so that the browser can scroll to the target. -->

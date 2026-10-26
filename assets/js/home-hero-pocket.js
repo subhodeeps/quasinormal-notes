@@ -10,7 +10,8 @@
  *
  * Colours come from the CSS variables --pocket-separatrix and --pocket-photon (amore blue
  * and red, set per theme in _sass/amore), and are read again when the theme changes.
- * With prefers-reduced-motion, the finished picture is drawn once, without motion.
+ * With prefers-reduced-motion, the finished picture is drawn once, without motion. The animation
+ * stops while the figure is off screen, the page is hidden or the sidebar of a phone is open.
  */
 (() => {
   const canvas = document.querySelector('.home-hero-canvas');
@@ -198,12 +199,21 @@
       return;
     }
 
-    // Animate only while the figure is on screen
-    new IntersectionObserver(([entry]) => (entry.isIntersecting ? play() : pause())).observe(canvas);
+    // Animate only while the figure is on screen, the page is in view and the sidebar of a phone is
+    // closed: its slide moves the whole page, and a canvas that repaints meanwhile makes it stutter
+    let onScreen = true;
+    const sidebarOpen = () => document.body.hasAttribute('sidebar-display');
+    const update = () => (onScreen && !sidebarOpen() && !document.hidden ? play() : pause());
+    new IntersectionObserver(([entry]) => {
+      onScreen = entry.isIntersecting;
+      update();
+    }).observe(canvas);
+    new MutationObserver(update).observe(document.body, { attributeFilter: ['sidebar-display'] });
+    document.addEventListener('visibilitychange', update);
     reduceMotion.addEventListener('change', () => {
       if (reduceMotion.matches) return still();
       moving = true;
-      play();
+      update();
     });
   }
 })();

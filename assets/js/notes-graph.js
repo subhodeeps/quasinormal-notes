@@ -36,7 +36,8 @@
   const PITCH = 0.35;
   const SPIN = 0.0025;
   const HEAT = 0.3;
-  const SETTLE = 3000;
+  // fewer steps on a touch screen, where the layout would hold up the page
+  const SETTLE = window.matchMedia?.('(pointer: coarse)').matches ? 1200 : 3000;
   const HOLD = 120;
   const [ZOOM_MIN, ZOOM_MAX] = [0.5, 4];
   const SWAY = [2.5, 5];
@@ -46,15 +47,22 @@
 
   // The graph of the right panel starts when the panel is shown: Chirpy hides it below 1200 px, so a
   // phone or a narrow window neither loads the data nor runs the layout
-  const wide = window.matchMedia('(min-width: 1200px)');
+  const wide = window.matchMedia ? window.matchMedia('(min-width: 1200px)') : { matches: true };
   document.querySelectorAll('.notes-graph').forEach((section) => {
-    const load = () =>
+    let started = false;
+    const load = () => {
+      if (started) return;
+      started = true;
       fetch(section.querySelector('canvas').dataset.src)
         .then((res) => res.json())
         .then((data) => start(section, data))
         .catch(() => section.remove()); // no graph is better than a broken one
-    if (section.classList.contains('notes-graph-page') || wide.matches) return load();
-    wide.addEventListener('change', () => wide.matches && !section.dataset.started && ((section.dataset.started = '1'), load()), { once: false });
+    };
+    // The panel graph waits for an idle moment, so that its layout does not hold up the page
+    const idle = window.requestIdleCallback || ((fn) => setTimeout(fn, 300));
+    if (section.classList.contains('notes-graph-page')) load();
+    else if (wide.matches) idle(load, { timeout: 2000 });
+    else wide.addEventListener?.('change', () => wide.matches && idle(load, { timeout: 2000 }));
   });
 
   const slugify = (s) => s.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-');
