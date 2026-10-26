@@ -3,7 +3,7 @@ title: "A Direct Ethernet Link between a MacBook Air and an Arch Linux ThinkPad"
 short_title: "Direct Ethernet Link" # in the note graph
 description: "A single USB-C to RJ45 cable between a MacBook Air M1 and a ThinkPad P15 running Arch Linux, with fixed addresses, checks of the link, and passwordless SSH for Julia workers and Mathematica kernels."
 date: 2026-06-23 00:00:00 +0530
-categories: [Homelab, Guides]
+categories: [Homelab, Maltár]
 tags: [homelab, linux, arch-linux, ssh, ethernet, cluster, macos, julia, mathematica]
 primary_tags: [homelab, linux, arch-linux] # one to three tags for the note graph
 math: true

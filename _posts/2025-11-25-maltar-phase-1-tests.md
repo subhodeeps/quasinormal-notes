@@ -5,6 +5,7 @@ description: "Julia and Mathematica code for the first Maltár benchmarks, which
 date: 2025-11-25 00:00:00 +0530
 last_modified_at: 2026-10-23 00:00:00 +0530
 categories: [Homelab, Maltár]
+order: 2
 tags: [homelab, cluster, julia, mathematica, distributed-computing, computational-physics, differential-equations, nonlinear-dynamics, ssh]
 primary_tags: [homelab, cluster] # one to three tags for the note graph; empty means the first two tags
 math: true
