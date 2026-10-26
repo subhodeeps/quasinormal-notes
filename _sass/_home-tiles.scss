@@ -1,31 +1,40 @@
-// The grid of tiles on the home page (_plugins/home-tiles.rb, assets/js/home-tiles.js).
-// Defines the tile sizes (tile-small, tile-wide, tile-tall, tile-large), the excerpt that fades out
-// towards the date, the pinned categories and posts (tile-category, tile-pinned), and the quiet
-// meta line of every card on the list.
+// The grid of tiles on the home page (_plugins/home-tiles.rb, assets/js/home-tiles.js): squares and
+// rectangles on a grid of units. A square is one column wide and two units high, a rectangle two
+// columns wide and one unit high, so that a pair of rectangles stands in the place of two squares and
+// the grid closes without a gap. A unit is half a column less half a gap, which makes a square truly
+// square, up to 5.6rem; the width of the grid, from its container (.home-tiles-box), gives the
+// columns: four on a wide page, two on a narrow one, and on a phone one column of short tiles.
+
+.home-tiles-box {
+  container-type: inline-size;
+}
 
 #post-list .home-tiles {
+  --cols: 4;
+  --gap: 0.75rem;
+
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));
-  grid-auto-rows: 9.75rem;
+  grid-template-columns: repeat(var(--cols), minmax(0, 1fr));
+  // not higher than 5.6rem, so that a square on a wide page does not grow into an empty box
+  grid-auto-rows: min(calc(((100cqw - (var(--cols) - 1) * var(--gap)) / var(--cols) - var(--gap)) / 2), 5.6rem);
   grid-auto-flow: dense;
-  gap: 1rem;
+  gap: var(--gap);
+
+  @container (max-width: 46rem) {
+    --cols: 2;
+  }
 
   .card-wrapper.tile {
     min-width: 0;
     margin: 0;
   }
 
+  .tile-small {
+    grid-row: span 2;
+  }
+
   .tile-wide {
     grid-column: span 2;
-  }
-
-  .tile-tall {
-    grid-row: span 2;
-  }
-
-  .tile-large {
-    grid-column: span 2;
-    grid-row: span 2;
   }
 
   // The card fills its tile, and a preview image, if a post has one, gives way to the text
@@ -43,23 +52,23 @@
   }
 
   .card .card-body {
-    padding: 0.85rem 1rem 0.75rem;
+    padding: 0.8rem 0.95rem 0.7rem;
 
-    // In a full tile the description gives way, so that the title keeps both its lines
     .card-title {
       flex-shrink: 0;
       font-size: 0.98rem;
       line-height: 1.35;
-      -webkit-line-clamp: 3;
+      -webkit-line-clamp: 2;
     }
 
     .card-text {
       min-height: 0;
       overflow: hidden;
-      margin-bottom: 0.5rem !important;
+      margin-bottom: 0.4rem !important;
 
       p {
-        -webkit-line-clamp: 2;
+        font-size: 0.85rem;
+        -webkit-line-clamp: 3;
       }
     }
 
@@ -68,45 +77,21 @@
     }
   }
 
-  .tile-wide .card-text p {
-    -webkit-line-clamp: 3;
-  }
+  // A rectangle is half as high as a square: the title on one line, and the quiet line below it
+  .tile-wide .card-body {
+    padding-top: 0.55rem;
+    padding-bottom: 0.5rem;
 
-  .tile-tall .card-text p,
-  .tile-large .card-text p {
-    -webkit-line-clamp: 3;
-  }
-
-  .tile-excerpt {
-    flex: 1 1 0;
-    min-height: 0;
-    margin-bottom: 0.6rem;
-    overflow: hidden;
-    font-size: 0.8rem;
-    line-height: 1.5;
-    color: var(--text-muted-color);
-    mask-image: linear-gradient(to bottom, #000 35%, transparent);
-
-    p {
-      margin: 0 0 0.6rem;
+    .card-title {
+      margin-top: 0 !important;
+      margin-bottom: 0.25rem !important;
+      -webkit-line-clamp: 1;
     }
-  }
 
-  .tile-excerpt + .post-meta {
-    flex-grow: 0 !important; // Chirpy's flex-grow-1 would take the space of the excerpt
-  }
-
-  // A wide tile shows its opening only when assets/js/home-tiles.js lengthens it to two rows
-  .tile-wide:not(.tile-grown) .tile-excerpt {
-    display: none;
-  }
-
-  .tile-wide:not(.tile-grown) .tile-excerpt + .post-meta {
-    flex-grow: 1 !important;
-  }
-
-  .tile-large .card-title {
-    font-size: 1.2rem;
+    // Chirpy sets display: inherit !important on the description, which only !important beats
+    .card-text {
+      display: none !important;
+    }
   }
 
   // A pinned category or post shows only Chirpy's thumbtack, without the word
@@ -119,42 +104,34 @@
     font-size: 0.85em;
   }
 
-  // A tile that the script shrank to a small square (assets/js/home-tiles.js) keeps no excerpt
-  .tile-small .tile-excerpt {
-    display: none;
-  }
-
-  // A small tile shows only the date, so that its title has the room
-  .tile-small .post-meta .categories {
-    display: none;
-  }
-
-  // On a phone every tile is a short one: one column, no excerpt, and the counts of a category
-  // card ("4 categories · 78 posts") left out
+  // The category cards leave out the counts on a phone, and every tile is a short one in a single
+  // column
   @media (max-width: 575.98px) {
     grid-template-columns: 1fr;
     grid-auto-rows: auto;
 
-    .tile-excerpt {
-      display: none;
+    .tile-small,
+    .tile-wide {
+      grid-column: auto;
+      grid-row: auto;
+    }
+
+    .tile-wide .card-body .card-text {
+      display: inherit !important;
+    }
+
+    .card .card-body .card-text p {
+      -webkit-line-clamp: 2;
     }
 
     .tile-category .post-meta .me-auto {
       display: none;
     }
-
-    .tile-wide,
-    .tile-tall,
-    .tile-large {
-      grid-column: auto;
-      grid-row: auto;
-    }
   }
 }
 
-// The meta line of every card on the home page, the pinned ones included: the date and the
-// category as one quiet line of text, "Oct 25, 2026 · Black Hole Environments", without
-// Chirpy's calendar and folder icons
+// The meta line of every card on the home page: the date and the category as one quiet line of
+// text, "Oct 25, 2026 · Black Hole Environments", without Chirpy's calendar and folder icons
 #post-list .card .post-meta {
   .fa-calendar,
   .fa-folder-open {

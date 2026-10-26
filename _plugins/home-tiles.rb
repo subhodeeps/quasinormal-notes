@@ -1,60 +1,74 @@
 #!/usr/bin/env ruby
 #
-# Post list of the home page as bands and tiles, and the data for the sort buttons.
+# Post list of the home page as a grid of square and rectangular tiles, and the data for the sort
+# buttons.
 #
-# The post list becomes a grid of tiles whose size follows the length of the post without its
-# code (HomeTiles.size). The grid of the first page opens with the pinned categories of
-# _data/categories.yml (HomeTiles.category_tile: name, description, counts, and a link to its
-# page) and the pinned posts, each marked with Chirpy's thumbtack (tile-pinned). The button Pinned
-# keeps them first; the other sort buttons sort all the posts and the category cards together, the
-# cards by the last change of the notes under their category. Every card takes the colour of its
-# subject from --graph-node-<category> (_sass/amore/) as a thin stripe, and an unpublished note
-# gets a dashed outline in that colour. The card names only the category of the note, the last
-# name of its main path (`category_paths`, _plugins/category-tree.rb); a small tile shows only
-# the date. A tall, wide or large tile also shows the opening paragraphs of the post
-# (HomeTiles.excerpt). The tiles of all pages are written to assets/data/home-tiles.json for
-# assets/js/list-sort.js, and assets/js/home-tiles.js closes the gaps at the end of the grid.
+# Chirpy's list becomes one grid. The first page opens with a card for each pinned category of
+# _data/categories.yml (HomeTiles.category_tile: name, description, counts and a link to its page),
+# then come the pinned posts, each marked with Chirpy's thumbtack (tile-pinned), then the others.
+# A page of eight tiles has six squares and two rectangles, the rectangles side by side, half as
+# high as a square and as wide as two (HomeTiles.sizes); the grid closes without a gap in every
+# number of columns, and the last page may end with an empty cell. A tile shows the title, the
+# description and a quiet line "date · category" (the last name of the main path of the note,
+# `category_paths`, _plugins/category-tree.rb); a rectangle shows no description. Every card takes
+# the colour of its subject from --graph-node-<category> (_sass/amore/) as a thin stripe, and an
+# unpublished note gets a dashed outline in that colour.
 #
-# Depends on Chirpy's cards (`<article class="card-wrapper card">` with `post-preview`). If
-# they are missing, the hook prints a build warning and leaves the list as Chirpy renders it.
+# The button Pinned of assets/js/list-sort.js keeps Chirpy's order, with the pinned tiles first; the
+# other buttons sort all posts and the category cards together, a card by the last change of the
+# notes under its category. The tiles of all pages are written to assets/data/home-tiles.json for
+# them, and assets/js/home-tiles.js sizes the tiles again after a sort.
 #
-# The number of posts a page follows from `paginate` in _config.yml (HomeTiles.per_page), so that
-# the pages hold even numbers of tiles and the last page no fewer than three posts.
+# MathJax, a large script, is loaded on the home page only when the description of a post has math.
 #
-# Hooks: :site, :post_read (before jekyll-paginate); :pages, :post_render; :site, :pre_render and
-# :post_write. Styles: _sass/_home-tiles.scss
-# and _sass/_note-cards.scss. Needs NoteStage from draft-category.rb and CategoryTree.
+# Depends on Chirpy's cards (`<article class="card-wrapper card">` with `post-preview`). If they
+# are missing, the hook prints a build warning and leaves the list as Chirpy renders it. The
+# number of posts a page is `paginate` of _config.yml, which Chirpy's paginator reads.
+#
+# Hooks: :pages, :pre_render and :post_render; :site, :pre_render and :post_write. Styles:
+# _sass/_home-tiles.scss and _sass/_note-cards.scss. Needs NoteStage and CategoryTree.
 
 require 'cgi'
 require 'fileutils'
 require 'json'
-require 'zlib'
 
-# Sizes, colours and excerpts of the tiles. `module_function` methods.
+# Sizes, colours and cards of the tiles. `module_function` methods.
 module HomeTiles
   CARD = %r{<article class="card-wrapper card">.*?</article>}m
   TILE = %r{<article class="card-wrapper card tile .*?</article>}m
-  SMALL = 300 # words: a shorter post is a small square
-  LARGE = 1500 # words: a longer post is a large square
-  EXCERPT = { 'tile-tall' => 90, 'tile-wide' => 150, 'tile-large' => 150 }.freeze # words of the opening
-  BLOCK = /\A\s*<(?:pre|details|blockquote|figure|table|div|ul|ol|h[1-6])\b/ # ends the opening run
   DATA = 'assets/data/home-tiles.json' # the tiles of all pages, for the sort buttons
-  STEPS = [0, 2, 4, 6].freeze # tried in turn around the preferred number of posts a page
   PAGES = {} # page number -> its tiles, collected during the build
 
   module_function
 
+  # The size of each tile of a page: squares (tile-small, one column wide and two units high) and one
+  # pair of rectangles (tile-wide, two columns wide and one unit high), the pair placed where it
+  # closes the grid in four columns and in two. A page of up to three tiles has squares only. The
+  # same rule is in assets/js/home-tiles.js, which applies it again after a sort.
+  # @param count [Integer] the tiles of the page
+  # @return [Array<String>]
+  def sizes(count)
+    sizes = Array.new(count, 'tile-small')
+    return sizes if count < 4
+
+    even = count - count % 2
+    at = (even / 2).even? ? 2 : 4
+    sizes[at] = sizes[at + 1] = 'tile-wide'
+    sizes
+  end
+
   # A tile for a pinned category, in the markup of Chirpy's cards, so that it takes their styles.
   # @param site [Jekyll::Site]
   # @param node [CategoryTree::Node]
+  # @param size [String] tile-small or tile-wide
   # @return [String] an <article>
-  def category_tile(site, node)
+  def category_tile(site, node, size)
     subs = CategoryTree.children(node).map(&:name)
     counts = [subs.empty? ? nil : CategoryTree.measure(site, subs.size, 'category_measure'),
               CategoryTree.measure(site, CategoryTree.notes_under(node).size, 'post_measure')].compact.join(' · ')
     colour = %(style="--note: var(--graph-node-#{slug(node.name)}, var(--graph-node))")
     <<~HTML.delete("\n")
-      <article class="card-wrapper card tile tile-small tile-pinned tile-category">
+      <article class="card-wrapper card tile #{size} tile-pinned tile-category">
       <a href="#{CGI.escapeHTML(CategoryTree.url(site, node.name))}" #{colour} class="post-preview row g-0 flex-md-row-reverse note-card">
       <div class="col-md-12"><div class="card-body d-flex flex-column">
       <h1 class="card-title my-2 mt-md-0"><i class="far fa-folder-open fa-fw me-1"></i>#{CGI.escapeHTML(node.name)}</h1>
@@ -63,19 +77,6 @@ module HomeTiles
       <div class="pin ms-1"><i class="fas fa-thumbtack fa-fw"></i></div></div>
       </div></div></a></article>
     HTML
-  end
-
-  # The number of posts a page of the home list: the first even number, from the preferred one
-  # (`paginate` in _config.yml) and then 2 more, 2 fewer, 4 and 6 more, with which the last page is
-  # full or holds at least three posts. Every page but the last then holds an even number of tiles,
-  # and the first one too, with the cards of the pinned categories, when there are two of them.
-  # @param count [Integer] the posts of the list
-  # @param preferred [Integer]
-  # @return [Integer]
-  def per_page(count, preferred)
-    base = [preferred + preferred % 2, 2].max
-    STEPS.map { |step| base + step }.select(&:positive?)
-         .find { |size| (count % size).zero? || count % size >= 3 } || base
   end
 
   # @param html [String, nil]
@@ -90,50 +91,16 @@ module HomeTiles
   def slug(category)
     category.to_s.downcase.strip.gsub(/[^a-z0-9]+/, '-')
   end
+end
 
-  # Length of a post without code blocks and tags.
-  # @param post [Jekyll::Document]
-  # @return [Integer] number of words
-  def words(post)
-    post.content.to_s.gsub(%r{<pre.*?</pre>}m, ' ').gsub(/```.*?```/m, ' ').gsub(/<[^>]+>/, ' ').split.size
-  end
+# MathJax only when a description has math
+Jekyll::Hooks.register :pages, :pre_render do |page, payload|
+  next unless page.url.to_s.match?(%r{\A/(page\d+/?)?\z}) && page.data['layout'] == 'home'
 
-  # The opening paragraphs of a post, up to the first block that is not a paragraph or a display
-  # equation (BLOCK), and about `limit` words.
-  # @param post [Jekyll::Document]
-  # @param limit [Integer] words
-  # @return [String] HTML of the paragraphs, "" if the post opens with a block
-  def excerpt(post, limit)
-    html = post.content.to_s.sub(/\A\s*<!--.*?-->/m, '')
-    out = []
-    count = 0
-    until html.strip.empty? || count >= limit
-      html = html.lstrip.sub(/\A<!--.*?-->/m, '').lstrip
-      break if html.match?(BLOCK)
-
-      paragraph = html.match(%r{\A<p\b[^>]*>(.*?)</p>}m)
-      break unless paragraph
-      break if paragraph[1].match?(/\$\$|\\\[|\\begin\{/)
-
-      text = paragraph[1].gsub(/<[^>]+>/, '').gsub(/\s+/, ' ').strip
-      out << "<p>#{text}</p>" unless text.empty?
-      count += text.split.size
-      html = html[paragraph.end(0)..]
-    end
-    out.join
-  end
-
-  # The tile class of a post: tile-small below SMALL words, tile-large above LARGE, otherwise
-  # tile-wide or tile-tall by the parity of a hash of its slug, so that it stays the same between builds.
-  # @param post [Jekyll::Document]
-  # @return [String]
-  def size(post)
-    count = words(post)
-    return 'tile-small' if count < SMALL
-    return 'tile-large' if count > LARGE
-
-    Zlib.crc32(post.data['slug'].to_s).even? ? 'tile-wide' : 'tile-tall'
-  end
+  posts = page.site.posts.docs.reject { |post| post.data['hidden'] }
+  math = posts.any? { |post| post.data['description'].to_s.match?(/\$|\\\(/) }
+  page.data['math'] = math
+  payload['page']['math'] = math # Jekyll has built the data of the page for the layouts already
 end
 
 Jekyll::Hooks.register :pages, :post_render do |page|
@@ -146,37 +113,35 @@ Jekyll::Hooks.register :pages, :post_render do |page|
   end
 
   site = page.site
+  number = page.pager&.page || 1
+  pinned = number == 1 ? CategoryTree.roots.select { |node| CategoryTree.pinned?(node.name) } : []
+  sizes = HomeTiles.sizes(pinned.size + page.output.scan(HomeTiles::CARD).size)
+  cards = pinned.each_with_index.map do |node, i|
+    changed = CategoryTree.notes_under(node).map { |doc| CategoryTree.updated(doc) }.max
+    { title: node.name, date: changed&.iso8601, html: HomeTiles.category_tile(site, node, sizes[i]) }
+  end
+
   posts = site.posts.docs.to_h { |post| ["#{site.baseurl}#{post.url}", post] }
+  index = pinned.size
   page.output = page.output.gsub(HomeTiles::CARD) do |card|
     post = posts[card[/<a href="([^"]+)" class="post-preview/, 1]]
+    index += 1
     next card unless post
 
-    category = HomeTiles.slug(NoteStage.subject(post))
-    colour = %(style="--note: var(--graph-node-#{category}, var(--graph-node))")
+    colour = %(style="--note: var(--graph-node-#{HomeTiles.slug(NoteStage.subject(post))}, var(--graph-node))")
     unpublished = NoteStage.stage(post) ? ' note-unpublished' : ''
     card = card.sub('class="post-preview', %(#{colour} class="post-preview note-card#{unpublished}))
     # Only the category of the note, in place of Chirpy's list of all its categories
     name = Array(Array(post.data['category_paths']).first).last || Array(post.data['categories']).last
     card = card.sub(%r{<span class="categories">.*?</span>}m) { %(<span class="categories">#{CGI.escapeHTML(name.to_s)}</span>) }
-    # A pinned post is a wide tile, title and description, whatever its length
-    size = post.data['pin'] ? 'tile-wide tile-pinned' : HomeTiles.size(post)
-    card = card.sub('<article class="card-wrapper card">', %(<article class="card-wrapper card tile #{size}">))
-    excerpt = HomeTiles::EXCERPT[size] && HomeTiles.excerpt(post, HomeTiles::EXCERPT[size])
-    excerpt.to_s.empty? ? card : card.sub('<div class="post-meta', %(<div class="tile-excerpt">#{excerpt}</div><div class="post-meta))
+    kind = [sizes[index - 1], post.data['pin'] ? 'tile-pinned' : nil].compact.join(' ')
+    card.sub('<article class="card-wrapper card">', %(<article class="card-wrapper card tile #{kind}">))
   end
 
-  # The pinned posts and the latest ones form one run of tiles
   tiles = page.output.to_enum(:scan, HomeTiles::TILE).map { Regexp.last_match }
   next if tiles.empty?
 
-  # The tiles of this page that the sort buttons sort, those of all pages; the pinned ones stay first
-  number = page.pager&.page || 1
-  pinned = number == 1 ? CategoryTree.roots.select { |node| CategoryTree.pinned?(node.name) } : []
-  # A card sorts by the last change of the notes under its category, and by its name
-  cards = pinned.map do |node|
-    changed = CategoryTree.notes_under(node).map { |doc| CategoryTree.updated(doc) }.max
-    { title: node.name, date: changed&.iso8601, html: HomeTiles.category_tile(site, node) }
-  end
+  # The tiles of this page for the sort buttons, which sort the tiles of all pages
   HomeTiles::PAGES[number] = cards + tiles.map do |tile|
     post = posts[tile[0][/<a href="([^"]+)"/, 1]]
     { title: HomeTiles.plain(post&.data&.fetch('title', nil)), date: post&.date&.iso8601, html: tile[0] }
@@ -184,29 +149,10 @@ Jekyll::Hooks.register :pages, :post_render do |page|
 
   start = tiles.first.begin(0)
   stop = tiles.last.end(0)
-  categories = cards.map { |card| card[:html] }.join
-  script = %(<script defer src="#{site.baseurl}/assets/js/home-tiles.js"></script>) # closes the gaps
-  grid = %(<div class="home-tiles" data-all="#{site.baseurl}/#{HomeTiles::DATA}">)
-  page.output = "#{page.output[0...start]}#{grid}#{categories}#{page.output[start...stop]}</div>#{script}#{page.output[stop..]}"
-end
-
-# MathJax, a large script, is loaded on the home page only when a description or an excerpt of a post
-# has math in it
-Jekyll::Hooks.register :pages, :pre_render do |page|
-  next unless page.respond_to?(:pager) && page.url.to_s.match?(%r{\A/(page\d+/)?\z})
-
-  posts = page.site.posts.docs.reject { |post| post.data['hidden'] }
-  page.data['math'] = posts.any? do |post|
-    [post.data['description'], HomeTiles.excerpt(post, 150)].any? { |text| text.to_s.match?(/\$|\\\(/) }
-  end
-end
-
-# The number of posts a page (HomeTiles.per_page), before jekyll-paginate builds the pages
-Jekyll::Hooks.register :site, :post_read do |site|
-  HomeTiles.instance_variable_set(:@preferred, site.config['paginate'].to_i) unless HomeTiles.instance_variable_get(:@preferred)
-  count = site.posts.docs.count { |post| !post.data['hidden'] }
-  preferred = HomeTiles.instance_variable_get(:@preferred)
-  site.config['paginate'] = HomeTiles.per_page(count, preferred)
+  script = %(<script defer src="#{site.baseurl}/assets/js/home-tiles.js"></script>)
+  grid = %(<div class="home-tiles-box"><div class="home-tiles" data-all="#{site.baseurl}/#{HomeTiles::DATA}">)
+  page.output = "#{page.output[0...start]}#{grid}#{cards.map { |card| card[:html] }.join}" \
+                "#{page.output[start...stop]}</div></div>#{script}#{page.output[stop..]}"
 end
 
 Jekyll::Hooks.register :site, :pre_render do

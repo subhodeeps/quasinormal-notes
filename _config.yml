@@ -157,7 +157,7 @@ pwa:
     deny_paths:
       # - "/example"  # URLs match `<SITE_URL>/example/*` will not be cached by the PWA
 
-paginate: 4 # preferred; _plugins/home-tiles.rb picks the even number nearest to it that suits the count
+paginate: 8 # posts a page: with the two cards of the pinned categories, ten tiles on the first page (_plugins/home-tiles.rb)
 
 # The base URL of your site
 baseurl: ""
@@ -228,6 +228,7 @@ exclude:
   - "*.gemspec"
   - docs
   - tools
+  - vercel.json # headers of the deployment (cache times), not a page of the site
   - README.md
   - LICENSE
   - purgecss.js

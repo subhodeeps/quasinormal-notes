@@ -90,16 +90,13 @@ details[open] > summary > .category-chevron {
       padding: 0;
     }
 
+    // The names of the subcategories, at every depth, in one size
     .category-row > a {
       font-size: 1.1rem;
     }
 
     .category-tree .category-row {
       padding: 0.45rem 0 0;
-
-      > a {
-        font-size: 1.05rem;
-      }
     }
   }
 }
@@ -168,17 +165,20 @@ details[open] > summary > .category-chevron {
     }
   }
 
+  // The names of folders and the titles of notes are the same size, Chirpy's 1.1rem of its own
+  // lists, at every depth
   .category-row {
     padding: 0.6rem 0;
     line-height: 1.5rem;
 
-    > a {
-      font-size: 1.1rem;
-    }
-
     i {
       font-size: 1rem;
     }
+  }
+
+  .category-row > a,
+  li:not(.category-folder) > a {
+    font-size: 1.1rem;
   }
 }
 
@@ -254,18 +254,16 @@ details[open] > summary > .category-chevron {
     }
   }
 
-  // The folder names of a category page a step larger; the Categories tab keeps its own sizes
-  #page-category .category-row > a {
+  // The names and the titles of a category page a step larger, all of one size; the Categories tab
+  // keeps its own sizes
+  #page-category .category-row > a,
+  #page-category li:not(.category-folder) > a {
     font-size: 1.2rem;
   }
 
-  // The subfolders inside a card of the Categories tab keep their own size and spacing
+  // The subfolders inside a card of the Categories tab keep their own spacing
   .categories .category-tree .category-row {
     padding: 0.45rem 0 0;
-
-    > a {
-      font-size: 1.05rem;
-    }
   }
 
   // Folder rows of a category page a little closer together; the cards of the Categories tab keep
@@ -306,7 +304,6 @@ details[open] > summary > .category-chevron {
 
     > a {
       margin-bottom: 0.05rem;
-      font-size: 1.2rem;
     }
 
     .date-kind,

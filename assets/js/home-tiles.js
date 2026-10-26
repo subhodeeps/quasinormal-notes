@@ -1,139 +1,33 @@
 /*
- * Close the gaps in the grid of tiles on the home page (_plugins/home-tiles.rb).
+ * Sizes of the tiles on the home page after a sort (_plugins/home-tiles.rb).
  *
- * The grid packs its tiles densely, so gaps remain only near its end, and where they fall
- * depends on the number of columns, which changes with the width of the window. Before each
- * layout, the script shrinks one or two of the last tiles that are not pinned, or else widens the
- * last small squares, so that the number of cells is a multiple of the columns (balance). It then reads where every tile landed and fixes
- * the tiles in place, so that a change to one tile cannot move the others, and fills each empty
- * cell that remains, from the bottom row up: it widens the tile to the left of the cell, or else
- * lengthens the tile above it, or else widens the tile to its right towards it. The grid then ends
- * in a straight edge at every width. On a phone the tiles stand in one column, and there is nothing to fill.
- *
- * A wide tile that is lengthened to two rows gets the class tile-grown, which shows the
- * opening of the post that the plugin puts in it (_sass/_home-tiles.scss), so that the
- * taller tile does not stand half empty.
- *
- * The sort buttons above the grid (assets/js/list-sort.js) reorder the tiles, or put in the
- * tiles of other pages, and then send the event tiles:reorder, which packs the grid again.
+ * The plugin gives every tile of a page its size, squares (tile-small) and one pair of rectangles
+ * (tile-wide), so that the grid closes in four columns and in two. The sort buttons of
+ * assets/js/list-sort.js reorder the tiles, or put in the tiles of other pages, and then send the
+ * event tiles:reorder; this script applies the same rule to the tiles in their new order. The rule
+ * is the one of HomeTiles.sizes: a page of up to three tiles has squares only; otherwise the pair of
+ * rectangles stands at the third place when half the tiles (rounded down to an even number) make an
+ * even number of rows, and at the fifth place when they make an odd number.
  */
 (() => {
   const grid = document.querySelector('#post-list .home-tiles');
   if (!grid) return;
 
-  // Cells of each size, and its next smaller size
-  const CELLS = { 'tile-small': 1, 'tile-wide': 2, 'tile-tall': 2, 'tile-large': 4 };
-  const SMALLER = { 'tile-large': 'tile-wide', 'tile-wide': 'tile-small', 'tile-tall': 'tile-small' };
-  const setSize = (tile, size) => {
-    tile.classList.remove(...Object.keys(CELLS));
-    tile.classList.add(size);
+  const sizes = (count) => {
+    const kinds = Array(count).fill('tile-small');
+    if (count < 4) return kinds;
+    const even = count - (count % 2);
+    const at = (even / 2) % 2 === 0 ? 2 : 4;
+    kinds[at] = kinds[at + 1] = 'tile-wide';
+    return kinds;
   };
 
-  // Brings the number of cells to a multiple of the columns, so that the grid can close without a
-  // stretched tile: first by shrinking the last tiles that are not pinned (a large tile becomes
-  // wide, two cells fewer; a wide or tall one a small square, one fewer), and if that is not
-  // enough, by widening the last small squares to wide tiles (one cell more each), those that are
-  // not pinned first. Every tile keeps a regular size. Each keeps its own size in data-size, and every layout starts from it.
-  function balance(tiles, cols) {
-    tiles.forEach((tile) => {
-      tile.dataset.size ??= Object.keys(CELLS).find((size) => tile.classList.contains(size)) || 'tile-small';
-      setSize(tile, tile.dataset.size);
-    });
-    let extra = tiles.reduce((sum, tile) => sum + CELLS[tile.dataset.size], 0) % cols;
-    for (const tile of [...tiles].reverse()) {
-      if (!extra) break;
-      const size = tile.dataset.size;
-      if (tile.classList.contains('tile-pinned') || !SMALLER[size]) continue;
-      const saved = CELLS[size] - CELLS[SMALLER[size]];
-      if (saved > extra) continue;
-      setSize(tile, SMALLER[size]);
-      extra -= saved;
-    }
-    // The small squares that are not pinned first, then the pinned ones, the category cards
-    let missing = (cols - extra) % cols;
-    const small = [...tiles].reverse().filter((tile) => tile.classList.contains('tile-small'));
-    const pinned = (tile) => tile.classList.contains('tile-pinned');
-    for (const tile of [...small.filter((t) => !pinned(t)), ...small.filter(pinned)]) {
-      if (!missing) break;
-      setSize(tile, 'tile-wide');
-      missing -= 1;
-    }
-  }
-
-  function pack() {
-    // the sort buttons may have put other tiles in the grid, so take the ones it holds now
+  grid.addEventListener('tiles:reorder', () => {
     const tiles = [...grid.querySelectorAll(':scope > .tile')];
-    tiles.forEach((tile) => {
-      tile.style.gridColumn = '';
-      tile.style.gridRow = '';
-      tile.classList.remove('tile-grown');
+    const kinds = sizes(tiles.length);
+    tiles.forEach((tile, i) => {
+      tile.classList.remove('tile-small', 'tile-wide');
+      tile.classList.add(kinds[i]);
     });
-    const style = getComputedStyle(grid);
-    const cols = style.gridTemplateColumns.split(' ').length;
-    if (cols < 2) return;
-    balance(tiles, cols);
-
-    // Where each tile landed, in cells
-    const box = grid.getBoundingClientRect();
-    const [colGap, rowGap] = [parseFloat(style.columnGap), parseFloat(style.rowGap)];
-    const colStep = (box.width - colGap * (cols - 1)) / cols + colGap;
-    const rowStep = parseFloat(style.gridAutoRows) + rowGap;
-    const place = tiles.map((tile) => {
-      const r = tile.getBoundingClientRect();
-      return {
-        tile,
-        col: Math.round((r.left - box.left) / colStep),
-        row: Math.round((r.top - box.top) / rowStep),
-        cols: Math.round((r.width + colGap) / colStep),
-        rows: Math.round((r.height + rowGap) / rowStep)
-      };
-    });
-    const rows = Math.max(...place.map((p) => p.row + p.rows));
-    const cell = Array.from({ length: rows }, () => Array(cols).fill(null));
-    const mark = (p) => {
-      for (let r = p.row; r < p.row + p.rows; r++) for (let c = p.col; c < p.col + p.cols; c++) cell[r][c] = p;
-    };
-    place.forEach(mark);
-
-    const empty = (r0, r1, c0, c1) => {
-      for (let r = r0; r < r1; r++) for (let c = c0; c < c1; c++) if (cell[r][c]) return false;
-      return true;
-    };
-    for (let r = rows - 1; r >= 0; r--) {
-      for (let c = 0; c < cols; c++) {
-        if (cell[r][c]) continue;
-        const left = c > 0 ? cell[r][c - 1] : null;
-        const above = r > 0 ? cell[r - 1][c] : null;
-        const right = c < cols - 1 ? cell[r][c + 1] : null;
-        if (left && left.col + left.cols === c && empty(left.row, left.row + left.rows, c, c + 1)) {
-          left.cols += 1;
-          mark(left);
-        } else if (above && above.row + above.rows === r && empty(r, r + 1, above.col, above.col + above.cols)) {
-          above.rows += 1;
-          mark(above);
-        } else if (right && right.col === c + 1 && empty(right.row, right.row + right.rows, c, c + 1)) {
-          right.col -= 1;
-          right.cols += 1;
-          mark(right);
-        }
-      }
-    }
-
-    place.forEach((p) => {
-      p.tile.style.gridColumn = `${p.col + 1} / span ${p.cols}`;
-      p.tile.style.gridRow = `${p.row + 1} / span ${p.rows}`;
-      p.tile.classList.toggle('tile-grown', p.rows > 1 && p.tile.classList.contains('tile-wide'));
-    });
-  }
-
-  let columns = 0;
-  const repack = () => {
-    const now = getComputedStyle(grid).gridTemplateColumns.split(' ').length;
-    if (now === columns) return;
-    columns = now;
-    pack();
-  };
-  repack();
-  window.addEventListener('resize', () => requestAnimationFrame(repack));
-  grid.addEventListener('tiles:reorder', () => pack());
+  });
 })();

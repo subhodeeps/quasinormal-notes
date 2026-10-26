@@ -373,6 +373,17 @@ module CategoryTree
     out[0...head] + " in #{CGI.escapeHTML(node.name)}" + out[head..]
   end
 
+  # The number of notes that Chirpy puts beside the title of a category page, which the counts of the
+  # folders below it say better.
+  # @return [String] the page
+  def without_count(out)
+    top = out.index(PAGE)
+    stop = top && out.index('</h1>', top)
+    return out unless stop
+
+    out[0...top] + out[top...stop].sub(%r{\s*<span class="lead text-muted[^"]*">[^<]*</span>}, '') + out[stop..]
+  end
+
   # The description of the category (_data/categories.yml) under the title of its page.
   # @return [String] the page
   def with_description(out, node)
@@ -402,6 +413,7 @@ module CategoryTree
     out, crumbs = with_parents(out, ancestors(node), site)
     out = with_recent(out, node, site)
     out = with_description(out, node)
+    out = without_count(out)
     top = out.index(PAGE)
     list = out.index(LIST, top)
     close = out.index('</ul>', list)
