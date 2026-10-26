@@ -66,16 +66,18 @@ You might also wish to check out:
 
 ---
 
+## Related areas
+
 The following references fall, broadly speaking, under the umbrella of black hole perturbation theory, but they deal with different physical setups and mathematical techniques. I would not mind exploring them should my time and talents permit.
 
-## The gravitational self-force problem
+### The gravitational self-force problem
 
 The self-force problem is a corner of black hole perturbation theory that is not directly about quasinormal modes. It asks how a small body, such as a star or a compact object orbiting a massive black hole, moves under the effect of its own gravitational field, which is the starting point for modelling extreme mass ratio inspirals. The quasinormal mode problem concerns the homogeneous wave equation, whereas here the wave equation has a source term. I have included this list, more as a set of bookmarks for myself and for the sake of being exhaustive.
 
 {% bibliography --query @*[keywords ~= qnm-selfforce] %}
 
-## Mathematical relativity
+### Mathematical relativity
 
-The works below also belong to black hole perturbation theory in the wider sense. They treat quasinormal modes, which are scattering resonances of the wave equation on a black hole background, from a mathematically rigorous point of view. I have included them for the same reasons.
+The works below also belong to black hole perturbation theory in the wider sense. They treat quasinormal modes, which are scattering resonances of the wave equation on a black hole background, from a mathematically rigorous point of view. I find it fascinating that objects that feel so familiar can be studied and understood (perhaps much better) in a language that seems so alien and, needless to say, hard. Salute!
 
 {% bibliography --query @*[keywords ~= qnm-math] %}
