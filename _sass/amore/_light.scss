@@ -103,7 +103,7 @@ $tint: 0.3;
   --prompt-warning-icon-color: #{p.$amber-main};
   --prompt-danger-bg: #{p.alpha(p.$red-light, $tint)};
   --prompt-danger-icon-color: #{p.$red-main};
-  --prompt-review-bg: #{p.alpha($accent-muted, 0.16)};
+  --prompt-review-bg: var(--graph-bg); // the canvas of the Graph tab
   --prompt-review-icon-color: #{$accent-muted};
 
   /* Tags */
