@@ -127,6 +127,11 @@ details[open] > summary > .category-chevron {
   }
 }
 
+// The thumbtack of a pinned category (_data/categories.yml), after its counts
+.category-pin {
+  margin-left: 0.4rem;
+}
+
 // Paths of a post's categories, one after the other
 .category-path + .category-path::before {
   content: '·';

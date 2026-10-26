@@ -5,7 +5,8 @@
 #
 # The tree follows the rules of _plugins/category-tree.rb: `categories` is a path from the primary
 # category down, `also_in` adds paths, and `order` places a note in its own category. A category
-# that holds only unpublished notes is marked with an asterisk. With --write, the tree replaces
+# that holds only unpublished notes is marked with an asterisk, and a pinned one with "pinned" after its count.
+# Categories follow the order of _data/categories.yml: pinned first, then by `order`, then by name. With --write, the tree replaces
 # the part of docs/categories-and-tags.md between `<!-- tree:start -->` and `<!-- tree:end -->`.
 #
 # Usage (after `source .venv/bin/activate`):
@@ -19,6 +20,14 @@ require 'yaml'
 
 ROOT = File.expand_path('..', __dir__)
 DOC = File.join(ROOT, 'docs', 'categories-and-tags.md')
+META = (File.exist?(File.join(ROOT, '_data', 'categories.yml')) && YAML.safe_load(File.read(File.join(ROOT, '_data', 'categories.yml')))) || {}
+
+# @return [Array] the place of a category among its siblings, as _plugins/category-tree.rb sorts them
+def rank(name)
+  pin = META.dig(name, 'pin') == true
+  order = META.dig(name, 'order')
+  [pin ? 0 : 1, order.nil? ? 1 : 0, order.to_f, name.downcase]
+end
 
 # A note: its title, its paths, its order, its date and whether it is published.
 Note = Struct.new(:title, :paths, :order, :date, :published, :tags)
@@ -71,10 +80,11 @@ end
 
 # @return [Array<String>] the lines of the tree, indented by level
 def lines(level, depth = 0, with_notes: false)
-  level.sort_by { |name, _| name.downcase }.flat_map do |name, node|
+  level.sort_by { |name, _| rank(name) }.flat_map do |name, node|
     all = under(node)
     mark = all.none?(&:published) ? ' *' : ''
-    head = "#{'  ' * depth}- #{name}#{mark} (#{all.size})"
+    pin = META.dig(name, 'pin') == true ? ', pinned' : ''
+    head = "#{'  ' * depth}- #{name}#{mark} (#{all.size}#{pin})"
     notes = with_notes ? ordered(node).map { |note, main| "#{'  ' * (depth + 1)}  #{main && note.order ? "#{note.order}. " : '· '}#{note.title}#{note.published ? '' : ' *'}" } : []
     [head, *notes, *lines(node[:children], depth + 1, with_notes: with_notes)]
   end

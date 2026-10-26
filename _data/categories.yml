@@ -1,0 +1,12 @@
+# Pins and order of the categories on the Categories tab and the category pages
+# (_plugins/category-tree.rb). Pinned categories come first, then those with an order, then the
+# rest by name. Any category of any level can appear here, under its name. See
+# docs/categories-and-tags.md.
+
+Physics:
+  pin: true
+  order: 1
+
+Coding:
+  pin: true
+  order: 2

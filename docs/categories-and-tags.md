@@ -34,7 +34,22 @@ A note that is equally at home in a second subject gets that path in `also_in`: 
 
 `order` gives the place of a note among the notes of its own category, the last name of `categories`, as in a series. The hub of a series takes 0, and its parts follow in reading order. Notes without `order` come after the ordered ones, newest first. A number between two others, such as 2.5, inserts a note without renumbering the rest. To see the numbers in use, run `ruby tools/categories.rb --notes`.
 
-## 5. Tags
+## 5. Pinned categories and their order
+
+Categories themselves have no files, so their pins and their order sit in `_data/categories.yml`, under their names:
+
+```yaml
+Physics:
+  pin: true
+  order: 1
+Coding:
+  pin: true
+  order: 2
+```
+
+On the Categories tab, in the folders of a category page and in `ruby tools/categories.rb`, pinned categories come first and carry a thumbtack, then the categories with an `order`, then the rest alphabetically. Any category of any level can appear in the file; `order` ranks a category among its siblings only. The build warns about a name in the file that no note uses.
+
+## 6. Tags
 
 Tags follow the science. They name the objects, the subjects, the methods and the tools of a note, in lowercase words joined by hyphens: `kerr-black-holes`, `quasinormal-modes`, `ray-tracing`, `julia`.
 
@@ -43,7 +58,7 @@ Tags follow the science. They name the objects, the subjects, the methods and th
 3. Never merge or drop tags to make the graph tidier. A tag on one note is fine when the note is about it.
 4. `primary_tags`, one to three tags, say what the note is mainly about. The note graph in the right panel joins two notes that share a primary tag. Without `primary_tags`, the first two tags count, except for a tag on more than 15 notes, so a note whose subject is a broad tag (such as `black-hole-shadows`) names it in `primary_tags`.
 
-## 6. Seeing the current tree
+## 7. Seeing the current tree
 
 The Categories tab of the preview (`bash tools/run.sh -d`) shows the whole tree, drafts included, with the deeper levels in folders that open on a click. A category page with subcategories shows them as folders, each of which opens on its subtopics and its notes in order, and then the notes filed in the category itself; a category without subcategories lists its notes in order, with buttons that sort them by date or title. In a terminal, after `source .venv/bin/activate`, run:
 
@@ -54,23 +69,11 @@ ruby tools/categories.rb --tags     # every tag with the number of its notes
 ruby tools/categories.rb --write    # the tree below into this file
 ```
 
-The tree on the date of the last `--write`, with an asterisk on the categories that hold only unpublished notes:
+The tree on the date of the last `--write`, with an asterisk on the categories that hold only unpublished notes and the pinned categories first:
 
 <!-- tree:start -->
 ```text
-- Code Carpentry (10)
-  - Code Carpentry Resources (2)
-  - Environments (2)
-  - Remote Access (5)
-  - Version Control * (2)
-- Coding (9)
-  - Julia (4)
-  - Python (5)
-- Homelab (4)
-  - Laptop Cluster (4)
-- Personal (1)
-  - Advice (1)
-- Physics (78)
+- Physics (78, pinned)
   - Black Holes (58)
     - Black Hole Environments * (4)
     - Black Hole Shadows * (35)
@@ -87,5 +90,17 @@ The tree on the date of the last `--write`, with an asterisk on the categories t
   - Quantum Gravity * (2)
   - Research * (12)
     - Discussions * (6)
+- Coding (9, pinned)
+  - Julia (4)
+  - Python (5)
+- Code Carpentry (10)
+  - Code Carpentry Resources (2)
+  - Environments (2)
+  - Remote Access (5)
+  - Version Control * (2)
+- Homelab (4)
+  - Laptop Cluster (4)
+- Personal (1)
+  - Advice (1)
 ```
 <!-- tree:end -->

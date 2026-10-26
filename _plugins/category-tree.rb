@@ -20,6 +20,9 @@
 # picked out and reordered. post-topics-top.rb and home-tiles.rb show the paths on a post and on
 # its card (CategoryTree.trail).
 #
+# _data/categories.yml can pin a category (`pin: true`) and give it an `order` among its siblings:
+# pinned categories come first, then those with an order, then the rest by name.
+#
 # jekyll-archives builds one page for each name, so a name has one place in the tree; a name
 # under two parents gives a build warning, and the tree keeps its first place. If Chirpy's markup
 # is missing (`<div class="card categories">`, `<div id="page-category">`,
@@ -67,6 +70,7 @@ module CategoryTree
   def build(site)
     @nodes = {}
     @warned = Set.new
+    @meta = site.data['categories'].is_a?(Hash) ? site.data['categories'] : {}
     site.posts.docs.each do |doc|
       doc.data['category_paths'] = paths(doc)
       doc.data['categories'] = doc.data['category_paths'].flatten.uniq
@@ -79,7 +83,25 @@ module CategoryTree
         end
       end
     end
+    (@meta.keys - @nodes.keys).each do |name|
+      Jekyll.logger.warn 'Categories:', "_data/categories.yml names '#{name}', which no note uses"
+    end
     @nodes
+  end
+
+  # @param name [String]
+  # @return [Boolean] whether _data/categories.yml pins the category
+  def pinned?(name)
+    @meta.dig(name, 'pin') == true
+  end
+
+  # The place of a category among its siblings: pinned ones first, then those with an `order` in
+  # _data/categories.yml by order, then the rest by name.
+  # @param node [Node]
+  # @return [Array]
+  def rank(node)
+    order = @meta.dig(node.name, 'order')
+    [pinned?(node.name) ? 0 : 1, order.nil? ? 1 : 0, order.to_f, node.name.downcase]
   end
 
   # The node of a category, made at its first appearance under its first parent.
@@ -108,9 +130,14 @@ module CategoryTree
   end
 
   # @param node [Node]
-  # @return [Array<Node>] the subcategories, by name
+  # @return [Array<Node>] the subcategories, in the order of rank
   def children(node)
-    node.children.map { |name| @nodes[name] }.sort_by { |child| child.name.downcase }
+    node.children.map { |name| @nodes[name] }.sort_by { |child| rank(child) }
+  end
+
+  # @return [String] the thumbtack of a pinned category, as Chirpy marks a pinned post
+  def pin(node)
+    pinned?(node.name) ? '<i class="fas fa-thumbtack fa-fw category-pin" title="Pinned"></i>' : ''
   end
 
   # @param node [Node]
@@ -187,7 +214,7 @@ module CategoryTree
   def folder(site, node, css = nil, notes: false)
     inner = children(node).map { |child| folder(site, child, notes: notes) }.join
     inner += notes_of(node).map { |doc| file(site, doc) }.join if notes
-    label = %(<i class="far fa-folder fa-fw"></i> #{link(site, node.name, 'mx-2')} #{counts(site, node)})
+    label = %(<i class="far fa-folder fa-fw"></i> #{link(site, node.name, 'mx-2')} #{counts(site, node)}#{pin(node)})
     li = %(<li class="category-folder#{css ? " #{css}" : ''}">)
     return %(#{li}<span class="category-row"><i class="fas fa-fw category-chevron"></i>#{label}</span></li>) if inner.empty?
 
@@ -200,11 +227,11 @@ module CategoryTree
   # @param site [Jekyll::Site]
   # @return [String]
   def tab(site)
-    roots = @nodes.values.select { |node| node.parent.nil? }.sort_by { |node| node.name.downcase }
+    roots = @nodes.values.select { |node| node.parent.nil? }.sort_by { |node| rank(node) }
     roots.each_with_index.map do |root, i|
       subs = children(root)
       icon = subs.empty? ? 'fa-folder' : 'fa-folder-open'
-      head = %(<span class="ms-2"><i class="far #{icon} fa-fw"></i> #{link(site, root.name, 'mx-2')} #{counts(site, root)}</span>)
+      head = %(<span class="ms-2"><i class="far #{icon} fa-fw"></i> #{link(site, root.name, 'mx-2')} #{counts(site, root)}#{pin(root)}</span>)
       if subs.empty?
         trigger = '<span data-bs-toggle="collapse" class="category-trigger hide-border-bottom disabled">' \
                   '<i class="fas fa-fw fa-angle-right"></i></span>'
