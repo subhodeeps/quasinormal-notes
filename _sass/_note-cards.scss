@@ -2,12 +2,26 @@
 // dashed outline for an unpublished note. The --note variable, set inline by
 // _plugins/home-tiles.rb from --graph-node-<category>, gives the colour.
 
-// Flat, without Chirpy's drop shadow: a hairline in the border colour of the theme keeps the edge
-// of the card on a page of the same colour
+// Flat, without Chirpy's drop shadow: a quiet edge from the muted text colour, which shows in
+// both themes, and the stripe of the subject. On hover the edge takes the colour of the card, and
+// the card rises a little, as in Material's elevation.
 #post-list .post-preview.note-card {
+  --card-edge: color-mix(in srgb, var(--text-muted-color) 30%, transparent);
+
   box-shadow:
     inset 3px 0 0 var(--note),
-    inset 0 0 0 1px var(--main-border-color);
+    inset 0 0 0 1px var(--card-edge);
+  transition:
+    box-shadow 150ms ease,
+    transform 150ms ease;
+
+  &:hover {
+    box-shadow:
+      inset 3px 0 0 var(--note),
+      inset 0 0 0 1px color-mix(in srgb, var(--note) 75%, transparent),
+      0 4px 12px rgb(0 0 0 / 15%);
+    transform: translateY(-2px);
+  }
 }
 
 #post-list .post-preview.note-card.note-unpublished {
@@ -15,19 +29,9 @@
   outline-offset: -1.5px;
 }
 
-// Square corners on every card of the list, and on hover a slight lift, as in Material's elevation
+// Corners only slightly rounded, Chirpy's hover overlay included
 #post-list .card-wrapper.card,
-#post-list .post-preview.note-card {
-  border-radius: 0;
-}
-
-#post-list .post-preview.note-card {
-  transition: box-shadow 150ms ease;
-
-  &:hover {
-    box-shadow:
-      inset 3px 0 0 var(--note),
-      inset 0 0 0 1px var(--main-border-color),
-      0 3px 10px rgb(0 0 0 / 18%);
-  }
+#post-list .post-preview.note-card,
+#post-list .post-preview.note-card::before {
+  border-radius: 4px;
 }

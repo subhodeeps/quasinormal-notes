@@ -104,23 +104,35 @@ details[open] > summary > .category-chevron {
   }
 }
 
-// The cards of the Categories tab in the look of the home tiles: square and flat, a stripe in the
-// colour of the primary category (--note, set by the plugin), a hairline edge, and a slight lift
-// on hover
+// The cards of the Categories tab in the look of the home tiles: flat, corners slightly rounded, a
+// quiet edge, and a stripe in the colour of the primary category (--note, set by the plugin). On
+// hover the edge takes that colour, and the row under the pointer a faint tint of it.
 .card.categories.category-card {
-  border: 1px solid var(--main-border-color);
+  --card-edge: color-mix(in srgb, var(--text-muted-color) 30%, transparent);
+
+  overflow: hidden;
+  border: 1px solid var(--card-edge);
   border-left: 3px solid var(--note);
-  border-radius: 0;
-  transition: box-shadow 150ms ease;
+  border-radius: 4px;
+  transition: border-color 150ms ease;
 
   &:hover {
-    box-shadow: 0 3px 10px rgb(0 0 0 / 18%);
+    border-color: color-mix(in srgb, var(--note) 75%, transparent);
+    border-left-color: var(--note);
   }
 
   .card-header,
   .list-group,
   .list-group-item {
     border-radius: 0;
+  }
+
+  .list-group-item {
+    transition: background-color 150ms ease;
+
+    &:hover {
+      background-color: color-mix(in srgb, var(--note) 8%, var(--card-bg));
+    }
   }
 }
 
