@@ -582,7 +582,8 @@
         ring: parseFloat(get('--graph-tag-ring', '0')), // px, a ring in the glow colour
         weak: parseFloat(get('--graph-tag-weak', '0.5')), // opacity of a tag without a line
         text: get('--text-color', '#28313d'),
-        bg: get('--main-bg', '#ffffff'),
+        // the canvas of the Graph tab has its own shade, and the panel sits on the page
+        bg: get(big ? '--graph-bg' : '--main-bg', get('--main-bg', '#ffffff')),
         font: css.fontFamily || 'sans-serif',
         category: Object.fromEntries(
           categories.map((c) => [c, get(`--graph-node-${slugify(c)}`, get('--graph-node', '#768594'))])

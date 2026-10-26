@@ -47,6 +47,9 @@
     max-height: 75vh;
     border: 1px solid var(--main-border-color);
     border-radius: 0.75rem;
+    // Its own flat shade, set by the theme (--graph-bg), which the script paints under the nodes and
+    // the labels as well; flat, so that a faded node shows no patch
+    background-color: var(--graph-bg, var(--main-bg));
     // A faint dot grid, like graph paper, behind the notes
     background-image: radial-gradient(var(--main-border-color) 1px, transparent 1px);
     background-size: 22px 22px;
@@ -75,7 +78,7 @@
     padding: 0.5rem 0.75rem 0.55rem;
     font-size: 0.7rem;
     color: var(--text-muted-color);
-    background: color-mix(in srgb, var(--main-bg) 88%, transparent);
+    background: color-mix(in srgb, var(--graph-bg, var(--main-bg)) 88%, transparent);
     border: 1px solid var(--main-border-color);
     border-radius: 0.6rem;
     opacity: 0;
@@ -178,7 +181,7 @@
       padding: 0;
       font-size: 0.8rem;
       color: var(--text-muted-color);
-      background: var(--main-bg);
+      background: var(--graph-bg, var(--main-bg));
       border: 1px solid var(--main-border-color);
       border-radius: 50%;
       transition: color 0.15s, border-color 0.15s;

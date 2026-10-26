@@ -152,6 +152,7 @@ $tint: 0.3;
   // eggshell inside a ring in the glow colour, with a more saturated orange than the palette's
   // amber (too pale for a glow on white), a third pass of the halo, and tags without a line
   // that are less faded than in the dark theme
+  --graph-bg: #f7f2e5; // the canvas of the Graph tab: a flat eggshell, a little lighter than the eggshell of the tag nodes
   --graph-tag: #f0ead6;
   --show-in-light: inline; // for text that only fits this theme (.in-light and .in-dark in _sass/_notes-graph.scss)
   --show-in-dark: none;
