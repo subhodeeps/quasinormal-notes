@@ -24,7 +24,7 @@ Two theme files are replaced: `assets/css/jekyll-theme-chirpy.scss` and `_includ
 
 | Folder | New files |
 | --- | --- |
-| `_plugins/` | home page, wikilinks and graph data, the category tree (`category-tree.rb`), post head and panel, drafts, references (`jhep.rb`), footer and page titles |
+| `_plugins/` | home page, wikilinks and graph data, the category tree (`category-tree.rb`), tag groups and archive categories (`tag-groups.rb`, `archive-categories.rb`), post head and panel, drafts, references (`jhep.rb`), footer and page titles |
 | `_sass/` | one partial for each feature, and the colours in `amore/` |
 | `assets/js/` | note graph, home page tiles, sort buttons, lightbox |
 | `_includes/`, `_tabs/` | hero, footer, backlinks, graph, the Note Graph tab |

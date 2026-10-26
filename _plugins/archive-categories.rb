@@ -21,14 +21,15 @@ Jekyll::Hooks.register :documents, :post_render do |doc|
   posts = site.posts.docs.to_h { |post| ["#{site.baseurl}#{post.url}", post] }
   count = 0
   doc.output = doc.output.gsub(%r{<li>(\s*<span class="date day".*?<a href="([^"]+)">.*?</a>)}m) do
-    post = posts[Regexp.last_match(2)]
-    next Regexp.last_match(0) unless post
+    m = Regexp.last_match # later regular expressions would replace it
+    post = posts[m[2]]
+    next m[0] unless post
 
     count += 1
     slug = NoteStage.subject(post).downcase.strip.gsub(/[^a-z0-9]+/, '-')
-    path = CategoryTree.trail(post) && Array(Array(post.data['category_paths']).first).join(CategoryTree::SEP)
-    %(<li style="--note: var(--graph-node-#{slug}, var(--graph-node))">#{Regexp.last_match(1)}) +
-      (path ? %( <span class="archive-path">#{path}</span>) : '')
+    path = Array(Array(post.data['category_paths']).first).map { |name| CGI.escapeHTML(name) }.join(CategoryTree::SEP)
+    %(<li style="--note: var(--graph-node-#{slug}, var(--graph-node))">#{m[1]}) +
+      (path.empty? ? '' : %( <span class="archive-path">#{path}</span>))
   end
   Jekyll.logger.warn 'Archive categories:', "no Chirpy entries found in #{doc.url}; the theme's markup may have changed" if count.zero?
 end
