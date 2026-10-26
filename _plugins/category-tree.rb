@@ -12,8 +12,10 @@
 # names of `also_in` to `categories`, so that jekyll-archives builds their pages and Chirpy links
 # them. The first category, which colours a note in the graph and on the home page, stays first.
 # After rendering, it replaces the cards of Chirpy's Categories tab, which show two levels, with
-# the whole tree, and gives each category page the path above its title, its subcategories, and
-# only the notes of the category itself, in order. The items of that list are Chirpy's own,
+# the whole tree, deeper levels in closed folders (<details>). A category page gets the path above
+# its title; with subcategories it becomes an explorer, the subcategories as closed folders that
+# open on their subtopics and their notes in order, then its own notes, without dates. A category
+# without subcategories keeps Chirpy's list of its notes, in order; those items are Chirpy's own,
 # picked out and reordered. post-topics-top.rb and home-tiles.rb show the paths on a post and on
 # its card (CategoryTree.trail).
 #
@@ -169,13 +171,27 @@ module CategoryTree
     %(<span class="text-muted small font-weight-light">#{parts.join(', ')}</span>)
   end
 
-  # A subcategory with its own subcategories nested below it.
+  # A note in the explorer of a category page, without a date.
   # @return [String] an <li>
-  def item(site, node, css = nil)
-    nested = children(node)
-    sub = nested.empty? ? '' : %(<ul class="category-tree">#{nested.map { |child| item(site, child) }.join}</ul>)
-    %(<li#{css ? %( class="#{css}") : ''}><i class="far fa-folder fa-fw"></i> ) \
-      "#{link(site, node.name, 'mx-2')} #{counts(site, node)}#{sub}</li>"
+  def file(site, doc)
+    css = defined?(NoteStage) && NoteStage.stage(doc) ? ' note-unpublished' : ''
+    %(<li class="category-note#{css}"><i class="far fa-file-lines fa-fw"></i> ) +
+      %(<a href="#{CGI.escapeHTML("#{site.baseurl}#{doc.url}")}">#{doc.data['title']}</a></li>)
+  end
+
+  # A subcategory as a folder, closed at first, that opens on its own subcategories and, with
+  # notes, on its notes in order. A folder with nothing to open is a plain row.
+  # @param notes [Boolean] list the notes too (category pages) or only the subcategories (tab)
+  # @return [String] an <li>
+  def folder(site, node, css = nil, notes: false)
+    inner = children(node).map { |child| folder(site, child, notes: notes) }.join
+    inner += notes_of(node).map { |doc| file(site, doc) }.join if notes
+    label = %(<i class="far fa-folder fa-fw"></i> #{link(site, node.name, 'mx-2')} #{counts(site, node)})
+    li = %(<li class="category-folder#{css ? " #{css}" : ''}">)
+    return %(#{li}<span class="category-row"><i class="fas fa-fw category-chevron"></i>#{label}</span></li>) if inner.empty?
+
+    %(#{li}<details><summary class="category-row"><i class="fas fa-angle-right fa-fw category-chevron"></i>#{label}) +
+      %(</summary><ul class="category-tree">#{inner}</ul></details></li>)
   end
 
   # The cards of the Categories tab: one card for each primary category, in Chirpy's markup, with
@@ -196,7 +212,7 @@ module CategoryTree
         trigger = %(<a href="#l_#{i}" data-bs-toggle="collapse" aria-expanded="true" aria-label="h_#{i}-trigger" ) +
                   'class="category-trigger hide-border-bottom"><i class="fas fa-fw fa-angle-down"></i></a>'
         body = %(<div id="l_#{i}" class="collapse show" aria-expanded="true"><ul class="list-group">) +
-               subs.map { |sub| item(site, sub, 'list-group-item') }.join + '</ul></div>'
+               subs.map { |sub| folder(site, sub, 'list-group-item') }.join + '</ul></div>'
       end
       %(<div class="card categories"><div id="h_#{i}" class="card-header d-flex justify-content-between ) +
         %(hide-border-bottom">#{head}#{trigger}</div>#{body}</div>)
@@ -218,7 +234,10 @@ module CategoryTree
     end.join
   end
 
-  # A category page with the path above its title, its subcategories, and its own notes in order.
+  # A category page with the path above its title. A category with subcategories becomes an
+  # explorer: its subcategories as closed folders, then its own notes, without dates. A category
+  # without subcategories keeps Chirpy's list, with only its own notes, in order, and the sort
+  # buttons of assets/js/list-sort.js.
   # @param page [Jekyll::Page] the page of jekyll-archives
   # @return [String, nil] the new output, or nil if Chirpy's markup is missing
   def page(page)
@@ -230,6 +249,18 @@ module CategoryTree
     close = list && out.index('</ul>', list)
     return nil unless node && close
 
+    path = ancestors(node)
+    crumbs = path.empty? ? '' : %(<nav class="category-crumbs" aria-label="Parent categories">) +
+                                path.map { |parent| link(site, parent.name) }.join(SEP) + SEP + '</nav>'
+    start = top + PAGE.length
+    subs = children(node)
+    unless subs.empty?
+      explorer = %(<ul class="category-tree category-explorer">) +
+                 subs.map { |sub| folder(site, sub, notes: true) }.join +
+                 notes_of(node).map { |doc| file(site, doc) }.join + '</ul>'
+      return out[0...start] + crumbs + out[start...list] + explorer + out[(close + '</ul>'.length)..]
+    end
+
     items = out[(list + LIST.length)...close].split(ITEM).select { |li| li.start_with?('<li') }
                                               .to_h { |li| [CGI.unescape(li[/href="([^"]+)"/, 1].to_s), li] }
     own = notes_of(node).filter_map do |doc|
@@ -240,14 +271,7 @@ module CategoryTree
       order = main && !doc.data['order'].nil? ? %( data-order="#{CGI.escapeHTML(doc.data['order'].to_s)}") : ''
       li.sub(/\A<li\b/) { %(<li data-date="#{doc.date.iso8601}"#{order}) }
     end
-
-    path = ancestors(node)
-    crumbs = path.empty? ? '' : %(<nav class="category-crumbs" aria-label="Parent categories">) +
-                                path.map { |parent| link(site, parent.name) }.join(SEP) + SEP + '</nav>'
-    subs = children(node)
-    under = subs.empty? ? '' : %(<ul class="category-children">#{subs.map { |sub| item(site, sub) }.join}</ul>)
-    start = top + PAGE.length
-    out[0...start] + crumbs + out[start...list] + under + LIST + own.join + out[close..]
+    out[0...start] + crumbs + out[start...list] + LIST + own.join + out[close..]
   end
 end
 

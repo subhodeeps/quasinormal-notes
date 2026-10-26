@@ -7,7 +7,7 @@ title: "${FOAM_TITLE}"
 short_title: "${FOAM_TITLE}" # in the note graph
 description: ""
 date: ${FOAM_DATE_YEAR}-${FOAM_DATE_MONTH}-${FOAM_DATE_DATE} ${FOAM_DATE_HOUR}:${FOAM_DATE_MINUTE}:00 +0530
-categories: [] # a path from the primary category down, such as [Physics, Black Holes, Black Hole Shadows]
+categories: [] # a path such as [Physics, Black Holes, Black Hole Shadows]; see docs/categories-and-tags.md
 tags: []
 primary_tags: [] # one to three tags for the note graph; empty means the first two tags
 math: false
