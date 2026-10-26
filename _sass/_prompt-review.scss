@@ -64,4 +64,8 @@ details.prompt-review {
       color: var(--prompt-review-icon-color);
     }
   }
+  // a line of text between two lists: some room above it, and close to the list that it introduces
+  > p {
+    margin: 1.25rem 0 0.4rem;
+  }
 }

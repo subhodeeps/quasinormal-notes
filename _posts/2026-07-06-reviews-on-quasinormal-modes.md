@@ -40,7 +40,7 @@ The study of linear perturbations to black hole spacetimes has been a remarkably
 <details class="prompt-fold prompt-review" open markdown="1">
 <summary markdown="span">I would recommend the following resources as a starting point. They are arranged roughly from introductory to advanced.</summary>
 
-{% jhep_list Arora:2020 Thorne:2019 Detweiler:1979jra Berti:2016 Maggiore:2018 Pani:2013pma Berti:2009kk Sasaki:2003xr Berti:2025hly %}
+{% jhep_list Arora:2020 Berti:2016 Maggiore:2018 Thorne:2019 Detweiler:1979jra Berti:2009kk Pani:2013pma Sasaki:2003xr Berti:2025hly %}
 
 You might also wish to check out:
 
