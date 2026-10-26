@@ -1,5 +1,5 @@
-// A small box of colour in the text, e.g. for the colours of a figure:
-// <span class="swatch" style="background: #5c9dc7"></span>
+// .swatch: a small coloured square in running text, which names a colour next to its value.
+
 .swatch {
   display: inline-block;
   width: 0.8em;

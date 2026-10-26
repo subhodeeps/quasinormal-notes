@@ -1,8 +1,5 @@
-// Code highlighting (Rouge token classes), matching the Next.js site's code blocks:
-// keywords in the accent, comments muted and italic, functions and classes blue,
-// strings green, punctuation teal, numbers amber, variables red.
-//
-// $tones is palette.$inks on the light theme and palette.$lights on the dark one.
+// Syntax highlighting (Rouge) for both themes, from the amore tones. The mixin `styles` takes the
+// tones, the accent and the colours of comments, background and tint.
 
 @use 'sass:map';
 @use 'palette' as p;

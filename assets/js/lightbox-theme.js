@@ -26,7 +26,6 @@
 (() => {
   if (!document.querySelector('a.popup')) return;
 
-  // The caption of a figure: the .aps-caption paragraph right after the paragraph that holds it
   const caption = (link) => {
     const next = link.closest('p')?.nextElementSibling;
     return next?.classList.contains('aps-caption') ? next.innerHTML : '';
@@ -56,7 +55,6 @@
         descPosition: 'bottom',
         moreLength: 0
       });
-      // A caption copied before MathJax finished still holds TeX, so typeset each slide as it loads
       gallery.on('slide_after_load', ({ slideNode }) => {
         if (window.MathJax?.typesetPromise) window.MathJax.typesetPromise([slideNode]).catch(() => {});
       });

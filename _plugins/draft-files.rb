@@ -1,13 +1,14 @@
 #!/usr/bin/env ruby
 #
-# Serve the files that drafts use from inside _drafts.
+# Serves the includes and assets of the drafts from inside _drafts/.
 #
-# _drafts mirrors the root of the site: a draft includes its scripts from
-# _drafts/_includes and shows its images from _drafts/assets, with the same
-# {% include %} tags and /assets/ URLs that a published post uses. To publish
-# a draft, move each file to the same path at the root and the post needs no
-# changes. Jekyll reads these folders only with --drafts
-# (`bash tools/run.sh -d`), so the deployed site never sees them.
+# _drafts/ mirrors the root of the site, so a draft uses {% include code/x.py %} and
+# /assets/images/... exactly as a published post does, and publishing means moving each file
+# to the same path at the root. The hook adds _drafts/_includes to the include paths and
+# _drafts/assets/** to the static files. It does nothing without --drafts.
+#
+# Hook: :site, :post_read. Jekyll does not watch _drafts/assets/, so restart the preview after
+# adding a file there.
 
 Jekyll::Hooks.register :site, :post_read do |site|
   next unless site.show_drafts
@@ -20,8 +21,6 @@ Jekyll::Hooks.register :site, :post_read do |site|
     site.includes_load_paths.insert(1, includes)
   end
 
-  # _config.yml excludes _drafts/assets, so that Jekyll does not read the
-  # images as drafts; add them here as static files under /assets/
   Dir.glob('assets/**/*', base: drafts).sort.each do |path|
     next if File.directory?(File.join(drafts, path)) || File.basename(path).start_with?('.')
 

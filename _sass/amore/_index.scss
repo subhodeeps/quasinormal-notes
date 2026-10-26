@@ -1,7 +1,6 @@
-// The amore colour themes, applied on top of Chirpy's own. The selectors mirror
-// Chirpy's _sass/base/_base.scss and come later in the stylesheet, so these
-// values win: an explicit light or dark mode via the `data-bs-theme` attribute,
-// otherwise the visitor's system setting.
+// Entry point of the amore theme: includes the light and the dark variables and sets them under
+// the theme attribute of Chirpy and under the system preference (prefers-color-scheme).
+// Loaded by assets/css/jekyll-theme-chirpy.scss.
 
 @use 'sass:list';
 @use 'abstracts/variables' as v;

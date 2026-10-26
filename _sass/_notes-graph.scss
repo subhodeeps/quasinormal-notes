@@ -9,8 +9,6 @@
   }
 }
 
-// The panel leaves out Chirpy's "Trending Tags", so that the graph has the room. The tags
-// are still on the Tags page, under each post, and in the search page's suggestions.
 #panel-wrapper .access > section:has(.post-tag) {
   display: none;
 }
@@ -22,9 +20,6 @@
   touch-action: manipulation;
 }
 
-// Text that describes only one theme, such as the colours of the tag nodes on the Graph tab. The
-// themes in _sass/amore say which of the two is shown, so the text follows the toggle and the
-// system setting alike; without them, the light text shows
 .in-light {
   display: var(--show-in-light, inline);
 }
@@ -47,8 +42,6 @@
     max-height: 75vh;
     border: 1px solid var(--main-border-color);
     border-radius: 0.75rem;
-    // Its own flat shade, set by the theme (--graph-bg), which the script paints under the nodes and
-    // the labels as well; flat, so that a faded node shows no patch
     background-color: var(--graph-bg, var(--main-bg));
     // A faint dot grid, like graph paper, behind the notes
     background-image: radial-gradient(var(--main-border-color) 1px, transparent 1px);
@@ -65,9 +58,6 @@
     }
   }
 
-  // The key to the lines of the tag map (assets/js/notes-graph.js), a small card in the lower
-  // left corner of the graph, as far from the edge as the buttons are in the upper right. It
-  // fades in while the map is on and lets the pointer through to the graph
   .notes-graph-scale {
     position: absolute;
     left: 0.6rem;
@@ -234,8 +224,6 @@
   flex-wrap: wrap;
   gap: 0.25rem 0.75rem;
 
-  // The entries that are buttons, on the Graph tab, have padding for their pressed pill, so the
-  // gap between them shrinks by as much
   &:has(button) {
     gap: 0.25rem 0.25rem;
   }
@@ -259,8 +247,6 @@
     height: 0;
   }
 
-  // The key for the tag nodes of the Graph tab: a disc in the muted text colour with a warm
-  // glow, as the graph draws them
   .tag-key {
     display: inline-block;
     width: 0.5rem;
@@ -272,9 +258,6 @@
     box-shadow: 0 0 5px 1px var(--graph-tag-glow, #d39b3c);
   }
 
-  // On the Graph tab, each category, each stage and the tag key are buttons that filter the
-  // graph (assets/js/notes-graph.js). Every entry in view sits on a filled pill, all of them
-  // while nothing is filtered, and the entries the filter leaves out lose the pill and fade
   button {
     display: inline-flex;
     align-items: center;
@@ -307,8 +290,6 @@
     }
   }
 
-  // The key for the dashed ring of drafts, stubs and private notes: a dot with a dashed ring,
-  // drawn as in the graph (an inline SVG from assets/js/notes-graph.js)
   .ring {
     width: 0.9rem;
     height: 0.9rem;
@@ -317,8 +298,6 @@
   }
 }
 
-// "Linked from", in the right panel below the graph, with the panel's own indent and spacing. The
-// links take the text colour, as those of Chirpy's lists in the panel do.
 #panel-wrapper .backlinks {
   padding-right: 1rem;
 
@@ -335,10 +314,6 @@
   }
 }
 
-// The post's footer keeps only the categories, the tags and the licence: the notes related by tag
-// and the links to the older and the newer post are left out, since the graph and "Linked from"
-// in the panel show how a note belongs to the others
-// (!important, since Chirpy's markup gives the navigation Bootstrap's d-flex, which has it too)
 #related-posts,
 .post-navigation {
   display: none !important;

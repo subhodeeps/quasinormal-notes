@@ -1,8 +1,5 @@
-// Figures side by side: the images of one paragraph, marked {: .figure-row },
-// share its width, and stack on a phone. Chirpy hides the light or the dark
-// version of each image, so only one version of each takes up room.
-// Each image needs Chirpy's class .normal, which turns off the centring
-// that Chirpy gives an image alone in a paragraph.
+// .figure-row: two or more linked figures side by side, in one column below 576 px.
+
 .figure-row {
   display: flex;
   gap: 1rem;

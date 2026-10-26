@@ -79,8 +79,6 @@ if $setup; then
     exit 0
 fi
 
-# Both repositories on main, with the remote, and a warning for
-# changes that were not committed
 for i in 0 1; do
     repo=${REPOS[$i]}
     name=${NAMES[$i]}
@@ -94,8 +92,6 @@ for i in 0 1; do
     fi
 done
 
-# What each repository would send: the commit that the ThinkPad has,
-# and the files that changed since then ("?" if that commit is unknown)
 OLD=("" "")
 NEW=("" "")
 FILES=("" "")
@@ -117,8 +113,6 @@ for i in 0 1; do
     FILES[$i]=$files
 done
 
-# The push: fast-forward only, and the ThinkPad refuses it if its
-# files have been edited there
 for i in 0 1; do
     repo=${REPOS[$i]}
     name=${NAMES[$i]}
@@ -133,8 +127,6 @@ for i in 0 1; do
         || fail "the push of $name failed; nothing else was done"
 done
 
-# The preview rebuilds changed pages by itself. A plugin, a
-# configuration file or the Gemfile is read at start-up only.
 files=${FILES[0]}
 need=false
 why=""

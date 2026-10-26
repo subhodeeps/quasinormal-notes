@@ -1,7 +1,5 @@
-// References from _bibliography/references.bib in the style of JHEP.bst (_plugins/jhep.rb):
-// a list numbered [1], [2], ... with the numbers in a column of their own, as at the end of
-// a JHEP paper. A citation that links to a reference makes it clear the top bar and light up
-// briefly, like a footnote in Chirpy.
+// The reference list in the JHEP style (_plugins/jhep.rb).
+// Styles ol.bibliography and its parts: the number, the authors, the title and the links.
 
 .content ol.bibliography {
   list-style: none;

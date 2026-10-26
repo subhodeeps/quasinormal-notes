@@ -1,7 +1,5 @@
-// Enlarged figures in Chirpy's popup (GLightbox, assets/js/lightbox-theme.js). The figures of the
-// posts have transparent backgrounds, and the popup draws them on a black backdrop, where the dark
-// lines of a light-theme figure would vanish. Each enlarged figure gets the background of the page
-// in the current theme, so it looks as it does in the post.
+// Enlarged figures (Chirpy's GLightbox popup) on the background of the page, with the caption in the
+// type of the page. assets/js/lightbox-theme.js opens them in the current theme.
 
 .gslide-image img {
   background: var(--main-bg);

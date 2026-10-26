@@ -1,11 +1,14 @@
 #!/usr/bin/env ruby
 #
-# Replace the content of Chirpy's footer with _includes/site-footer.html on every page.
+# Footer of every page from _includes/site-footer.html.
 #
-# Chirpy's footer.html holds the copyright line and the "Using the Chirpy theme" line.
-# Instead of copying that file (and drifting from theme updates), this hook edits the
-# rendered pages. The footer element itself stays, so Chirpy's layout still finds it.
+# Replaces the content of Chirpy's `<footer aria-label="Site Info">` after rendering, so that
+# the theme's footer.html stays untouched and the element remains where Chirpy's layout expects
+# it. The include is rendered once per build (:pre_render) and inserted in every page
+# (:post_render). If a page has no such footer, the hook prints a build warning. Styles:
+# _sass/_footer.scss.
 
+# Chirpy's footer element, which the hook replaces.
 FOOTER = %r{<footer\s+aria-label="Site Info"[^>]*>.*?</footer>}m
 
 Jekyll::Hooks.register :site, :pre_render do |site|

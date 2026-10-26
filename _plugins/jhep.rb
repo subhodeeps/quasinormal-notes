@@ -1,24 +1,25 @@
 #!/usr/bin/env ruby
 #
-# References in the style of JHEP.bst, version 2.18, by SISSA Medialab
-# (https://jhep.sissa.it/jhep/help/JHEP/TeXclass/DOCS/JHEP.bst, kept in tools/bib/).
+# References in the style of JHEP.bst (version 2.18, SISSA Medialab), written as HTML.
 #
-# jekyll-scholar reads _bibliography/references.bib, numbers the citations in the order
-# in which a post first cites them, and renders {% bibliography %} through the template in
-# _config.yml, which calls the Liquid filter jhep on each entry. A CSL style cannot put a
-# link around a span of text, as JHEP.bst does with the journal reference, so this file
-# ports the functions of JHEP.bst to Ruby and writes HTML in place of LaTeX: \emph becomes
-# <em>, \bfseries <strong>, \ttfamily and \scshape a span of class bib-tt or bib-sc, \href
-# a link, and ~ a non-breaking space. Names, initials and sentence case follow the rules of
-# BibTeX itself. Math in $...$ passes through to MathJax. Cross-references (crossref) are
-# not supported.
+# jekyll-scholar numbers the citations in order of first citation and renders {% bibliography %}
+# through the template of _config.yml, which calls the Liquid filter `jhep` on each entry. A
+# CSL style cannot link a span of the reference, as JHEP.bst does with the journal and the DOI,
+# so this file ports the functions of JHEP.bst to Ruby. The methods of Entry carry the names of
+# the BST functions (format_authors, format_date, format_pages, ...), and each entry type
+# (article, book, ...) is a method that assembles them. LaTeX becomes HTML: \emph is <em>,
+# \textbf <strong>, \texttt and \textsc a span of class bib-tt or bib-sc, and ~ a no-break
+# space. Math in $...$ passes through to MathJax. Cross-references (crossref) are not supported.
 #
-# tools/bib/check.rb compares the output with that of BibTeX and JHEP.bst, entry by entry.
+# Also collapses the citations of a page, [1, 2, 3] to [1-3] (hook :post_render at the end).
+# Check: `bundle exec ruby tools/bib/check.rb` compares the output with BibTeX (needs TeX).
+# Source of the entries: _bibliography/references.bib.
 
 require 'bibtex'
 require 'cgi'
 require 'latex/decode'
 
+# BibTeX entries in JHEP style. `module_function` methods; Entry formats one entry.
 module JHEP
   NBSP = " "
 
@@ -39,8 +40,10 @@ module JHEP
 
   # ---- Entries ----------------------------------------------------------------------------
 
-  # The entries of a .bib file, with names and months left as written, cached until the
-  # file changes
+  # Reads the bibliography once per change of the file.
+  # @param path [String] a .bib file
+  # @return [Hash{String=>Hash}] fields of each entry by key; field names are lowercase and
+  #   "@type" holds the entry type
   def entries(path)
     @entries ||= {}
     mtime = File.mtime(path)
@@ -58,8 +61,10 @@ module JHEP
     table
   end
 
-  # ---- Braces -------------------------------------------------------------------------------
 
+  # @param s [String]
+  # @param open [Integer] index of a "{"
+  # @return [Integer] index of the matching "}", or the last index if there is none
   def matching_brace(s, open)
     depth = 0
     (open...s.length).each do |i|
@@ -93,8 +98,9 @@ module JHEP
     parts << s[start..]
   end
 
-  # ---- Names, after format.name$ of BibTeX --------------------------------------------------
 
+  # @param field [String] an author or editor field
+  # @return [Array<String>] the names, split at "and" outside braces
   def split_names(field)
     split_top(field.strip, /\A\s+and\s+/i).map(&:strip).reject(&:empty?)
   end
@@ -122,9 +128,9 @@ module JHEP
     tokens
   end
 
-  # Whether a word starts in lower case, as BibTeX decides it: the first letter outside
-  # braces counts, a special character such as {\'e} counts by its letter, and other brace
-  # groups have no case
+  # BibTeX's test for a lower-case word, which looks past braces and accent commands.
+  # @param word [String]
+  # @return [Boolean]
   def lower?(word)
     i = 0
     while i < word.length
@@ -149,10 +155,16 @@ module JHEP
     false
   end
 
+  # @param tokens [Array<Array(String, String)>] words with their separators, from words
+  # @return [String]
   def join_words(tokens)
     tokens.each_with_index.map { |(word, sep), i| i == tokens.length - 1 ? word : word + (sep == '-' ? '-' : sep) }.join
   end
 
+  # Splits one name into first, von, last and junior parts, as BibTeX does for the three forms
+  # "First von Last", "von Last, First" and "von Last, Jr, First".
+  # @param name [String]
+  # @return [Hash]
   def parse_name(name)
     parts = split_top(name, /\A,/).map(&:strip)
     case parts.length
@@ -177,8 +189,8 @@ module JHEP
     end
   end
 
-  # {f.}: the first letter of each word of the first names, with a full stop, the words of a
-  # hyphenated name joined by a hyphen; remove.spaces of JHEP.bst then drops spaces and ties
+  # @param tokens [Array] the first names, with separators
+  # @return [String] their initials, such as "J. K."
   def initials(tokens)
     tokens.each_with_index.map do |(word, sep), i|
       letter = word.start_with?('{') ? word[0..matching_brace(word, 0)] : word[0]
@@ -186,7 +198,8 @@ module JHEP
     end.join
   end
 
-  # {f.}~{vv~}{ll}{, jj}
+  # @param name [String] one name as in the .bib file
+  # @return [String] HTML: initials, von part, last part
   def format_name(name)
     return 'others' if name.strip == 'others'
 
@@ -200,7 +213,8 @@ module JHEP
     out
   end
 
-  # format.names: "A, B and C", and from the seventh name on, "et al."
+  # @param field [String] an author or editor field
+  # @return [String] HTML of the list, with "et al." from the seventh name
   def format_names(field)
     names = split_names(field)
     out = +''
@@ -226,10 +240,11 @@ module JHEP
     html(out)
   end
 
-  # ---- Case and LaTeX -----------------------------------------------------------------------
 
-  # change.case$ with "t": lower case outside braces, except the first character and the
-  # first character after a colon and a space; special characters such as {\'E} change too
+  # Puts a title in sentence case: the first letter and the letter after a colon stay, protected
+  # groups in braces are kept as they are, everything else is lowered.
+  # @param s [String]
+  # @return [String] LaTeX
   def sentence_case(s)
     out = +''
     depth = 0
@@ -275,8 +290,9 @@ module JHEP
     out
   end
 
-  # LaTeX to HTML: font commands become tags, accents and dashes become characters, ties
-  # become non-breaking spaces, braces go, and $...$ stays as it is for MathJax
+  # Converts LaTeX text to HTML: font commands (FONTS), accents, ~ and escapes; $...$ is kept for MathJax.
+  # @param s [String]
+  # @return [String]
   def html(s)
     s = s.to_s
     out = +''
@@ -307,6 +323,8 @@ module JHEP
     out
   end
 
+  # @param fragment [String] HTML
+  # @return [String] its text
   def visible(fragment)
     CGI.unescapeHTML(fragment.gsub(/<[^>]*>/, ''))
   end
@@ -316,8 +334,9 @@ module JHEP
     visible(fragment).match?(/[.?!]\z/) ? fragment : "#{fragment}."
   end
 
-  # ---- The output state machine of JHEP.bst -------------------------------------------------
 
+  # Collects the pieces of a reference with the separators that JHEP.bst puts between them
+  # (output, output_nonnull, blank_sep, new_block, new_sentence, fin_entry).
   class Writer
     attr_accessor :state
 
@@ -365,8 +384,9 @@ module JHEP
     end
   end
 
-  # ---- The formatting functions of JHEP.bst --------------------------------------------------
 
+  # One entry. The format_* methods follow the functions of JHEP.bst with the same names; the
+  # method of the entry type (article, book, ...) assembles them and to_html chooses it by TYPES.
   class Entry
     def initialize(fields)
       @f = fields
@@ -744,14 +764,15 @@ module JHEP
     end
   end
 
+  # @param fields [Hash] one entry of entries
+  # @return [String] HTML of the reference
   def format(fields)
     Entry.new(fields).to_html
   end
 
-  # Runs of three or more consecutive numbers in a citation become a range, as the cite
-  # package of LaTeX writes them in a JHEP paper: "1, 2, 3, 4, 7" becomes "1–4, 7". The
-  # citation style asks for this, but citeproc-ruby does not apply it. A citation with
-  # anything other than numbers, such as a locator, stays as it is.
+  # Joins runs of three or more consecutive citation numbers.
+  # @param numbers [String] such as "1, 2, 3, 5"
+  # @return [String] such as "1–3, 5"
   def collapse(numbers)
     items = numbers.split(/,\s*/)
     return numbers unless items.all? { |item| item.match?(/\A\d+\z/) }
@@ -765,6 +786,9 @@ end
 if defined?(Liquid)
   module Jekyll
     module JHEPFilter
+      # Liquid filter {{ entry | jhep }} for the bibliography template.
+      # @param entry [Hash] the entry of jekyll-scholar, which has the key
+      # @return [String] HTML of the reference, or the key if the entry is missing
       def jhep(entry)
         site = @context.registers[:site]
         scholar = site.config['scholar'] || {}

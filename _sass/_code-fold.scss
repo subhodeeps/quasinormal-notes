@@ -1,6 +1,5 @@
-// A long code block folded away under a one-line summary, with <details class="code-fold">
-// in a post (the post needs markdown="1" on the tag, so that the code block inside is
-// rendered as usual). No script is needed: the browser opens and closes it.
+// Folded boxes: <details class="code-fold"> for code and appendices, and the collapsible
+// prompt-fold boxes of Chirpy's callouts. Written in the posts with markdown="1".
 
 .code-fold {
   margin: 1rem 0 1.5rem;
@@ -53,8 +52,6 @@
   }
 }
 
-// An info box that opens on click, with <details class="prompt-fold" markdown="1"> in a post.
-// It uses the colours and the icon of Chirpy's own info box (blockquote.prompt-info).
 .prompt-fold {
   position: relative;
   margin: 1rem 0 1.5rem;

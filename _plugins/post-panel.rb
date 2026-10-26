@@ -1,20 +1,27 @@
 #!/usr/bin/env ruby
 #
-# The right panel of a post shows "Connections" (the note graph, _plugins/notes-graph.rb) and
-# Chirpy's "Contents", without Chirpy's "Recently Updated". The list of recent posts stays on the
-# pages of the sidebar: the home page, the categories, the tags, the archives and the tabs.
+# Right panel of a post without "Recently Updated".
 #
-# The hook removes the "Recently Updated" section from the panel's "access" block. The graph stays
-# in that block, so Chirpy's "Contents" follows it and stays in view as the reader scrolls. If the
-# theme's markup changes, the hook finds no section to remove and the panel stays as Chirpy
+# The panel of a post shows the note graph (notes-graph.rb) and Chirpy's "Contents". The
+# hook removes the section `<section id="access-lastmod">` from the page, so the Contents sit
+# right below the graph and stay in view when the reader scrolls. The recent posts remain on the
+# pages of the sidebar (home, categories, tags, archives, tabs).
+#
+# If the theme's markup changes, there is no section to remove and the page stays as Chirpy
 # renders it.
+#
+# Hook: :posts, :post_render.
 
+# Removes "Recently Updated" from the right panel. `module_function` methods.
 module PostPanel
+  # Opening tag of that section.
   RECENT = '<section id="access-lastmod">'
 
   module_function
 
-  # The section from its opening tag up to its </section>; it holds no other section
+  # The page without the section from RECENT to its closing tag.
+  # @param output [String] the rendered page
+  # @return [String] output itself if the section is missing
   def without_recent(output)
     start = output.index(RECENT)
     stop = start && output.index('</section>', start)

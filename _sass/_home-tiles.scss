@@ -1,7 +1,6 @@
-// The latest posts of the home page as a grid of tiles (_plugins/home-tiles.rb): small squares,
-// wide and tall tiles, and large squares, packed densely so that the tiles fill the gaps and a
-// new post finds its place. The pinned posts above stay full-width bands. On a phone the tiles
-// stack in one column, like the bands.
+// The grid of tiles on the home page (_plugins/home-tiles.rb, assets/js/home-tiles.js).
+// Defines the tile sizes (tile-small, tile-wide, tile-tall, tile-large), the excerpt that fades out
+// towards the date, and the dashed border of unpublished notes.
 
 #post-list .home-tiles {
   display: grid;
@@ -73,8 +72,6 @@
     -webkit-line-clamp: 3;
   }
 
-  // The opening of the post (_plugins/home-tiles.rb) fills the space of a tall or a large tile
-  // between the description and the date, and fades out towards the date
   .tile-excerpt {
     flex: 1 1 0;
     min-height: 0;
@@ -107,8 +104,6 @@
     font-size: 1.3rem;
   }
 
-  // A small square has room for the title, the description and the date, and for a draft, its
-  // stage in place of the categories
   .tile-small:not(.tile-stage) .post-meta .categories,
   .tile-small:not(.tile-stage) .post-meta .fa-folder-open {
     display: none;

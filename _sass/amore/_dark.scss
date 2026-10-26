@@ -1,6 +1,4 @@
 // Dark theme: the same palettes, with light tones for text.
-//
-// Overrides the variables of Chirpy's _sass/themes/_dark.scss.
 
 @use 'sass:color';
 @use 'palette' as p;
@@ -153,7 +151,7 @@ $tint: 0.14;
   --graph-node-personal: #{p.$plum-main};
   --graph-edge: #{p.alpha(p.$slate-main, 0.7)};
   --graph-edge-faint: #{p.alpha(p.$slate-main, 0.45)};
-  --graph-bg: #0d1118; // the canvas of the Graph tab: a flat, deeper and cooler shade than the page
+  --graph-bg: #100d19; // the canvas of the Graph tab: a flat violet-black, clearly apart from the page
   --graph-tag: var(--text-muted-color); // the fill of a tag node
   --show-in-light: none; // for text that only fits this theme (.in-light and .in-dark in _sass/_notes-graph.scss)
   --show-in-dark: inline;

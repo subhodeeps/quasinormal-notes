@@ -1,8 +1,5 @@
-// Every card of the home page in the colour of its note in the graph (_plugins/home-tiles.rb):
-// a stripe on the left and a faint tint of --note, which the plugin sets on each card from
-// --graph-node-<category> in _sass/amore/. Drafts, stubs and private notes take the colours of
-// their subjects, like published posts, with a dashed border in that colour. The strength of
-// the tint, --card-tint, is set for each theme.
+// Cards of the post list in the colour of their subject. The --note variable, set inline by
+// _plugins/home-tiles.rb from --graph-node-<category>, gives the stripe and the tint.
 
 #post-list .post-preview.note-card {
   --card-hover-bg: color-mix(in srgb, var(--note) var(--card-tint-hover), transparent);
@@ -16,8 +13,6 @@
     var(--card-shadow);
 }
 
-// A draft, a stub or a private note, in the local preview: a dashed border in the colour of its
-// subject. An outline follows the rounded corners and does not change the size of the card.
 #post-list .post-preview.note-card.note-unpublished {
   outline: 1.5px dashed var(--note);
   outline-offset: -1.5px;

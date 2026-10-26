@@ -1,18 +1,16 @@
 #!/usr/bin/env ruby
 #
-# Author(s): Subhodeep Sarkar
-# Affiliation: IIT Gandhinagar and IIIT Allahabad
-# Contact: subhodeep.sarkar1@gmail.com
-# Date: October 2026
+# Categories and tags of a post under its byline instead of at its foot.
 #
-# The categories and the tags of a post, after its byline instead of at the foot of the page.
+# Chirpy puts them in the footer of a post, above the licence and the share buttons. The hook
+# cuts that block out of the footer and sets it at the end of the post's header in
+# <div class="post-topics"> (_sass/_post-topics.scss). It finds the footer
+# (TAIL), the end of the block (BOTTOM) and the post's header (TITLE, HEADER_END) by their markup.
+# If a marker is missing, it prints a build warning and leaves the page as Chirpy renders it.
 #
-# Chirpy puts them in the footer of a post, above the licence and the share buttons. After the
-# page is rendered, this hook cuts that block out of the footer and sets it at the end of the
-# post's header, under the date and the author, in a div of its own (.post-topics, styled in
-# _sass/_post-topics.scss). The theme's layouts are not changed. If a theme update moves one of
-# the markers below, the hook prints a build warning and leaves the page as Chirpy renders it.
+# Hook: :posts, :post_render.
 
+# Moves the topics block from the footer to the header. `module_function` methods.
 module PostTopics
   TAIL = '<div class="post-tail-wrapper'   # the footer, which opens with the categories and the tags
   BOTTOM = 'post-tail-bottom'              # the licence and the share buttons, which end that block
@@ -21,8 +19,9 @@ module PostTopics
 
   module_function
 
-  # The page with the block between the footer's opening tag and the licence moved into the header,
-  # or the page unchanged, with a warning, if a marker is missing
+  # @param output [String] the rendered post
+  # @param where [String] the post, for the warning
+  # @return [String] the page with the block moved, or output itself if a marker is missing
   def moved(output, where)
     tail = output.index(TAIL)
     first = tail && output.index('>', tail)

@@ -1,8 +1,5 @@
-// Light theme: slate for the neutrals, a purple accent (hue 271) between amore's
-// plum and the violet of its colour cycle. Text uses the darker tones; mid tones
-// are for icons, underlines and other non-text accents.
-//
-// Overrides the variables of Chirpy's _sass/themes/_light.scss.
+// Light theme: the variables of Chirpy and of the site (--graph-*, --card-*, --show-in-*) from
+// the amore palette. The dark counterpart is _dark.scss; both must define the same variables.
 
 @use 'sass:color';
 @use 'palette' as p;
@@ -148,11 +145,7 @@ $tint: 0.3;
   --graph-node-personal: #{p.$plum-main};
   --graph-edge: #{p.alpha(p.$slate-main, 0.55)}; // a thin line of the slate, as the pale slate-light looked thick on white
   --graph-edge-faint: #{p.alpha(p.$slate-main, 0.35)};
-  // The tag nodes: a gray disc is too dull on white, so the light theme fills them with
-  // eggshell inside a ring in the glow colour, with a more saturated orange than the palette's
-  // amber (too pale for a glow on white), a third pass of the halo, and tags without a line
-  // that are less faded than in the dark theme
-  --graph-bg: #f7f2e5; // the canvas of the Graph tab: a flat eggshell, a little lighter than the eggshell of the tag nodes
+  --graph-bg: #f1edf6; // the canvas of the Graph tab: a flat, cool eggshell with a tint of the purple accent
   --graph-tag: #f0ead6;
   --show-in-light: inline; // for text that only fits this theme (.in-light and .in-dark in _sass/_notes-graph.scss)
   --show-in-dark: none;

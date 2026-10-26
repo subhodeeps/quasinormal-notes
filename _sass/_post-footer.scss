@@ -1,7 +1,6 @@
-// The foot of a post: the share buttons and nothing else. The categories and the tags are under
-// the byline (_plugins/post-topics-top.rb), the licence line is left out, the double rule under
-// the buttons goes (the site footer keeps its own rule), and the gaps shrink. Only Chirpy's
-// classes are targeted, and a rule that Chirpy sets as !important is overridden as one.
+// Foot of a post after _plugins/post-topics-top.rb has moved the topics up: less space, a single rule,
+// and no licence line.
+
 .post-tail-wrapper {
   margin-top: 2.5rem;
   border-bottom: 0;

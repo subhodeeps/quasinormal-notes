@@ -1,16 +1,19 @@
 #!/usr/bin/env ruby
 #
-# Keep inline code from wrapping inside a word, such as after the hyphen of a flag
-# (`-rfbport=5900` would otherwise break as "-" / "rfbport=5900").
+# Keeps a word of inline code from breaking at its hyphens.
 #
-# Browsers may break a line after any hyphen, and CSS cannot turn that off for hyphens
-# alone, while `white-space: nowrap` on the whole snippet pushes long commands past the
-# edge of the page. So each space-free token of inline code is wrapped in a span that does
-# not break (.code-token in _sass/_code-font.scss): long commands still wrap between words,
-# never inside one. Tokens longer than MAX_TOKEN stay breakable, so they cannot overflow
-# a phone screen. Code blocks are left alone, and the copied text is unchanged.
+# Browsers may break a line after any hyphen, which splits a flag such as `-rfbport=5900`.
+# The hook wraps each space-free token of inline code that contains a hyphen in
+# <span class="code-token">, which does not wrap (_sass/_code-font.scss), so long commands
+# still wrap between words. Tokens longer than MAX_TOKEN stay breakable and cannot overflow a
+# phone screen. Code blocks and inline code that contains markup are left alone, and the
+# copied text is unchanged.
+#
+# Hook: :documents and :pages, :post_render.
 
+# Longest token, in characters, that is kept in one piece.
 MAX_TOKEN = 40
+# An inline code element of Rouge, with its opening tag, its body and its closing tag.
 INLINE_CODE = %r{(<code class="[^"]*\bhighlighter-rouge\b[^"]*">)(.*?)(</code>)}m
 
 Jekyll::Hooks.register [:documents, :pages], :post_render do |doc|

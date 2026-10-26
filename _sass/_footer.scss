@@ -1,7 +1,4 @@
-// The site footer (_includes/site-footer.html): the copyright line in the accent colour
-// and a quotation under it, small and faint, centred and set in the code font, as on
-// subhodeeps.github.io. Chirpy gives the footer a fixed height and lays out its two
-// lines side by side on wide screens; here the content sets the height.
+// Footer of every page (_includes/site-footer.html, put in place by _plugins/site-footer.rb).
 
 footer.site-footer {
   display: flex;
@@ -43,8 +40,6 @@ footer.site-footer {
       margin-top: 0.25rem;
       opacity: 0.8;
 
-      // The title of the book links to the scan at the Internet Archive; it keeps the colour of the
-      // credit and takes the accent on hover
       a {
         color: inherit;
         text-decoration: underline dotted;
@@ -57,8 +52,6 @@ footer.site-footer {
     }
   }
 
-  // From tablets up, the quotation breaks once, after "useful;", so that it is wide and
-  // low rather than a square block
   .footer-quote-break {
     display: none;
   }

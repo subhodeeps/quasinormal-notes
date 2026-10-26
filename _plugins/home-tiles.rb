@@ -1,40 +1,25 @@
 #!/usr/bin/env ruby
 #
-# The post list of the home page: pinned posts as full-width bands, the latest posts as a grid
-# of tiles of several sizes, and every card in the colour of its note in the graph.
+# Post list of the home page as bands and tiles, and the data for the sort buttons.
 #
-# Chirpy's home layout lists every post as a band of the same height. Instead of copying that
-# layout, and drifting from theme updates, this hook edits the rendered pages of the list, after
-# _plugins/home-hero.rb has split it into pinned and latest posts.
+# Pinned posts stay full-width bands. The other posts become a grid of tiles whose size follows
+# the length of the post without its code (HomeTiles.size). Every card takes the colour of its
+# subject from --graph-node-<category> (_sass/amore/), and an unpublished note gets a dashed
+# border. A tall, wide or large tile also shows the opening paragraphs of the post
+# (HomeTiles.excerpt). The tiles of all pages are written to assets/data/home-tiles.json for
+# assets/js/list-sort.js, and assets/js/home-tiles.js closes the gaps at the end of the grid.
 #
-# - Each card takes the colour of its subject, its first category, which is the colour of its
-#   node in the note graph (--graph-node-<category> in _sass/amore/), as a stripe on the left
-#   and a faint tint (_sass/_note-cards.scss). A draft, a stub or a private note has its stage
-#   as the first category (_plugins/draft-category.rb), so its colour comes from the category
-#   after the stage, and its card gets a dashed border in that colour. A new category takes its
-#   graph colour with no further change.
-# - The latest posts form a grid (_sass/_home-tiles.scss). The size of a tile follows the
-#   length of the post, without its code: a short note is a small square, a longer one a wide
-#   or a tall tile, and the longest a large square. A hash of the post's name decides between
-#   wide and tall, so the pattern looks varied but stays the same from one build to the next.
-#   The grid packs the tiles densely, so a new post finds its place without any configuration,
-#   and assets/js/home-tiles.js closes the gaps that remain at its end, at every width.
-# - A tall or a large tile has room for more than the description, so it also shows the
-#   opening of the post, which fades out towards the date. The excerpt is the run of
-#   paragraphs at the start of the post, up to the first display equation, code block, folded
-#   box, quotation, figure or table, so that it never starts in the middle of an argument.
-#   Inline math stays, and the home page loads MathJax for it (math: true in index.html).
-#   A wide tile carries the opening as well, hidden until assets/js/home-tiles.js lengthens
-#   the tile to two rows to close a gap, when it has the room of a large tile.
-# - The sort buttons above the grid (assets/js/list-sort.js) sort all the latest posts, not only
-#   those of the page in view. The plugin collects the tiles of every page of the home page and
-#   writes them, page by page, to assets/data/home-tiles.json after the build, with the title of
-#   each post. The grid names the file in data-all.
+# Depends on Chirpy's cards (`<article class="card-wrapper card">` with `post-preview`). If
+# they are missing, the hook prints a build warning and leaves the list as Chirpy renders it.
+#
+# Hooks: :pages, :post_render; :site, :pre_render and :post_write. Styles: _sass/_home-tiles.scss
+# and _sass/_note-cards.scss. Needs NoteStage from draft-category.rb.
 
 require 'fileutils'
 require 'json'
 require 'zlib'
 
+# Sizes, colours and excerpts of the tiles. `module_function` methods.
 module HomeTiles
   CARD = %r{<article class="card-wrapper card">.*?</article>}m
   TILE = %r{<article class="card-wrapper card tile .*?</article>}m
@@ -47,21 +32,31 @@ module HomeTiles
 
   module_function
 
+  # @param html [String, nil]
+  # @return [String] the text of html without tags
   def plain(html)
     html.to_s.gsub(/<[^>]+>/, '').strip
   end
 
-  # As slugify in assets/js/notes-graph.js, so that the names of the colours match
+  # The name of a category as the graph script writes it, which gives --graph-node-<slug>.
+  # @param category [String]
+  # @return [String]
   def slug(category)
     category.to_s.downcase.strip.gsub(/[^a-z0-9]+/, '-')
   end
 
+  # Length of a post without code blocks and tags.
+  # @param post [Jekyll::Document]
+  # @return [Integer] number of words
   def words(post)
     post.content.to_s.gsub(%r{<pre.*?</pre>}m, ' ').gsub(/```.*?```/m, ' ').gsub(/<[^>]+>/, ' ').split.size
   end
 
-  # The paragraphs at the start of the post, up to about `limit` words. The run ends at the
-  # first element that is not a paragraph, or at a paragraph with a display equation
+  # The opening paragraphs of a post, up to the first block that is not a paragraph or a display
+  # equation (BLOCK), and about `limit` words.
+  # @param post [Jekyll::Document]
+  # @param limit [Integer] words
+  # @return [String] HTML of the paragraphs, "" if the post opens with a block
   def excerpt(post, limit)
     html = post.content.to_s.sub(/\A\s*<!--.*?-->/m, '')
     out = []
@@ -82,6 +77,10 @@ module HomeTiles
     out.join
   end
 
+  # The tile class of a post: tile-small below SMALL words, tile-large above LARGE, otherwise
+  # tile-wide or tile-tall by the parity of a hash of its slug, so that it stays the same between builds.
+  # @param post [Jekyll::Document]
+  # @return [String]
   def size(post)
     count = words(post)
     return 'tile-small' if count < SMALL

@@ -1,14 +1,20 @@
 #!/usr/bin/env ruby
 #
-# Insert _includes/home-hero.html above the post list on the home page, and split
-# the list into pinned and latest posts with a heading for each.
+# Hero of the home page and the headings of its post list.
 #
-# Chirpy's `home` layout ignores the page's own content and lists pinned posts
-# together with the rest, so instead of copying that layout (and drifting from
-# theme updates), this hook edits the rendered page. Configure it with the
-# `hero` front matter in index.html.
+# Inserts _includes/home-hero.html above the post list and, when the front matter of
+# index.html gives `hero.pinned_heading` and `hero.list_heading`, puts the second heading
+# after the pinned posts. Chirpy's home layout lists pinned and other posts as one run of
+# cards, so the hook edits the rendered page and leaves the layout alone.
+#
+# Depends on Chirpy's markup `<div id="post-list"` and `<article class="card-wrapper card">`.
+# If either is missing, the hook prints a build warning and leaves the page unchanged.
+#
+# Hook: :pages, :post_render. Runs before home-tiles.rb splits the list into tiles.
 
+# Chirpy's container of the post list, before which the hero goes.
 MARKER = '<div id="post-list"'
+# Opening tag of a post card, which separates the pinned posts from the rest.
 CARD = '<article class="card-wrapper card">'
 
 Jekyll::Hooks.register :pages, :post_render do |page|

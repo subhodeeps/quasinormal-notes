@@ -185,7 +185,6 @@
     new ResizeObserver(resize).observe(canvas);
     resize();
 
-    // Theme changes: Chirpy's toggle sets data-bs-theme on <html>; the system setting can change too
     const recolour = () => {
       readColours();
       redrawLayer();

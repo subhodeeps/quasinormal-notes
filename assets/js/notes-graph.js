@@ -1,138 +1,48 @@
 /*
- * The note graph in the right panel and on the Graph tab (_includes/notes-graph.html), from
- * assets/data/notes-graph.json (_plugins/notes-graph.rb).
+ * Note graph of the right panel and of the Graph tab.
  *
- * Nodes are posts, coloured by their subject, their first category. A draft, a stub or a
- * private note, which the local preview shows, takes the colour of its subject too, with a
- * dashed ring around the node (stage in the data). Solid edges are links between notes,
- * wikilinks or ordinary links, and dotted edges join notes that share tags. A node grows with
- * the number of its links. Hovering a node highlights it and its neighbours and shows its
- * title, and a click opens it. On a touch screen, which has no hover, the first tap on a node
- * shows its title and the second opens it.
+ * Reads assets/data/notes-graph.json (written by _plugins/notes-graph.rb) from the data-src
+ * of each <canvas> in a .notes-graph section (_includes/notes-graph.html) and draws it on
+ * that canvas. With data-drift="true" the nodes of the panel sway a few pixels.
  *
- * The layout is a small force simulation. Every pair of notes repels, links and shared tags
- * pull like springs, and a weak pull holds the whole near the centre. It runs in full before
- * the first frame and starts from positions seeded by the names of the notes, so the same notes
- * always land in the same place. Nodes are solid: each sits on a disc of the background colour,
- * so a faded node hides the lines behind it and does not show them through.
+ * Two modes, chosen by the section's class:
+ *   - panel (flat, 2D): the post and its neighbours, or every note on other pages;
+ *   - Graph tab (.notes-graph-page, "big", 3D): every note and every tag, with a legend, a
+ *     tag map ("Tags only"), selection and focus, and mouse and touch controls.
  *
- * The right panel is a quiet map of where a note sits, beside the text it accompanies.
+ * Structure: constants and helpers (colour mixing, rotation matrices, Jacobi eigenvectors) ->
+ * layout(): builds nodes and edges for the mode and runs the force simulation (step()) ->
+ * start(): canvas, legend, draw(), pointer and touch handlers, drift loop.
  *
- * - The layout is flat, and the springs of a node with many connections are longer and weaker
- *   (SPREAD_FLAT and LOOSEN_FLAT) and the discs of well-linked notes are a little smaller
- *   (GROWTH_FLAT), so that the interlinked notes of a long series do not gather into a clump of
- *   touching discs. Each node drifts a few pixels around its place, slowly and out of step
- *   with the others, so that the graph is not frozen (SWAY). The drift stops while the pointer
- *   rests on a node, while the graph is out of view or the page hidden, and for a reader whose
- *   system asks for less motion (data-drift in _includes/notes-graph.html).
- * - On a post, the post and the notes it links to or from appear at full strength. The notes
- *   one link further away, and the notes that share a primary tag with the post, appear
- *   faintly (FAR). They give the wider context without asking for attention. On other pages
- *   the panel shows every note with its links only. With every note in view, tag edges would
- *   cover the links.
- * - A tag edge appears only for a primary tag that both notes share. The primary tags say what
- *   a note is about: primary_tags in its front matter, at most three, or else its first two
- *   tags. Minor tags, such as a tool or an operating system, would join almost every note to
- *   every other and bury the links. A tag edge also gives way to a link between the same two
- *   notes, which says more. On a post, every tag edge starts at the post, so the panel shows
- *   how this note relates to the others by topic. A primary tag shared by many notes, such as
- *   black-holes, would otherwise draw a line between every two of them.
- * - The panel has no legend. Hovering a node gives its title, and the Graph tab explains the
- *   colours.
- *
- * The Graph tab is the full picture, inspired by Obsidian's Graph view and Foam's Graph Visualization.
- *
- * - Every tag has a node of its own, sized by the number of its notes and joined to them by
- *   dotted lines. The node is a disc in the muted text colour with an amber glow in the dark
- *   theme, and an eggshell disc in an orange ring in the light theme (--graph-tag,
- *   --graph-tag-glow, -halo, -ring and -weak in _sass/amore). A line between every two notes
- *   that share a tag would grow as the square of the number of notes and would leave out the
- *   broadest tags, so the notes on a subject gather around the node of their tag instead, and
- *   a tag such as black-holes becomes a hub. Hovering over a tag node shows the tag and its
- *   number of notes, and a click opens the tag's page (tag_url in _plugins/notes-graph.rb) in
- *   two steps, as for a note.
- * - A first click on a note or a tag selects it: the graph stops turning, and the node keeps
- *   its title and the highlight of its cluster after the pointer moves on. The node under the
- *   pointer then lights its own cluster more softly (SECOND), and a click on it moves the
- *   selection there. A second click opens its page, and
- *   a click on empty space or Escape clears the selection. The right panel, which has no depth,
- *   opens a note on the first click. The tag nodes
- *   keep the colour neutral, since colour stands for the category of a note, and their glow
- *   sets them apart from the notes.
- * - A click on a category in the legend shows only the notes of that category, with the tags
- *   they share; further clicks add or remove categories, and removing the last one shows every
- *   note again. In the local preview, a second row of the legend filters by stage in the same
- *   way: Published, Draft, To Write (the stubs) and Private (_plugins/draft-category.rb). A note
- *   is shown when it passes both rows, so Physics and Draft together show the physics drafts. A
- *   click on Tag hides or shows the tags. The filter only fades the rest of the graph, so the
- *   layout stays as it is. Every entry of the legend that is in view sits on a pill, all of them
- *   while nothing is filtered, and the entries the filter leaves out fade. The
- *   last button in the corner of the graph clears the filter and the selected tag at once.
- * - A click on Tags only shows the tag map. It hides the notes and their links, and it joins
- *   two tags by a thin line when they share at least two notes. The line is dotted for two
- *   shared notes, dashed for three and solid for four or more, with a halo from five (tagLine),
- *   and from four notes it turns from slate toward the amber of the glow, one step for each
- *   note. A key to the steps fades in at the lower left of the graph. The tags keep their
- *   places among the notes. A tag that shares no two notes with another has no line. It stays
- *   in view, a little faded (--graph-tag-weak), and a click on any tag still opens its page, so the map also works as a table of contents. The category and
- *   stage filters choose the tags of those notes, and a click on Tag or on the clear button
- *   brings the notes back.
- * - It shows every note and every edge in three dimensions and in perspective, and it turns
- *   slowly, so that the depth reads without any interaction. Notes farther back fade a little,
- *   a second cue for depth, and nodes are drawn from back to front.
- * - The forces differ from the flat ones. Notes repel more strongly, since three dimensions
- *   have more room, and the springs of a node with many connections are longer (SPREAD), so that
- *   a hub, such as the overview of a series or a broad tag, does not gather its notes into a clump.
- *   On the notes of this site, this spreads the 34 notes of the shadow series by about a third,
- *   and the whole cloud grows by less than 5 %. Tag springs are weaker and longer, because the many
- *   shared tags would otherwise pull the notes into one clump. The pull to the centre is firmer and brings loosely
- *   linked notes in from the edge. On the notes of this site, these choices give a rounder and
- *   more even cloud with fewer stragglers, and linked notes still sit closer together than
- *   unlinked ones.
- * - Before the first frame, the simulation runs on at the strength it has while a note is
- *   pulled (HEAT) until it comes to rest (SETTLE). A pull then moves only the pulled note and the
- *   notes it drags along, and the graph springs back after it (HOLD).
- * - The layout is turned so that its longest extent lies across the screen and its shortest
- *   stands upright, along the eigenvectors of the spread of the notes. The graph spins about
- *   this shortest axis and fills a wide canvas at every angle of the turn.
- * - The starting zoom is the largest at which every note stays inside the canvas through a
- *   full turn of the spin, at the starting tilt and in perspective. The graph opens large and
- *   never leaves the frame.
- * - The interaction follows Obsidian. A drag on empty space moves the graph, and a drag on a
- *   note pulls it, so that its links stretch and take its colour and its neighbours follow. A
- *   drag with Shift or the right button turns the graph about the axes of the screen, all the
- *   way round. On a touch screen, one finger moves the graph or pulls a note, and two fingers
- *   zoom and turn it. The wheel, a pinch, the + and - keys or the buttons in its corner zoom,
- *   and the arrow keys move the graph.
- *
- * Colours come from CSS variables set per theme in _sass/amore: --graph-node-<category>
- * (e.g. --graph-node-physics), --graph-node for other categories, --graph-edge,
- * --graph-edge-faint and --graph-current. They are read again when the theme changes.
+ * Colours are read from the theme's CSS variables (readColours(): --graph-node-<category>,
+ * --graph-edge, --graph-tag*, --graph-bg) and read again when the theme changes. If the data
+ * cannot be fetched, the section is removed. Styles: _sass/_notes-graph.scss.
+ * Design, forces, constants and tests: .claude/DESIGN.md.
  */
 (() => {
-  const LINK_LENGTH = 30; // rest length of the springs, in layout units
+  const LINK_LENGTH = 30;
   const TAG_LENGTH = 60;
-  const TAG_LENGTH_3D = 80; // on the Graph tab, where weak, long tag springs give a rounder, even spread
-  const MEMBER_LENGTH = 45; // from a note to a tag node, on the Graph tab
-  const SPREAD = 0.4; // on the Graph tab, how much longer the springs of a node with many connections are, for each e-fold of connections
-  const SPREAD_FLAT = 0.8; // the same in the right panel
-  const LOOSEN_FLAT = 0.6; // and how much weaker those springs are there, for each e-fold of connections
-  const GROWTH = 1.2; // px that a note's disc grows with the square root of its links, on the Graph tab
-  const GROWTH_FLAT = 0.9; // and in the right panel, where the discs of a long series would touch
-  const TAG_GLOW = 14; // px: the blur of the warm glow around a tag node
+  const TAG_LENGTH_3D = 80;
+  const MEMBER_LENGTH = 45;
+  const SPREAD = 0.4;
+  const SPREAD_FLAT = 0.8;
+  const LOOSEN_FLAT = 0.6;
+  const GROWTH = 1.2;
+  const GROWTH_FLAT = 0.9;
+  const TAG_GLOW = 14;
   const ITERATIONS = 400;
-  const HIT = 9; // px: how close the pointer must be to a node
-  const HIT_TOUCH = 18; // px: the same, for a finger
-  const PITCH = 0.35; // rad: the starting tilt of the 3D view
-  const SPIN = 0.0025; // rad per frame: how fast the 3D view turns by itself
-  const HEAT = 0.3; // strength of the live simulation on the Graph tab, as alpha in step()
-  const SETTLE = 3000; // steps at that strength before the Graph tab draws, so the graph starts at rest
-  const HOLD = 120; // frames the simulation stays at full strength after a pull, so the graph springs back
+  const HIT = 9;
+  const HIT_TOUCH = 18;
+  const PITCH = 0.35;
+  const SPIN = 0.0025;
+  const HEAT = 0.3;
+  const SETTLE = 3000;
+  const HOLD = 120;
   const [ZOOM_MIN, ZOOM_MAX] = [0.5, 4];
-  const SWAY = [2.5, 5]; // px: the range of the amplitudes of the drift in the right panel
-  const FAR = 0.4; // opacity of the notes and edges that the panel draws faintly
-  const HIDDEN = 0.06; // opacity of the notes that the legend's filter leaves out
-  const SECOND = 0.6; // opacity of the cluster that the pointer lights while another node is selected
+  const SWAY = [2.5, 5];
+  const FAR = 0.4;
+  const HIDDEN = 0.06;
+  const SECOND = 0.6;
 
   document.querySelectorAll('.notes-graph').forEach((section) => {
     fetch(section.querySelector('canvas').dataset.src)
@@ -144,8 +54,7 @@
   const slugify = (s) => s.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-');
   const clamp = (v, lo, hi) => Math.min(Math.max(v, lo), hi);
 
-  // A colour between two CSS colours in hex, t of the way from a to b; a colour in another
-  // notation is returned unmixed, the nearer of the two
+  // mix(a, b, t): hex colours only
   const rgb = (c) => {
     const m = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.exec(c.trim());
     if (!m) return null;
@@ -157,9 +66,7 @@
     return p && q ? `rgb(${p.map((v, i) => Math.round(v + (q[i] - v) * t)).join(', ')})` : t < 0.5 ? a : b;
   };
 
-  // How the tag map draws a line for the number of notes two tags share: two notes are dotted
-  // slate, three dashed, and from four a solid line that is warmer by a quarter of the way to the
-  // glow colour for each note, with a halo from five. The legend's key draws the same steps
+  // Style of a tag-map line by the number of shared notes
   const TAG_LINE = { first: 2, last: 6, halo: 5 };
   const tagLine = (shared) => ({
     dash: shared <= 2 ? [0.1, 4.5] : shared === 3 ? [5, 4] : [],
@@ -168,7 +75,6 @@
     halo: shared >= TAG_LINE.halo
   });
 
-  // 3 x 3 rotation matrices, stored by rows: about the vertical axis y and the horizontal axis x
   const rotY = (a) => [Math.cos(a), 0, Math.sin(a), 0, 1, 0, -Math.sin(a), 0, Math.cos(a)];
   const rotX = (a) => [1, 0, 0, 0, Math.cos(a), -Math.sin(a), 0, Math.sin(a), Math.cos(a)];
   const times = (a, b) =>
@@ -177,7 +83,7 @@
       return a[3 * i] * b[j] + a[3 * i + 1] * b[3 + j] + a[3 * i + 2] * b[6 + j];
     });
 
-  // Rounding errors pile up over many small turns; Gram-Schmidt on the rows keeps the matrix a rotation
+  // Gram-Schmidt keeps the matrix a rotation
   function orthonormal(m) {
     const unit = (v) => v.map((c) => c / Math.hypot(...v));
     const dot = (u, v) => u[0] * v[0] + u[1] * v[1] + u[2] * v[2];
@@ -188,7 +94,7 @@
     return [...a, ...b, ...c];
   }
 
-  // A small deterministic random generator, seeded from a string
+  // Seeded random numbers
   function seeded(text) {
     let h = 2166136261;
     for (const ch of text) h = Math.imul(h ^ ch.charCodeAt(0), 16777619);
@@ -199,7 +105,7 @@
     };
   }
 
-  // The eigenvalues and eigenvectors of a symmetric 3 x 3 matrix, by Jacobi rotations, largest first
+  // Jacobi eigenvectors of a symmetric 3 x 3 matrix, largest first
   function eigen(matrix) {
     const a = matrix.map((row) => [...row]);
     const v = [[1, 0, 0], [0, 1, 0], [0, 0, 1]];
@@ -227,9 +133,7 @@
       .sort((x, y) => y.value - x.value);
   }
 
-  // Turn the 3D layout so that its longest extent lies across the screen and its shortest
-  // stands upright: the graph spins about its shortest axis and fills a wide canvas. A
-  // rotation about the centre changes no distance between notes
+  // Turn the layout so that the shortest axis is upright
   function alignAxes(nodes) {
     const mean = (key) => nodes.reduce((s, n) => s + n[key], 0) / nodes.length;
     const c = [mean('x'), mean('y'), mean('z')];
@@ -248,12 +152,7 @@
     });
   }
 
-  // The notes and edges to show, and the notes to draw faintly (far). The Graph tab shows them
-  // all. The panel keeps a tag edge only for a primary tag that both notes share, and only
-  // where no link joins the two notes already. On a post it shows the post with the notes it
-  // links to or from, and faintly the notes one link further away and the notes that share a
-  // primary tag with it. Its tag edges then all start at the post. On other pages the panel
-  // shows every note with its links, and no tag edges
+  // Notes and edges to show, and the notes to draw faintly
   function subgraph(data, current, panel) {
     const primary = new Map(data.nodes.map((n) => [n.id, n.primary || []]));
     const pair = (e) => [e.source, e.target].sort().join('|');
@@ -287,9 +186,7 @@
     };
   }
 
-  // The Graph tab: the notes and their links, and a node for every tag, including a tag of one note,
-  // joined to each of its notes by a member edge, in place of the edges between notes that share
-  // a tag
+  // Graph tab: notes, links and a node for every tag
   function withTags(data) {
     const members = new Map();
     for (const n of data.nodes) for (const tag of n.tags || []) members.set(tag, [...(members.get(tag) || []), n.id]);
@@ -312,8 +209,7 @@
     };
   }
 
-  // With depth, the nodes start off the plane and the forces act in three dimensions; without
-  // it, z stays zero and the layout is the flat one
+  // Without depth the layout is flat (z stays zero)
   function layout(nodes, edges, depth) {
     const random = seeded(nodes.map((n) => n.id).join('|'));
     const byId = new Map(nodes.map((n) => [n.id, n]));
@@ -327,17 +223,14 @@
       .map((e) => [byId.get(e.source), byId.get(e.target), e])
       .filter(([a, b]) => a && b);
 
-    // How many connections each node has, for the length of its springs: the links of a note, the
-    // notes of a tag
+    // Connections of each node, for the length of its springs
     for (const n of nodes) n.crowd = n.kind === 'tag' ? n.count : 0;
     for (const [a, b, e] of springs) if (e.kind === 'link') [a.crowd, b.crowd] = [a.crowd + 1, b.crowd + 1];
     for (let i = 0; i < ITERATIONS; i++) step(nodes, springs, depth, 1 - i / ITERATIONS);
     return springs;
   }
 
-  // One step of the force simulation, with the forces scaled by alpha. The layout runs it
-  // ITERATIONS times with alpha falling to zero; on the Graph tab it runs again while a note is
-  // pulled, so that the links stretch and the neighbours follow
+  // One step of the force simulation
   function step(nodes, springs, depth, alpha) {
     for (let i = 0; i < nodes.length; i++) {
       for (let j = i + 1; j < nodes.length; j++) {
@@ -347,8 +240,6 @@
         let dy = b.y - a.y;
         let dz = b.z - a.z;
         const d2 = Math.max(dx * dx + dy * dy + dz * dz, 1);
-        // 3D has more room, so push harder; a tag node pushes half as hard, so that it settles
-        // among its notes instead of at the edge of the graph
         const soft = a.kind === 'tag' || b.kind === 'tag' ? 0.5 : 1;
         const f = ((depth ? 3000 : 900) / d2) * alpha * soft;
         const d = Math.sqrt(d2);
@@ -366,8 +257,7 @@
     for (const [a, b, e] of springs) {
       const link = e.kind === 'link';
       const member = e.kind === 'member';
-      // On the Graph tab, a node with many connections holds them further away, so that a hub, such
-      // as the overview of a series or a broad tag, does not gather its notes into a clump
+      // A node with many connections holds them further away
       const crowd = link || member ? Math.max(a.crowd, b.crowd, 1) : 1;
       const rest = (link ? LINK_LENGTH : member ? MEMBER_LENGTH : depth ? TAG_LENGTH_3D : TAG_LENGTH) * (1 + (depth ? SPREAD : SPREAD_FLAT) * Math.log(crowd));
       const k = ((link ? 0.08 : member ? 0.02 : (depth ? 0.004 : 0.015) * (e.weight || 1)) * alpha) / (1 + (depth ? 0 : LOOSEN_FLAT) * Math.log(crowd));
@@ -403,8 +293,6 @@
     if (!nodes.length) return section.remove();
     const byId = new Map(nodes.map((n) => [n.id, n]));
     const springs = layout(nodes, edges, big);
-    // On the Graph tab the simulation comes alive when a note is pulled; let it come to rest
-    // first, so that a pull moves only the pulled note and the notes it drags along
     if (big) {
       for (let i = 0; i < SETTLE; i++) step(nodes, springs, true, HEAT);
       alignAxes(nodes);
@@ -421,10 +309,7 @@
       neighbours.get(b.id).add(a.id);
     }
 
-    // The tag map: a line between two tags that share at least two notes (its style says how
-    // many, see tagLine). A tag without a line, one that shares no two notes with another, is
-    // weak and is drawn fainter. The notes of a tag are its neighbours, since only
-    // member edges meet a tag
+    // Tag map: a line between tags that share two notes or more
     const tagNodes = nodes.filter((n) => n.kind === 'tag');
     const tagEdges = [];
     const partners = new Map(tagNodes.map((n) => [n.id, new Set()]));
@@ -439,10 +324,7 @@
     });
     const weak = new Set(tagNodes.filter((n) => !partners.get(n.id).size).map((n) => n.id));
 
-    // Legend: the categories in view and, in the local preview, the stages of the notes, each a
-    // button that filters the graph, and a button that hides or shows the tags. The stages sit on
-    // a row of their own; a solid disc marks the published notes, and a dot in a dashed ring, as
-    // in the graph, the others, both drawn at the same size
+    // Legend: categories, stages and the tag button
     const categories = [...new Set(nodes.map((n) => n.category).filter(Boolean))].sort();
     const stageOf = (n) => n.stage || 'Published';
     const stages = ['Published', 'Draft', 'To Write', 'Private'].filter((st) =>
@@ -488,9 +370,7 @@
           : '');
     }
 
-    // The key to the lines of the tag map: a small card in the lower left corner of the graph,
-    // which fades in while the map is on. It has a sample of each line, from two to six shared
-    // notes, drawn from the same table as the lines (tagLine), and a hairline from slate to amber
+    // Key card of the tag map
     const scale = big && tagNodes.length ? document.createElement('div') : null;
     if (scale) {
       scale.className = 'notes-graph-scale';
@@ -518,15 +398,11 @@
     let colours = {};
     let hover = null;
     let selected = null; // the node clicked last on the Graph tab, which stays highlighted until it is cleared
-    // The cluster of the selected node, or of the node under the pointer when none is selected, is
-    // at full strength. While a node is selected, the node under the pointer lights its own cluster
-    // more softly (SECOND), and a click on it moves the selection there
+    // Focus: the cluster of the selected node, then of the node under the pointer (SECOND)
     const main = () => selected || hover;
     const second = () => (selected && hover && hover !== selected ? hover : null);
     let touch = false; // whether the last pointer was a finger
-    // The legend's filter: the categories and the stages to show (an empty set means all), and
-    // whether to show the tags. A note must pass both sets, and a tag stays in view while one of
-    // its notes does
+    // Filter of the legend
     const filters = { category: new Set(), stage: new Set() };
     let showTags = true;
     let tagsOnly = false; // the tag map: no notes, and the tags joined by the notes they share
@@ -538,15 +414,11 @@
       n.kind === 'tag'
         ? (showTags || tagsOnly) && [...neighbours.get(n.id)].some((id) => passes(byId.get(id)))
         : !tagsOnly && passes(n);
-    // What lights up with the node in focus: the notes and tags it is joined to, and on the tag
-    // map, the tags it shares notes with
     const adjacent = (id) => (tagsOnly ? partners.get(id) || new Set() : neighbours.get(id));
     let view = { scale: 1, ox: 0, oy: 0, cx: 0, cy: 0, cz: 0, r: 0 }; // r > 0 once the 3D view fits
-    // m: how the 3D view is turned, a rotation matrix; px, py: how far it is moved, in px
     let turn = { m: rotX(PITCH), zoom: 1, px: 0, py: 0 };
     const proj = new Map(); // node -> where it is drawn: x, y, depth z and perspective factor f
-    // The drift of the panel: for each node, the amplitude, the angular speed and the phase of a
-    // slow oscillation in x and in y, drawn from the node's name so that every visit looks the same
+    // Drift: amplitude, speed and phase of each node, seeded from its name
     const sway = !big && canvas.dataset.drift === 'true' ? new Map() : null;
     if (sway) {
       for (const n of nodes) {
@@ -558,7 +430,6 @@
     }
     let clock = 0; // seconds of drift so far
     const dpr = () => window.devicePixelRatio || 1;
-    // For a tag node, the radius of its disc, which grows with the number of its notes
     const radius = (n) =>
       (n.kind === 'tag'
         ? 1.8 + Math.sqrt(n.count) * 0.55
@@ -582,7 +453,6 @@
         ring: parseFloat(get('--graph-tag-ring', '0')), // px, a ring in the glow colour
         weak: parseFloat(get('--graph-tag-weak', '0.5')), // opacity of a tag without a line
         text: get('--text-color', '#28313d'),
-        // the canvas of the Graph tab has its own shade, and the panel sits on the page
         bg: get(big ? '--graph-bg' : '--main-bg', get('--main-bg', '#ffffff')),
         font: css.fontFamily || 'sans-serif',
         category: Object.fromEntries(
@@ -612,13 +482,10 @@
       refilter();
     });
 
-    // Mark the legend's buttons as the filter stands, and work out which nodes it shows. An entry
-    // in view sits on a pill (on), as every entry does while nothing is filtered, and an entry
-    // that the filter leaves out fades (off)
+    // Mark the legend as the filter stands and find the nodes it shows
     function refilter() {
       legend?.querySelectorAll('button[data-filter]').forEach((b) => {
         if (b.dataset.filter === 'tagmap') {
-          // A mode and not a filter: a pill while it is on, and none otherwise
           b.setAttribute('aria-pressed', String(tagsOnly));
           b.classList.toggle('on', tagsOnly);
           return;
@@ -644,9 +511,7 @@
       canvas.width = Math.round(w * dpr());
       canvas.height = Math.round(h * dpr());
       if (big) {
-        // The 3D view turns about the centre of the notes. The scale is the largest at which every
-        // note stays inside the canvas through a whole turn of the spin, at the starting tilt and
-        // in perspective, so the graph starts as large as it can
+        // Starting zoom: every note stays inside the canvas through a full turn
         const mean = (key) => nodes.reduce((s, n) => s + n[key], 0) / nodes.length;
         const [cx, cy, cz] = [mean('x'), mean('y'), mean('z')];
         const r = Math.max(...nodes.map((n) => Math.hypot(n.x - cx, n.y - cy, n.z - cz)), 1);
@@ -672,8 +537,7 @@
       view = { ...view, scale, ox: w / 2 - ((x0 + x1) / 2) * scale, oy: h / 2 - ((y0 + y1) / 2) * scale };
     }
 
-    // Turn the 3D layout by the matrix turn.m, and look at it from a distance of three radii;
-    // z grows away from the viewer
+    // Rotate, then view from three radii
     function project() {
       if (!big) {
         for (const n of nodes) {
@@ -698,7 +562,6 @@
     }
 
     const screen = (n) => [proj.get(n).x, proj.get(n).y];
-    // Notes at the back of the 3D view fade a little, so the eye reads the depth
     const depth = (z) => (big ? 0.55 + 0.45 * clamp((view.r - z) / (2 * view.r), 0, 1) : 1);
 
     function draw() {
@@ -707,10 +570,7 @@
       const s = dpr();
       ctx.setTransform(s, 0, 0, s, 0, 0);
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      // The selected node is highlighted with its neighbours, and otherwise the node under the
-      // pointer. While one is selected, the node under the pointer shows its cluster at a lower
-      // strength. The level of a node: 1 in the main cluster (and with no focus at all), SECOND in
-      // the softer one, and 0.3 outside both
+      // Level of a node: 1 in the main cluster, SECOND in the softer one, 0.3 outside
       const first = main();
       const soft = second();
       const litMain = first ? adjacent(first.id) : null;
@@ -719,7 +579,6 @@
         !first || id === first.id || litMain.has(id) ? 1 : soft && (id === soft.id || litSecond.has(id)) ? SECOND : 0.3;
 
       if (tagsOnly) {
-        // The tag map: a thin line for each pair of tags, in the style of its number of notes
         const scale = big ? 1.25 : 1;
         ctx.lineCap = 'round';
         for (const [a, b, shared] of tagEdges) {
@@ -754,8 +613,6 @@
         const [bx, by] = screen(b);
         const link = e.kind === 'link';
         const fade = depth((proj.get(a).z + proj.get(b).z) / 2);
-        // On the Graph tab, the lines of a focused node take its colour, at full strength for the
-        // main one and softer for the one under the pointer
         const onMain = first && (a === first || b === first);
         const onSecond = !onMain && soft && (a === soft || b === soft);
         const glow = big && (onMain || onSecond);
@@ -773,7 +630,6 @@
       }
       ctx.setLineDash([]);
 
-      // From the back to the front, so that nearer notes cover farther ones
       const order = big ? [...nodes].sort((a, b) => proj.get(b).z - proj.get(a).z) : nodes;
       for (const n of order) {
         const [x, y] = screen(n);
@@ -785,7 +641,6 @@
         const hidden = !shown.has(n.id); // left out by the legend's filter: a faint dot, no ring
         ctx.beginPath();
         ctx.arc(x, y, radius(n), 0, 2 * Math.PI);
-        // A disc in the background colour first, so that a faded node hides the lines behind it
         ctx.globalAlpha = 1;
         ctx.fillStyle = colours.bg;
         ctx.fill();
@@ -794,7 +649,7 @@
         ctx.fill();
         if (hidden) continue;
         if (n.stage) {
-          // A dashed ring in the colour of the note marks a draft, a stub or a private note
+          // Dashed ring: draft, stub or private note
           ctx.strokeStyle = colours.category[n.category] || colours.node;
           ctx.lineWidth = big ? 1.4 : 1;
           ctx.setLineDash(big ? [3, 2.5] : [2, 2]);
@@ -806,7 +661,6 @@
           ctx.arc(x, y, radius(n), 0, 2 * Math.PI);
         }
         if (big) {
-          // A ring in the background colour lifts the node off the lines that meet it
           ctx.strokeStyle = colours.bg;
           ctx.lineWidth = 2;
           ctx.stroke();
@@ -832,9 +686,7 @@
       if (hover) label(hover);
     }
 
-    // A tag node: a disc in the muted text colour with a warm glow around it. A disc of the
-    // background colour goes first, so that the node hides the lines behind it, and a ring marks
-    // it while the pointer rests on it
+    // Tag node
     function tagNode(n, x, y, level, weakTag) {
       const r = radius(n);
       const disc = (grow) => {
@@ -871,8 +723,7 @@
       }
     }
 
-    // The title of a node, or the name of a tag and its number of notes, on the page's
-    // background, kept inside the canvas
+    // Label, kept inside the canvas
     function label(n) {
       const [x, y] = screen(n);
       ctx.font = `${big ? '600 13px' : '12px'} ${colours.font}`;
@@ -889,7 +740,7 @@
       ctx.fillText(text, lx, ly);
     }
 
-    // The nearest node under the pointer; in 3D, the frontmost one wins a tie
+    // Nearest node under the pointer
     function nodeAt(event) {
       const rect = canvas.getBoundingClientRect();
       const px = event.clientX - rect.left;
@@ -905,7 +756,7 @@
       return best;
     }
 
-    // The 3D view: turning by itself, by hand, moving, zooming, and pulling notes
+    // 3D view: spin, move, zoom, pull
     let spinning = false;
     let frame = null;
     let heat = 0; // strength of the live simulation: HEAT during a pull and HOLD frames after, then it cools
@@ -928,7 +779,6 @@
       if (!frame) frame = requestAnimationFrame(tick);
     };
 
-    // The view holds still while the pointer rests on a note, so that its title can be read
     function tick() {
       frame = null;
       const live = heat > 0.005;
@@ -942,21 +792,18 @@
         heat = hold-- > 0 ? HEAT : heat * 0.97;
       }
       const turning = spinning && !hover;
-      // About the layout's own vertical axis, like a globe, whichever way the view is tilted
       if (turning) turn.m = orthonormal(times(turn.m, rotY(SPIN)));
       if (live || turning) draw();
       frame = requestAnimationFrame(tick);
     }
 
-    // The pulled note sits where the pointer holds it
     function pin() {
       const n = grab.node;
       [n.x, n.y, n.z] = grab.target;
       n.vx = n.vy = n.vz = 0;
     }
 
-    // Move the pulled note to the pointer, at the depth where it was picked up: undo the
-    // perspective, then the turn (the transpose of a rotation is its inverse)
+    // Move the pulled note to the pointer at its depth
     function pullTo(event) {
       const rect = canvas.getBoundingClientRect();
       const s = view.scale * turn.zoom * ((3 * view.r) / (3 * view.r + grab.z));
@@ -973,8 +820,6 @@
       wake();
     }
 
-    // About the axes of the screen, so that the view follows the pointer and turns all the way
-    // round in every direction, upside down included
     function turnBy(dx, dy) {
       turn.m = orthonormal(times(times(rotX(dy * 0.008), rotY(dx * 0.008)), turn.m));
     }
@@ -1015,8 +860,7 @@
       draw();
     }
 
-    // A finger cannot hover, and it leaves the canvas at the end of every tap, so only taps
-    // move the highlight on a touch screen
+    // Touch: only taps move the highlight
     canvas.addEventListener('pointerdown', (event) => {
       touch = event.pointerType === 'touch';
       if (!big) return;
@@ -1024,7 +868,6 @@
       canvas.setPointerCapture(event.pointerId);
       setSpin(false);
       if (pointers.size > 1) {
-        // A second finger: pinch to zoom and turn, and let go of the note
         grab = null;
         mode = 'pinch';
         return;
@@ -1071,9 +914,7 @@
     canvas.addEventListener('click', (event) => {
       if (big && travel > 4) return;
       const n = nodeAt(event);
-      // On the Graph tab, the first click on a note or a tag selects it: the graph stops turning,
-      // and the node keeps its title and its highlight. The second click opens its page, and a
-      // click on empty space clears the selection
+      // First click selects, second opens, empty space clears
       if (big) {
         if (n && n !== selected) {
           selected = n;
@@ -1104,8 +945,7 @@
         },
         { passive: false }
       );
-      // The graph turns when the page opens, unless the reader's system asks for less motion,
-      // and both reset buttons bring it back to that state
+      // Spin on load unless the reader wants less motion
       const restartSpin = () => setSpin(!window.matchMedia('(prefers-reduced-motion: reduce)').matches);
       const actions = {
         'zoom-in': () => zoomBy(1.25),
@@ -1116,7 +956,6 @@
           draw();
         },
         spin: () => setSpin(!spinning),
-        // Clear the legend's filter and the selected tag, and show the notes and the tags again
         clear: () => {
           filters.category.clear();
           filters.stage.clear();
@@ -1130,7 +969,6 @@
       section.querySelectorAll('[data-graph]').forEach((button) => {
         button.addEventListener('click', () => actions[button.dataset.graph]());
       });
-      // As in Obsidian, + and - zoom and the arrow keys move the graph, once the canvas has the focus
       const keys = {
         '+': () => zoomBy(1.25),
         '=': () => zoomBy(1.25),
@@ -1165,8 +1003,7 @@
     }).observe(canvas);
     document.fonts.ready.then(draw); // the labels use the page's web font
 
-    // The drift of the panel graph: a frame about every 33 ms, only while the graph is in view, the
-    // page is visible and the pointer is not on a node, and not at all if the reader wants less motion
+    // Drift loop
     if (sway) {
       const calm = window.matchMedia('(prefers-reduced-motion: reduce)');
       let inView = true;

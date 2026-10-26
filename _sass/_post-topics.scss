@@ -1,10 +1,6 @@
-// The head of a post: the byline in one line, and under it the categories and the tags in one
-// row (_plugins/post-topics-top.rb moves them there from the footer). The markup is Chirpy's, and
-// only the arrangement changes.
+// Byline and topics under the title of a post: the byline in one line and the categories and tags
+// in one row of pills (<div class="post-topics">, _plugins/post-topics-top.rb).
 
-// "Posted Oct 23, 2026 · By the author · 17 min read". Chirpy lays the byline out in two rows,
-// the second with the read time at the far right; its inner row (d-flex, !important) dissolves
-// here, so that the three parts sit side by side and wrap on a narrow screen
 header > .post-meta {
   display: flex;
   flex-wrap: wrap;

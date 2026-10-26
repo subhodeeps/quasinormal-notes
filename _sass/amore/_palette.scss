@@ -1,9 +1,8 @@
 // The 32 colours of amore.mplstyle (https://github.com/subhodeeps/amore.mplstyle):
-// eight palettes, each with an ink, main, light and shade tone. Ink and light tones
-// carry text (ink on the light theme, light on the dark theme); main tones are for
-// icons, borders and other non-text accents; shades are tinted backgrounds.
-//
-// Kept in sync with src/app/globals.css of the Next.js site.
+// eight palettes, each with an ink, main, light and shade tone. Ink and light tones carry text
+// (ink on the light theme, light on the dark theme), main tones are for icons, borders and
+// other accents, and shades are tinted backgrounds. $indigo-main (Homelab category) lies
+// outside the 32. Kept in sync with src/app/globals.css of the Next.js site.
 
 @use 'sass:color';
 
@@ -47,9 +46,6 @@ $slate-main: #768594;
 $slate-light: #c2c9d1;
 $slate-shade: #f4f5f7;
 
-// Text tones per theme, used by the syntax highlighter
-// Not part of amore: the colour of the Homelab category in the note graph and on the home
-// page, an indigo between the blue and plum palettes, which are the furthest apart in hue
 $indigo-main: #7f86cc;
 
 $inks: (

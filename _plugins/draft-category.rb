@@ -1,35 +1,40 @@
 #!/usr/bin/env ruby
 #
-# Put every draft in the category Draft, every stub in _drafts/to-write in the
-# category To Write, and every note in _drafts/private in the category Private.
-# A stub is a stage before a draft: a note with its front matter and links, and
-# the text still to be written.
+# Stage categories of the notes that the site does not publish.
 #
-# Drafts appear only in the local preview (`bash tools/run.sh -d`), and the
-# category tells them apart from published posts there. The deployed site
-# builds without --drafts, so it never shows them.
+# Puts the category Draft on every draft, To Write on every stub in _drafts/to-write/ and
+# Private on every note in _drafts/private/, ahead of the note's own categories. The graph
+# and the home page colour a note by its subject (its first category after the stage) and mark
+# the stage with a dashed outline. Drafts exist only in the local preview (`tools/run.sh -d`),
+# since the deployed site builds without --drafts.
 #
-# The stage comes first among the categories, but it does not set the colour of
-# the note: the graph and the home page colour a note by its subject, its first
-# category after the stage, as they colour a published post, and they mark the
-# stage with a dashed outline (_plugins/notes-graph.rb, _plugins/home-tiles.rb).
+# Hook: :site, :post_read. Provides NoteStage for notes-graph.rb and home-tiles.rb.
 
+# The stages of unpublished notes. `module_function` methods, called as NoteStage.subject(doc).
 module NoteStage
+  # Category names that mark a stage and never set a colour.
   STAGES = ['Draft', 'To Write', 'Private'].freeze
 
   module_function
 
-  # The first category that is not a stage, which sets the colour of the note
+  # The first category that is not a stage, which sets the colour of the note.
+  # @param doc [Jekyll::Document]
+  # @return [String] the category, or "" if there is none
   def subject(doc)
     (Array(doc.data['categories']) - STAGES).first.to_s
   end
 
-  # Draft, To Write or Private for a note that is not published, nil for a post
+  # The stage of a note that is not published.
+  # @param doc [Jekyll::Document]
+  # @return [String, nil] Draft, To Write or Private; nil for a published post
   def stage(doc)
     (Array(doc.data['categories']) & STAGES).first
   end
 end
 
+# The stage of a draft, from its folder.
+# @param post [Jekyll::Document]
+# @return [String] Private (_drafts/private/), To Write (_drafts/to-write/) or Draft
 def note_kind(post)
   return 'Private' if post.relative_path.start_with?('_drafts/private/')
   return 'To Write' if post.relative_path.start_with?('_drafts/to-write/')

@@ -1,15 +1,13 @@
 #!/usr/bin/env ruby
 #
-# Strip HTML tags from the <title> of every page, and give a tab its own title when Chirpy
-# has none for it.
+# Plain text in the <title> of every page.
 #
-# A post title may contain markup, e.g. "Solving ODEs using <code>odeint</code>", which
-# Chirpy shows as a code chip in the heading. The <title> element cannot hold markup, so
-# the browser tab and bookmarks would show the tags as text. The heading is left as it is.
+# A post title may contain markup, such as <code>odeint</code>, which Chirpy shows as a chip in
+# the heading. The <title> element cannot hold markup, so the hook strips the tags from it and
+# leaves the heading as it is. A tab of this site that the theme's locale file does not name
+# gets its own title, so that the browser tab does not start with " | Quasinormal Notes".
 #
-# Chirpy takes the <title> of a tab from its locale file (_data/locales/en.yml in the
-# theme), which names only its own tabs, so a tab of this site, such as Note Graph, would
-# get an empty title before " | Quasinormal Notes".
+# Hook: :pages and :documents, :post_render.
 
 Jekyll::Hooks.register [:pages, :documents], :post_render do |doc|
   next unless doc.output_ext == '.html' && doc.output&.include?('<title>')
