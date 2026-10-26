@@ -44,7 +44,7 @@ end
 entries = JHEP.entries(bib)
 failures = 0
 entries.each do |key, fields|
-  out = JHEP.format(fields)
+  out = JHEP.format(fields, extras: false)
   text = plain(JHEP.visible(out))
   links = out.scan(/href="([^"]*)"/).flatten.map { |url| CGI.unescapeHTML(url) }
   want_text, want_links = expected[key]

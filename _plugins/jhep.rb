@@ -11,6 +11,10 @@
 # \textbf <strong>, \texttt and \textsc a span of class bib-tt or bib-sc, and ~ a no-break
 # space. Math in $...$ passes through to MathJax. Cross-references (crossref) are not supported.
 #
+# JHEP.bst prints no web address for most entry types. The fields `url` and `adsurl` of an entry are
+# printed here as links, "[INSPIRE, ADS]", before the final full stop (JHEP.web_links); the
+# check against BibTeX leaves them out.
+#
 # Also collapses the citations of a page, [1, 2, 3] to [1-3] (hook :post_render at the end).
 # Check: `bundle exec ruby tools/bib/check.rb` compares the output with BibTeX (needs TeX).
 # Source of the entries: _bibliography/references.bib.
@@ -764,10 +768,39 @@ module JHEP
     end
   end
 
+  # The sites that get a name instead of their address as the text of a link
+  SITES = {
+    'inspirehep.net' => 'INSPIRE', 'ui.adsabs.harvard.edu' => 'ADS',
+    'archive.org' => 'Internet Archive', 'web.archive.org' => 'Internet Archive'
+  }.freeze
+
+  # The links of the fields `url` and `adsurl`, which JHEP.bst does not print for most entry types:
+  # "[INSPIRE, ADS]", placed before the final full stop. The text of a link is the name of its site
+  # (SITES), or its host.
   # @param fields [Hash] one entry of entries
+  # @return [String] HTML, or an empty string if the entry has neither field
+  def web_links(fields)
+    urls = %w[url adsurl].map { |name| fields[name].to_s.strip }.reject(&:empty?)
+    return '' if urls.empty?
+
+    links = urls.map do |url|
+      host = url[%r{\Ahttps?://([^/]+)}, 1].to_s.sub(/\Awww\./, '')
+      %(<a href="#{CGI.escapeHTML(url)}">#{CGI.escapeHTML(SITES.fetch(host, host))}</a>)
+    end
+    " [#{links.join(', ')}]"
+  end
+
+  # @param fields [Hash] one entry of entries
+  # @param extras [Boolean] false prints exactly what JHEP.bst prints (tools/bib/check.rb); true
+  #   prints the links of `url` and `adsurl` as web_links, in place of the address that
+  #   JHEP.bst prints for a chapter without DOI
   # @return [String] HTML of the reference
-  def format(fields)
-    Entry.new(fields).to_html
+  def format(fields, extras: true)
+    return Entry.new(fields).to_html unless extras
+
+    links = web_links(fields)
+    html = Entry.new(fields.reject { |name, _| %w[url adsurl].include?(name) }).to_html
+    links.empty? ? html : html.sub(/\.?\z/) { "#{links}." }
   end
 
   # Joins runs of three or more consecutive citation numbers.
