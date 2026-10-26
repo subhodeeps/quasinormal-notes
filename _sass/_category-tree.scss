@@ -101,20 +101,29 @@ details[open] > summary > .category-chevron {
     display: block;
     padding-top: 0;
     padding-bottom: 0;
-    line-height: 1.6rem;
+    line-height: 1.75rem;
 
     &::before {
       content: none;
     }
   }
 
+  // The sizes of Chirpy's own list of a category: titles at 1.1rem, icons at full size
   li > a,
   .category-row > a {
+    font-size: 1.1rem;
+  }
+
+  i {
     font-size: 1rem;
   }
 
+  .category-row {
+    padding: 0.4rem 0;
+  }
+
   .category-note {
-    padding: 0.2rem 0 0.2rem 1.25rem;
+    padding: 0.35rem 0 0.35rem 1.25rem;
   }
 }
 
