@@ -28,7 +28,7 @@ Two theme files are replaced: `assets/css/jekyll-theme-chirpy.scss` and `_includ
 | `_sass/` | one partial for each feature, and the colours in `amore/` |
 | `assets/js/` | note graph, home page tiles, sort buttons, lightbox |
 | `_includes/`, `_tabs/` | hero, footer, backlinks, graph, the Note Graph tab |
-| `docs/` | notes on writing for the site, such as the guide to categories and tags |
+| `docs/` | notes on writing for the site, such as the guide to categories and tags, mirrored in the wiki by `tools/docs-to-wiki.rb` |
 | `tools/` | setup and run scripts, the category tree (`categories.rb`), push to the ThinkPad, style sheet for calibre, bibliography check |
 
 ## Credits

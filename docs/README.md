@@ -1,6 +1,6 @@
 # Documentation
 
-Notes on writing for the site. Jekyll does not build this folder.
+Notes on writing for the site. They live in `docs/` of the repository, which Jekyll does not build, and `ruby tools/docs-to-wiki.rb` copies them into the wiki of the repository.
 
 - [Categories and tags](categories-and-tags.md): where a note goes in the tree of categories, when it also belongs elsewhere (`also_in`), how a series is ordered (`order`), and how to choose its tags.
 
