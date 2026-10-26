@@ -6,8 +6,8 @@
 # code (HomeTiles.size). The grid of the first page opens with the pinned categories of
 # _data/categories.yml (HomeTiles.category_tile: name, description, counts, and a link to its
 # page) and the pinned posts, each marked with Chirpy's thumbtack (tile-pinned). The button Pinned
-# keeps them first; the other sort buttons sort all the posts, pinned ones included, while the
-# cards of the categories stay at the start. Every card takes the colour of its
+# keeps them first; the other sort buttons sort all the posts and the category cards together, the
+# cards by the last change of the notes under their category. Every card takes the colour of its
 # subject from --graph-node-<category> (_sass/amore/) as a thin stripe, and an unpublished note
 # gets a dashed outline in that colour. The card names only the category of the note, the last
 # name of its main path (`category_paths`, _plugins/category-tree.rb); a small tile shows only
@@ -171,15 +171,20 @@ Jekyll::Hooks.register :pages, :post_render do |page|
 
   # The tiles of this page that the sort buttons sort, those of all pages; the pinned ones stay first
   number = page.pager&.page || 1
-  HomeTiles::PAGES[number] = tiles.map do |tile|
+  pinned = number == 1 ? CategoryTree.roots.select { |node| CategoryTree.pinned?(node.name) } : []
+  # A card sorts by the last change of the notes under its category, and by its name
+  cards = pinned.map do |node|
+    changed = CategoryTree.notes_under(node).map { |doc| CategoryTree.updated(doc) }.max
+    { title: node.name, date: changed&.iso8601, html: HomeTiles.category_tile(site, node) }
+  end
+  HomeTiles::PAGES[number] = cards + tiles.map do |tile|
     post = posts[tile[0][/<a href="([^"]+)"/, 1]]
     { title: HomeTiles.plain(post&.data&.fetch('title', nil)), date: post&.date&.iso8601, html: tile[0] }
   end
 
   start = tiles.first.begin(0)
   stop = tiles.last.end(0)
-  pinned = number == 1 ? CategoryTree.roots.select { |node| CategoryTree.pinned?(node.name) } : []
-  categories = pinned.map { |node| HomeTiles.category_tile(site, node) }.join
+  categories = cards.map { |card| card[:html] }.join
   script = %(<script defer src="#{site.baseurl}/assets/js/home-tiles.js"></script>) # closes the gaps
   grid = %(<div class="home-tiles" data-all="#{site.baseurl}/#{HomeTiles::DATA}">)
   page.output = "#{page.output[0...start]}#{grid}#{categories}#{page.output[start...stop]}</div>#{script}#{page.output[stop..]}"

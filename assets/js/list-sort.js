@@ -21,9 +21,9 @@
  * the tiles of every page from assets/data/home-tiles.json (the grid's data-all, which the plugin
  * writes), sort them, and show on each page the slice of the order that falls on it, with as many
  * tiles as Chirpy puts there. Pinned, the default, brings back the page as Chirpy built it, with
- * the pinned posts first; the other buttons sort all the posts, the pinned ones too. The cards of
- * the pinned categories stay at the start of the grid. If the file cannot be loaded, the buttons
- * sort the tiles of the page in view. After a sort, the script asks assets/js/home-tiles.js to
+ * the cards of the pinned categories and the pinned posts first; the other buttons sort all the
+ * posts and the cards together, a card by the last change of the notes under its category. If
+ * the file cannot be loaded, the buttons sort the tiles of the page in view. After a sort, the script asks assets/js/home-tiles.js to
  * pack the grid again (the event tiles:reorder) and MathJax to typeset the excerpts of the new
  * tiles.
  *
@@ -157,13 +157,11 @@
     if (lists.some(({ items }) => items.length > 1)) buttons(explorer, 'explorer-sort', apply, 'order', CATEGORY);
   }
 
-  // The home page: the tiles of all its pages. Pinned keeps Chirpy's order, the pinned posts first;
-  // the other buttons sort every post, the pinned ones too. The cards of the pinned categories stay
-  // at the start.
+  // The home page: the tiles of all its pages. Pinned keeps Chirpy's order, the cards of the pinned
+  // categories and the pinned posts first; the other buttons sort every post and card together.
   const grid = document.querySelector('#post-list .home-tiles');
   if (grid) {
-    const cards = [...grid.querySelectorAll(':scope > .tile-category')];
-    const own = [...grid.querySelectorAll(':scope > .tile:not(.tile-category)')];
+    const own = [...grid.querySelectorAll(':scope > .tile')];
     const local = own.map((node, rank) => ({
       node,
       rank,
@@ -186,7 +184,7 @@
         .catch(() => null));
 
     const show = (nodes) => {
-      grid.replaceChildren(...cards, ...nodes);
+      grid.replaceChildren(...nodes);
       grid.dispatchEvent(new CustomEvent('tiles:reorder'));
       if (window.MathJax?.typesetPromise) MathJax.typesetPromise([grid]).catch(() => {});
     };
