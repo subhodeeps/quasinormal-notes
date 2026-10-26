@@ -25,6 +25,10 @@
   const PATH_ALPHA = 0.18; // opacity of each piece (pieces overlap, so dense regions darken)
 
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+  // Two canvas pixels to a CSS pixel are enough for a thin line, and 30 frames a second for a slow
+  // orbit; a phone with three pixels and sixty frames spends its battery on detail nobody sees
+  const ratio = () => Math.min(window.devicePixelRatio || 1, 2);
+  const FRAME = 30; // ms between two frames
 
   fetch(canvas.dataset.src)
     .then((res) => res.json())
@@ -59,7 +63,7 @@
     }
 
     function resize() {
-      const dpr = window.devicePixelRatio || 1;
+      const dpr = ratio();
       const w = canvas.clientWidth;
       const h = canvas.clientHeight;
       if (!w || !h) return;
@@ -76,7 +80,7 @@
       lctx.setTransform(k, 0, 0, (canvas.height / H), 0, 0);
       lctx.strokeStyle = colours.photon;
       lctx.globalAlpha = PATH_ALPHA;
-      lctx.lineWidth = 0.8 / k * (window.devicePixelRatio || 1);
+      lctx.lineWidth = 0.8 / k * ratio();
       lctx.lineJoin = 'round';
       for (let c = from; c < to; c += CHUNK) {
         const end = Math.min(c + CHUNK, n - 1);
@@ -110,7 +114,7 @@
     }
 
     function paint(fade = 1) {
-      const dpr = window.devicePixelRatio || 1;
+      const dpr = ratio();
       ctx.setTransform(1, 0, 0, 1, 0, 0);
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -138,7 +142,13 @@
       ctx.fill();
     }
 
+    let last = 0;
     function tick(now) {
+      if (now - last < FRAME) {
+        frame = requestAnimationFrame(tick);
+        return;
+      }
+      last = now;
       if (t0 === null) t0 = now;
       const elapsed = now - t0;
       if (elapsed < MOTION) {

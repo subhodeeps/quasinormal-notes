@@ -98,7 +98,7 @@ theme_mode: # [light | dark]
 cdn:
 
 # the avatar on sidebar, support local or CORS resources
-avatar: "/assets/images/bh_shadow_thin_disk.png" # string, local or CORS resources
+avatar: "/assets/images/avatar.png" # string, local or CORS resources; 256 px from bh_shadow_thin_disk.png (11385 px, 1.3 MB, too heavy for a 112 px picture)
 
 # The URL of the site-wide social preview image used in SEO `og:image` meta tag.
 # It can be overridden by a customized `page.image` in front matter.
