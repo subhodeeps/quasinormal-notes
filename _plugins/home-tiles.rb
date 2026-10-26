@@ -5,8 +5,9 @@
 # The post list becomes a grid of tiles whose size follows the length of the post without its
 # code (HomeTiles.size). The grid of the first page opens with the pinned categories of
 # _data/categories.yml (HomeTiles.category_tile: name, description, counts, and a link to its
-# page) and the pinned posts, each marked with Chirpy's thumbtack (tile-pinned); these stay first
-# when the sort buttons reorder the rest. Every card takes the colour of its
+# page) and the pinned posts, each marked with Chirpy's thumbtack (tile-pinned). The button Pinned
+# keeps them first; the other sort buttons sort all the posts, pinned ones included, while the
+# cards of the categories stay at the start. Every card takes the colour of its
 # subject from --graph-node-<category> (_sass/amore/) as a thin stripe, and an unpublished note
 # gets a dashed outline in that colour. The card names only the category of the note, the last
 # name of its main path (`category_paths`, _plugins/category-tree.rb); a small tile shows only
@@ -170,9 +171,9 @@ Jekyll::Hooks.register :pages, :post_render do |page|
 
   # The tiles of this page that the sort buttons sort, those of all pages; the pinned ones stay first
   number = page.pager&.page || 1
-  HomeTiles::PAGES[number] = tiles.reject { |tile| tile[0].include?('tile-pinned') }.map do |tile|
+  HomeTiles::PAGES[number] = tiles.map do |tile|
     post = posts[tile[0][/<a href="([^"]+)"/, 1]]
-    { title: HomeTiles.plain(post&.data&.fetch('title', nil)), html: tile[0] }
+    { title: HomeTiles.plain(post&.data&.fetch('title', nil)), date: post&.date&.iso8601, html: tile[0] }
   end
 
   start = tiles.first.begin(0)

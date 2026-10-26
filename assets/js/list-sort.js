@@ -17,14 +17,15 @@
  * the folders first, as a file explorer does: by the latest change or creation of the notes under
  * a folder, or by its name.
  *
- * The home page shows ten posts to a page, so its buttons sort the latest posts of all pages:
- * they load the tiles of every page from assets/data/home-tiles.json (the grid's data-all, which
- * the plugin writes), sort them, and show on each page the slice of the order that falls on it,
- * with as many tiles as Chirpy puts there. "Newest" brings back the page as Chirpy built it. If
- * the file cannot be loaded, the buttons sort the tiles of the page in view. The pinned
- * categories and posts at the start of the grid (tile-pinned) stay where they are. After a sort,
- * the script asks assets/js/home-tiles.js to pack the grid again (the event tiles:reorder) and
- * MathJax to typeset the excerpts of the new tiles.
+ * The home page shows a few posts to a page, so its buttons sort the posts of all pages: they load
+ * the tiles of every page from assets/data/home-tiles.json (the grid's data-all, which the plugin
+ * writes), sort them, and show on each page the slice of the order that falls on it, with as many
+ * tiles as Chirpy puts there. Pinned, the default, brings back the page as Chirpy built it, with
+ * the pinned posts first; the other buttons sort all the posts, the pinned ones too. The cards of
+ * the pinned categories stay at the start of the grid. If the file cannot be loaded, the buttons
+ * sort the tiles of the page in view. After a sort, the script asks assets/js/home-tiles.js to
+ * pack the grid again (the event tiles:reorder) and MathJax to typeset the excerpts of the new
+ * tiles.
  *
  * The browser keeps the choice (localStorage), one each for the tag pages, the category pages, the
  * category pages with an order and the home page, so the next page opens in the same order.
@@ -156,17 +157,26 @@
     if (lists.some(({ items }) => items.length > 1)) buttons(explorer, 'explorer-sort', apply, 'order', CATEGORY);
   }
 
-  // The home page: the tiles of all its pages
+  // The home page: the tiles of all its pages. Pinned keeps Chirpy's order, the pinned posts first;
+  // the other buttons sort every post, the pinned ones too. The cards of the pinned categories stay
+  // at the start.
   const grid = document.querySelector('#post-list .home-tiles');
   if (grid) {
-    // The pinned categories and posts (tile-pinned) stay first, and the buttons sort the rest
-    const fixed = [...grid.querySelectorAll(':scope > .tile-pinned')];
-    const own = [...grid.querySelectorAll(':scope > .tile:not(.tile-pinned)')];
+    const cards = [...grid.querySelectorAll(':scope > .tile-category')];
+    const own = [...grid.querySelectorAll(':scope > .tile:not(.tile-category)')];
     const local = own.map((node, rank) => ({
       node,
       rank,
       title: (node.querySelector('.card-title')?.textContent || '').trim()
     }));
+    const byDate = (a, b) => Date.parse(b.date) - Date.parse(a.date) || a.rank - b.rank;
+    const HOME = {
+      pinned: { label: 'Pinned', compare: byRank },
+      newest: { label: 'Newest', compare: byDate },
+      oldest: { label: 'Oldest', compare: (a, b) => byDate(b, a) },
+      az: ORDERS.az,
+      za: ORDERS.za
+    };
     const number = Number(location.pathname.match(/\/page(\d+)\/?$/)?.[1] || 1);
     let pages = null; // the tiles of every page, once loaded
     const load = () =>
@@ -176,7 +186,7 @@
         .catch(() => null));
 
     const show = (nodes) => {
-      grid.replaceChildren(...fixed, ...nodes);
+      grid.replaceChildren(...cards, ...nodes);
       grid.dispatchEvent(new CustomEvent('tiles:reorder'));
       if (window.MathJax?.typesetPromise) MathJax.typesetPromise([grid]).catch(() => {});
     };
@@ -184,7 +194,7 @@
     let latest = 0; // a later click wins over a slow load
     const apply = async (compare) => {
       const call = ++latest;
-      if (compare === ORDERS.newest.compare) return show(own);
+      if (compare === byRank) return show(own);
       const all = await load();
       if (call !== latest) return;
       if (!all) return show([...local].sort(compare).map((item) => item.node));
@@ -200,6 +210,6 @@
     };
 
     // The buttons sort the tiles of all pages, so they show whatever this page holds
-    buttons(grid, 'home-sort', apply, 'newest');
+    buttons(grid, 'home-order', apply, 'pinned', HOME);
   }
 })();
