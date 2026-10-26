@@ -15,7 +15,11 @@ math: true
 > 
 > — S. L. Detweiler, 1978 {: .text-right }
 
-![Quasinormal Mode Ringdown](/assets/images/ringdownl2s2.png "For Whom The Bell Tolls: Quasinormal Mode Ringdown"){: width="400" }
+![Ringdown waveform of a black hole compared with that of a horizonless compact object](/assets/images/reviews-on-quasinormal-modes/ringdown-echoes-light.png){: .light width="1800" height="1200" }
+![Ringdown waveform of a black hole compared with that of a horizonless compact object](/assets/images/reviews-on-quasinormal-modes/ringdown-echoes-dark.png){: .dark width="1800" height="1200" }
+
+<span class="aps-label">Fig. 1.</span> Ringdown waveform of a black hole (dashed) compared with that of a horizonless compact object (solid), from our own simulation after Fig. 9 of [V. Cardoso and P. Pani](#Cardoso:2019rvt), [*Living Rev. Rel.* **22** (2019) 4](https://doi.org/10.1007/s41114-019-0020-4).
+{: .aps-caption .aps-figure}
 
 These are all the reviews on quasinormal modes that I know of, along with some lecture notes and the book chapters, which I gathered in one place while writing my thesis. They differ wildly in their style, motivation and pedagogy, but they are all pretty fun to read, and I hope that at least one of them suits the way you like to learn. For lecture notes on black holes and general relativity, see [[2026-07-06-lecture-notes]].
 
@@ -24,12 +28,6 @@ These are all the reviews on quasinormal modes that I know of, along with some l
 
 {% bibliography --template bib-box --query @*[keywords ~= qnm-start] %}
 </details>
-
-![Ringdown waveform of a black hole compared with that of a horizonless compact object](/assets/images/reviews-on-quasinormal-modes/ringdown-echoes-light.png){: .light width="1800" height="1200" }
-![Ringdown waveform of a black hole compared with that of a horizonless compact object](/assets/images/reviews-on-quasinormal-modes/ringdown-echoes-dark.png){: .dark width="1800" height="1200" }
-
-<span class="aps-label">Fig. 1.</span> Ringdown waveform of a black hole (dashed) compared with that of a horizonless compact object (solid), after Fig. 9 of [Cardoso and Pani](#Cardoso:2019rvt), from our own simulation.
-{: .aps-caption .aps-figure}
 
 ## Reviews
 
