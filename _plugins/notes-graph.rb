@@ -43,7 +43,10 @@ module NotesGraph
   /mx
 
   ACCESS_MARKER = '<div class="access">' # the panel's "Recently Updated" and "Trending Tags"
-  TAG_HUB_LIMIT = 15 # a tag on more posts than this is too general to draw edges for
+  # A tag on more posts than this is too general to draw edges for, unless a post names it in
+  # primary_tags: then the author says it is what the post is about, and the tag draws its edges
+  # between the posts that name it, however many posts carry it
+  TAG_HUB_LIMIT = 15
 
   module_function
 
@@ -149,8 +152,7 @@ module NotesGraph
     posts.each { |doc| Array(doc.data['tags']).each { |tag| by_tag[tag] << doc } }
     shared = Hash.new { |h, k| h[k] = [] }
     by_tag.each do |tag, docs|
-      next if docs.size > TAG_HUB_LIMIT
-
+      docs = docs.select { |doc| Array(doc.data['primary_tags']).include?(tag) } if docs.size > TAG_HUB_LIMIT
       docs.combination(2) { |a, b| shared[[ids[a], ids[b]].sort] << tag }
     end
     shared.each { |(a, b), tags| edges << { source: a, target: b, kind: 'tag', weight: tags.size, tags: tags } }

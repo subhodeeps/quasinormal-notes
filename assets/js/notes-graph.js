@@ -68,10 +68,8 @@
  *   shared notes, dashed for three and solid for four or more, with a halo from five (tagLine),
  *   and from four notes it turns from slate toward the amber of the glow, one step for each
  *   note. A key to the steps fades in at the lower left of the graph. The tags keep their
- *   places among the notes. A tag on more than TAG_HUB notes, such as black-holes, would join
- *   almost every other tag, so it has no line, and neither has a tag without a partner that
- *   shares two notes. Both stay in view, a little faded (--graph-tag-weak), and a click on any
- *   tag still opens its page, so the map also works as a table of contents. The category and
+ *   places among the notes. A tag that shares no two notes with another has no line. It stays
+ *   in view, a little faded (--graph-tag-weak), and a click on any tag still opens its page, so the map also works as a table of contents. The category and
  *   stage filters choose the tags of those notes, and a click on Tag or on the clear button
  *   brings the notes back.
  * - It shows every note and every edge in three dimensions and in perspective, and it turns
@@ -121,7 +119,6 @@
   const SWAY = [2.5, 5]; // px: the range of the amplitudes of the drift in the right panel
   const FAR = 0.4; // opacity of the notes and edges that the panel draws faintly
   const HIDDEN = 0.06; // opacity of the notes that the legend's filter leaves out
-  const TAG_HUB = 15; // a tag on more notes than this draws no line on the tag map (TAG_HUB_LIMIT in _plugins/notes-graph.rb)
 
   document.querySelectorAll('.notes-graph').forEach((section) => {
     fetch(section.querySelector('canvas').dataset.src)
@@ -404,15 +401,14 @@
     }
 
     // The tag map: a line between two tags that share at least two notes (its style says how
-    // many, see tagLine). A tag without a line, a hub or a tag that shares no two notes with
-    // another, is weak and is drawn fainter. The notes of a tag are its neighbours, since only
+    // many, see tagLine). A tag without a line, one that shares no two notes with another, is
+    // weak and is drawn fainter. The notes of a tag are its neighbours, since only
     // member edges meet a tag
     const tagNodes = nodes.filter((n) => n.kind === 'tag');
     const tagEdges = [];
     const partners = new Map(tagNodes.map((n) => [n.id, new Set()]));
     tagNodes.forEach((a, i) => {
       for (const b of tagNodes.slice(i + 1)) {
-        if (a.count > TAG_HUB || b.count > TAG_HUB) continue;
         const shared = [...neighbours.get(a.id)].filter((id) => neighbours.get(b.id).has(id)).length;
         if (shared < 2) continue;
         tagEdges.push([a, b, shared]);
@@ -489,7 +485,7 @@
               `<line x1="2" y1="4" x2="22" y2="4" stroke-linecap="round" stroke-width="1.4" ` +
               `stroke-dasharray="${line.dash.join(' ')}" ` +
               `style="stroke:color-mix(in srgb, var(--graph-tag-glow) ${tint}%, var(--graph-node))"/></svg>` +
-              `<b>${n}</b></span>`
+              `<b>${n === TAG_LINE.last ? `${n}+` : n}</b></span>`
             );
           })
           .join('') +
