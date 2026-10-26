@@ -25,6 +25,12 @@ These are all the reviews on quasinormal modes that I know of, along with some l
 {% bibliography --template bib-box --query @*[keywords ~= qnm-start] %}
 </details>
 
+![Ringdown waveform of a black hole compared with that of a horizonless compact object](/assets/images/reviews-on-quasinormal-modes/ringdown-echoes-light.png){: .light width="1800" height="1200" }
+![Ringdown waveform of a black hole compared with that of a horizonless compact object](/assets/images/reviews-on-quasinormal-modes/ringdown-echoes-dark.png){: .dark width="1800" height="1200" }
+
+<span class="aps-label">Fig. 1.</span> Ringdown waveform of a black hole (dashed) compared with that of a horizonless compact object (solid), after Fig. 9 of [Cardoso and Pani](#Cardoso:2019rvt), from our own simulation.
+{: .aps-caption .aps-figure}
+
 ## Reviews
 
 {% bibliography --query @*[keywords ~= qnm-reviews] %}
