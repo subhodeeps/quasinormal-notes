@@ -12,9 +12,10 @@
 # names of `also_in` to `categories`, so that jekyll-archives builds their pages and Chirpy links
 # them. The first category, which colours a note in the graph and on the home page, stays first.
 # After rendering, it replaces the cards of Chirpy's Categories tab, which show two levels, with
-# the whole tree, deeper levels in closed folders (<details>). A category page gets the path above
-# its title; with subcategories it becomes an explorer, the subcategories as closed folders that
-# open on their subtopics and their notes in order, then its own notes, without dates. A category
+# the whole tree, deeper levels in closed folders (<details>). A category page gets its parent
+# categories in Chirpy's breadcrumb. With subcategories it becomes an explorer: the subcategories
+# as closed folders that open on their subtopics and their notes in order, then its own notes,
+# without dates. A category
 # without subcategories keeps Chirpy's list of its notes, in order; those items are Chirpy's own,
 # picked out and reordered. post-topics-top.rb and home-tiles.rb show the paths on a post and on
 # its card (CategoryTree.trail).
@@ -234,6 +235,27 @@ module CategoryTree
     end.join
   end
 
+  # Puts the parent categories into Chirpy's breadcrumb, before the name of the category, so that
+  # it reads Home › Categories › Physics › Black Holes › Black Hole Environments. Without that
+  # breadcrumb (`<nav id="breadcrumb"`), the parents go in a line of their own above the title.
+  # @param out [String] the rendered page
+  # @param parents [Array<Node>] from the primary category down
+  # @return [Array(String, String)] the page, and the HTML of the fallback line ("" if not needed)
+  def with_parents(out, parents, site)
+    return [out, ''] if parents.empty?
+
+    nav = out.index('<nav id="breadcrumb"')
+    stop = nav && out.index('</nav>', nav)
+    last = stop && out.rindex('<span>', stop)
+    if last && last > nav
+      spans = parents.map { |parent| "<span> #{link(site, parent.name)} </span> " }.join
+      return [out[0...last] + spans + out[last..], '']
+    end
+
+    [out, %(<nav class="category-crumbs" aria-label="Parent categories">) +
+      parents.map { |parent| link(site, parent.name) }.join(SEP) + SEP + '</nav>']
+  end
+
   # A category page with the path above its title. A category with subcategories becomes an
   # explorer: its subcategories as closed folders, then its own notes, without dates. A category
   # without subcategories keeps Chirpy's list, with only its own notes, in order, and the sort
@@ -249,9 +271,10 @@ module CategoryTree
     close = list && out.index('</ul>', list)
     return nil unless node && close
 
-    path = ancestors(node)
-    crumbs = path.empty? ? '' : %(<nav class="category-crumbs" aria-label="Parent categories">) +
-                                path.map { |parent| link(site, parent.name) }.join(SEP) + SEP + '</nav>'
+    out, crumbs = with_parents(out, ancestors(node), site)
+    top = out.index(PAGE)
+    list = out.index(LIST, top)
+    close = out.index('</ul>', list)
     start = top + PAGE.length
     subs = children(node)
     unless subs.empty?
