@@ -8,8 +8,10 @@
 // box whose class starts with "prompt-" its padding, rounded corners, text colour and the place
 // of the icon; this file adds the colour and the icon of this one. The colours are
 // --prompt-review-bg and --prompt-review-icon-color of _sass/amore/_light.scss and _dark.scss.
-// If a theme update drops the shared rule, the box is a plain tinted quotation. The links in the
-// box take the accent of the theme, as elsewhere in a post. A list of references in the box
+// If a theme update drops the shared rule, the box is a plain tinted quotation. The same colours and
+// icon are given to a collapsible box, <details class="prompt-fold prompt-review"> (the folding is
+// in _sass/_code-fold.scss), which the post "Reviews on Quasinormal Modes" uses. The links in the
+// box take the accent of the theme, as elsewhere in a post, and a list of references in the box
 // (ol.bibliography) gets bullets.
 
 blockquote.prompt-review {
@@ -27,6 +29,28 @@ blockquote.prompt-review {
 
   // the references of the box (_layouts/bib-box.html) as a bulleted list; the numbered lists of
   // _sass/_bibliography.scss have no bullets
+  ol.bibliography {
+    margin-bottom: 0;
+    padding-left: 1.1rem;
+    list-style: disc;
+
+    li::marker {
+      color: var(--prompt-review-icon-color);
+    }
+  }
+}
+
+// The collapsible form: the layout of .prompt-fold (_sass/_code-fold.scss) with the colour and the
+// icon of the review box
+details.prompt-review {
+  background-color: var(--prompt-review-bg);
+
+  &::before {
+    content: '\f02d';
+    transform: none;
+    color: var(--prompt-review-icon-color);
+  }
+
   ol.bibliography {
     margin-bottom: 0;
     padding-left: 1.1rem;
