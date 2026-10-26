@@ -5,6 +5,7 @@ description: "A guide to creating a reproducible scientific Python environment o
 date: 2026-07-06 00:00:00 +0530
 last_modified_at: 2026-10-23 00:00:00 +0530
 categories: [Code Carpentry, Environments]
+also_in: [Coding, Python]
 tags: [python, macos, environment-setup]
 math: false
 pin: false

@@ -4,7 +4,7 @@ short_title: "Maltár Lore" # in the note graph
 description: "Of Maltár, and of the names of its strongholds, with apologies to J. R. R. Tolkien."
 date: 2025-11-25 00:00:00 +0530
 last_modified_at: 2026-10-23 00:00:00 +0530
-categories: [Homelab, Maltár]
+categories: [Homelab, Laptop Cluster]
 order: 3
 tags: [homelab, cluster, lore]
 primary_tags: [homelab, cluster] # one to three tags for the note graph; empty means the first two tags

@@ -4,9 +4,10 @@ short_title: "Maltár Tests" # in the note graph
 description: "Julia and Mathematica code for the first Maltár benchmarks, which time a sweep of Lorenz trajectories and a set of eigenvalue problems on two laptops."
 date: 2025-11-25 00:00:00 +0530
 last_modified_at: 2026-10-23 00:00:00 +0530
-categories: [Homelab, Maltár]
+categories: [Homelab, Laptop Cluster]
+also_in: [Coding, Julia]
 order: 2
-tags: [homelab, cluster, julia, mathematica, distributed-computing, computational-physics, differential-equations, nonlinear-dynamics, ssh]
+tags: [homelab, cluster, julia, mathematica, distributed-computing, computational-physics, differential-equations, nonlinear-dynamics, ssh, benchmarks]
 primary_tags: [homelab, cluster] # one to three tags for the note graph; empty means the first two tags
 math: true
 pin: false
