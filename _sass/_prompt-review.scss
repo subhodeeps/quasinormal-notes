@@ -49,6 +49,10 @@ details.prompt-review {
     content: '\f02d';
     transform: none;
     color: var(--prompt-review-icon-color);
+    // the font shorthand of the icon sets a line height of 1; the line of the icon takes the
+    // height of the text line (and starts at the padding of the box), so that the two are centred
+    top: 0.9rem;
+    line-height: inherit;
   }
 
   ol.bibliography {
