@@ -255,3 +255,47 @@ details[open] > summary > .category-chevron {
     }
   }
 }
+
+// On a phone a long name wraps in its own column, aligned under the first line and not under the
+// icon, in the folders of the tab and of a category page
+@media (max-width: 575.98px) {
+  .category-row {
+    display: flex;
+    align-items: baseline;
+
+    > i {
+      flex: none;
+    }
+
+    > a {
+      min-width: 0;
+      overflow-wrap: anywhere;
+    }
+  }
+
+  // A note of a category page: the title wraps whole on its own line, with the date under it
+  // (Chirpy cuts the title with an ellipsis and keeps the date on the same line)
+  #page-category ul.content > li,
+  #page-category .category-explorer li:not(.category-folder) {
+    flex-wrap: wrap;
+    justify-content: flex-start !important;
+    column-gap: 0.4rem;
+
+    > a {
+      flex: 1 0 100%;
+      overflow: visible;
+      text-overflow: clip;
+      white-space: normal;
+      line-height: 1.35;
+    }
+
+    > .dash {
+      display: none;
+    }
+
+    .date-kind,
+    time {
+      font-size: 0.75rem;
+    }
+  }
+}
