@@ -771,7 +771,7 @@ module JHEP
   # The sites that get a name instead of their address as the text of a link
   SITES = {
     'inspirehep.net' => 'INSPIRE', 'ui.adsabs.harvard.edu' => 'ADS',
-    'archive.org' => 'Internet Archive', 'web.archive.org' => 'Internet Archive', 'dropbox.com' => 'Dropbox'
+    'archive.org' => 'Internet Archive', 'web.archive.org' => 'Internet Archive', 'dropbox.com' => 'Dropbox', 'books.google.com' => 'Google Books', 'books.google.co.in' => 'Google Books'
   }.freeze
 
   # The links of the fields `url` and `adsurl`, which JHEP.bst does not print for most entry types:
