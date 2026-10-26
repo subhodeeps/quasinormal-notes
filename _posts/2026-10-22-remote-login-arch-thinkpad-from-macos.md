@@ -9,27 +9,27 @@ math: false
 pin: false
 ---
 
-This post describes how we set up remote access from a Mac to an Arch Linux ThinkPad, with a terminal over SSH and the full desktop over VNC. The setup is free for personal use and has no session time limit, and all traffic stays encrypted between our own machines. For our own devices, it covers what we would otherwise use AnyDesk or TeamViewer for. For graphics-heavy work, such as interactive 3D plots in Jupyter or Mathematica notebooks, we add a high-performance mode that streams the desktop as video using Sunshine and Moonlight.
+This post describes how we set up remote access from a Mac to an Arch Linux ThinkPad, with a terminal over SSH and the full desktop over VNC. It's free for personal use, has no session time limit, and keeps all traffic encrypted between our own machines, so for our own devices it replaces what we would otherwise use AnyDesk or TeamViewer for. For graphics-heavy work, such as interactive 3D plots in Jupyter or Mathematica notebooks, we add a high-performance mode that streams the desktop as video with Sunshine and Moonlight.
 
-The setup uses Tailscale for networking, Tailscale SSH for authentication, TigerVNC's Wayland server (`w0vncserver`) for desktop sharing, and the Screen Sharing app included with macOS. Section 13 describes the high-performance mode, Section 14 covers file transfer between the two machines, and Section 15 the clipboard. Where the desktop environment matters, the examples assume KDE Plasma on Wayland.
+Tailscale handles the networking and the SSH authentication, TigerVNC's Wayland server (`w0vncserver`) shares the desktop, and the Screen Sharing app that comes with macOS views it. The high-performance mode is Section 13, file transfer is Section 14 and the clipboard is Section 15. Where the desktop environment matters, the examples assume KDE Plasma on Wayland.
 
 ## 1. Overview
 
-A VNC session follows this path. Screen Sharing on the Mac connects to `127.0.0.1:5901` on the Mac. An SSH tunnel forwards that port over Tailscale to `127.0.0.1:5900` on the ThinkPad, where `w0vncserver` shares the desktop session that is already running.
+A VNC session takes this path: Screen Sharing on the Mac connects to `127.0.0.1:5901`, an SSH tunnel forwards that port over Tailscale to `127.0.0.1:5900` on the ThinkPad, and `w0vncserver` there shares the desktop session that's already running.
 
-Tailscale's free Personal plan is sufficient for this. At the time of writing, it allows up to six users, each with an unlimited number of personal devices, for non-commercial use, which covers one person's laptops, desktops, phone and tablet. Tailscale revises its plans from time to time, so we recommend checking the pricing page before adding other users or using the tailnet for work.
+Tailscale's free Personal plan is enough for this. At the time of writing it allows up to six users, each with an unlimited number of personal devices, for non-commercial use, which covers one person's laptops, desktops, phone and tablet. Plans change from time to time, so check the pricing page before adding other users or using the tailnet for work.
 
-Tailscale encrypts all SSH and VNC traffic with WireGuard, and the VNC connection additionally runs inside an SSH tunnel. The VNC server listens only on the ThinkPad's loopback interface, so no other machine can connect to it directly. Lid-close sleep behaves normally until we enable a remote mode, and the remote session is the same desktop session we see at the keyboard rather than a separate virtual display.
+Tailscale encrypts all SSH and VNC traffic with WireGuard, and the VNC connection runs inside an SSH tunnel on top of that. The VNC server listens only on the ThinkPad's loopback interface, so no other machine can connect to it directly. Closing the lid still puts the laptop to sleep until we switch on remote mode, and the remote session is the desktop session we see at the keyboard, not a separate virtual display.
 
-`w0vncserver` requires TigerVNC 1.16 or later and a supported compositor: either a wlroots-based compositor, or one that implements the xdg-desktop-portal RemoteDesktop interface, as GNOME and KDE Plasma do. Running Wayland alone is not sufficient. Desktops that support neither interface need a different server, such as GNOME Remote Desktop or KDE's RDP server.
+`w0vncserver` needs TigerVNC 1.16 or later and a compositor that is either wlroots-based or implements the xdg-desktop-portal RemoteDesktop interface, as GNOME and KDE Plasma do. Running Wayland alone isn't enough. A desktop with neither interface needs a different server, such as GNOME Remote Desktop or KDE's RDP server.
 
 The setup has the following limitations:
 
-1. `w0vncserver` shares an existing desktop session, so a user must remain logged in. After a logout or reboot there is no session to share until someone logs in at the keyboard; SSH continues to work in the meantime.
-2. Tailscale cannot wake a suspended or powered-off laptop.
-3. Some compositors switch off the internal display when the lid closes, which leaves nothing to capture. Section 8.4 tests for this.
-4. Compositors differ in how they handle the lock screen. Some continue to share it, which allows us to unlock the session remotely; others pause capture until the session is unlocked. Section 8.4 tests this as well.
-5. During a remote session, the ThinkPad's own display is also unlocked, so anyone who opens the lid can see and use the session. Section 8.5 discusses how to limit this exposure.
+1. `w0vncserver` shares an existing desktop session, so someone has to stay logged in. After a logout or reboot there's nothing to share until a person logs in at the keyboard, although SSH keeps working meanwhile.
+2. Tailscale can't wake a suspended or powered-off laptop.
+3. Some compositors switch off the internal display when the lid closes, leaving nothing to capture; Section 8.4 tests for this.
+4. Compositors also differ in how they treat the lock screen. Some keep sharing it, so we can unlock the session remotely, and others pause capture until the session is unlocked. Section 8.4 tests this too.
+5. During a remote session the ThinkPad's own display is unlocked as well, so anyone who opens the lid can see and use the session. Section 8.5 shows how to limit this.
 
 ## 2. Tailscale on the ThinkPad
 
@@ -52,14 +52,14 @@ If `tailscale up` prints an authentication URL, we open it and sign in with a pe
 sudo tailscale set --ssh
 ```
 
-Tailscale SSH runs inside `tailscaled`, so we do not need the OpenSSH server (`sshd.service`). To verify the connection:
+Tailscale SSH runs inside `tailscaled`, so we don't need the OpenSSH server (`sshd.service`). To check the connection:
 
 ```bash
 tailscale status
 tailscale ip -4
 ```
 
-The ThinkPad's Tailscale IPv4 address begins with `100.`. MagicDNS, which Tailscale enables by default, also resolves the machine name shown by `tailscale status`. We record both.
+The ThinkPad's Tailscale IPv4 address begins with `100.`, and MagicDNS, which Tailscale turns on by default, also resolves the machine name that `tailscale status` shows. We note down both.
 
 By default, a device's Tailscale key expires after 180 days, and the device then leaves the tailnet until someone authenticates it again at the keyboard. For a machine that we mainly reach remotely, this would cut off access, so we disable key expiry for the ThinkPad in the admin console under **Machines** → the ThinkPad → **⋯** → **Disable key expiry**.
 
@@ -79,9 +79,9 @@ From Terminal on the Mac, replacing the placeholders with our username and the T
 ssh arch_username@100.x.y.z
 ```
 
-If a sign-in URL appears, we open it in a browser on the Mac and approve the login. This is Tailscale SSH's *check* mode, which the default policy uses; it requests re-authentication periodically, and we can complete it from any location.
+If a sign-in URL appears, we open it in a browser on the Mac and approve the login. That's Tailscale SSH's *check* mode, which the default policy uses, and it asks for re-authentication now and then, which we can complete from anywhere.
 
-Two commands confirm that we are on the right machine, and `exit` returns us to the Mac:
+These commands confirm we're on the right machine, and `exit` brings us back to the Mac:
 
 ```bash
 whoami
@@ -89,7 +89,7 @@ hostname
 exit
 ```
 
-Tailscale SSH accepts a connection only if the tailnet policy permits it. The default policy permits access to our own devices as a non-root user. If we have edited the policy, both the network access rules and the `ssh` rules must permit the connection.
+Tailscale SSH accepts a connection only if the tailnet policy allows it, and the default policy allows access to our own devices as a non-root user. If we've edited the policy, the network access rules and the `ssh` rules both have to allow the connection.
 
 ## 5. SSH host alias
 
@@ -111,14 +111,14 @@ Host thinkpad
     ServerAliveCountMax 3
 ```
 
-`HostName` accepts either the Tailscale IP or the MagicDNS name. We use the IP because it does not depend on DNS. After saving the file:
+`HostName` takes either the Tailscale IP or the MagicDNS name; we use the IP because it doesn't depend on DNS. After saving the file:
 
 ```bash
 chmod 600 ~/.ssh/config
 ssh thinkpad
 ```
 
-If a shell on the ThinkPad opens, the alias works. The VNC tunnel in Section 7 uses it.
+If a shell on the ThinkPad opens, the alias works, and the VNC tunnel in Section 7 relies on it.
 
 ## 6. TigerVNC on Wayland
 
@@ -133,7 +133,7 @@ command -v w0vncserver
 w0vncserver -version
 ```
 
-The output should show the session type `wayland`, a path to `w0vncserver`, and version 1.16 or later. `w0vncserver -h` lists all parameters that the server accepts.
+You should see the session type `wayland`, a path to `w0vncserver` and version 1.16 or later. `w0vncserver -h` lists every parameter the server accepts.
 
 ### 6.2 VNC password
 
@@ -144,19 +144,19 @@ vncpasswd ~/.config/tigervnc/passwd
 chmod 600 ~/.config/tigervnc/passwd
 ```
 
-`vncpasswd` also offers to create a view-only password, which we decline with `n`. The VNC password should differ from the Linux account password.
+`vncpasswd` also offers to create a view-only password, and we decline with `n`. Use a VNC password that differs from the Linux account password.
 
-Classic VNC authentication uses only the first eight characters of the password and does not encrypt the session. This is acceptable here because the server listens only on loopback and every connection arrives through SSH. Port 5900 must never be reachable from the network directly.
+Classic VNC authentication uses only the first eight characters of the password and doesn't encrypt the session. That's fine here, because the server listens only on loopback and every connection arrives through SSH. Port 5900 must never be reachable from the network directly.
 
 ### 6.3 Making the session visible to systemd
 
-We run the VNC server as a systemd user service rather than with `nohup`. A service survives the terminal closing and writes its output to the journal, and we can restart it over SSH. The service needs to know which Wayland display to share, which we check as follows:
+We run the VNC server as a systemd user service instead of with `nohup`, since a service survives the terminal closing, writes its output to the journal and can be restarted over SSH. It also needs to know which Wayland display to share, which we check like this:
 
 ```bash
 systemctl --user show-environment | grep -E '^(WAYLAND_DISPLAY|XDG_CURRENT_DESKTOP)='
 ```
 
-KDE Plasma and GNOME export both variables at login. Some minimal compositors do not; in that case, we import the variables from a terminal within the desktop session:
+KDE Plasma and GNOME export both variables at login. Some minimal compositors don't, and then we import them from a terminal inside the desktop session:
 
 ```bash
 systemctl --user import-environment WAYLAND_DISPLAY XDG_CURRENT_DESKTOP
@@ -182,17 +182,17 @@ EOF
 systemctl --user daemon-reload
 ```
 
-We leave the service disabled and start it only when we need remote access. The `systemctl --user` commands do not require `sudo`.
+We leave the service disabled and start it only when we need remote access. The `systemctl --user` commands don't need `sudo`.
 
-The options work as follows. `-localhost` accepts connections only from the ThinkPad itself, and `-rfbport=5900` sets the port. `-PasswordFile` (alias `-rfbauth`) points to the password file. `-SecurityTypes=VncAuth` selects plain VNC password authentication; the default also offers TLS, which macOS Screen Sharing does not support, and the SSH tunnel already provides encryption. `-RememberDisplayChoice=Always` concerns the permission prompt, which the next section explains.
+`-localhost` accepts connections only from the ThinkPad itself, and `-rfbport=5900` sets the port. `-PasswordFile` (alias `-rfbauth`) points to the password file. `-SecurityTypes=VncAuth` selects plain VNC password authentication, because the default also offers TLS, which macOS Screen Sharing doesn't support, and the SSH tunnel already provides encryption. `-RememberDisplayChoice=Always` belongs to the permission prompt, which the next section explains.
 
 ### 6.5 The permission prompt
 
-On portal-based desktops such as GNOME and KDE, a permission dialog appears on the ThinkPad's screen when the first viewer connects, not when the server starts. We cannot answer it from the Mac.
+On portal-based desktops such as GNOME and KDE, a permission dialog appears on the ThinkPad's screen when the first viewer connects, not when the server starts, and we can't answer it from the Mac.
 
-`-RememberDisplayChoice=Always` stores the answer, so we can restart the server over SSH later without a new prompt. The trade-off is that anyone with both SSH access and the VNC password can connect without a fresh approval. `w0vncserver-forget` deletes the stored choice.
+`-RememberDisplayChoice=Always` stores the answer, so we can restart the server over SSH later without a new prompt. The trade-off is that anyone with both SSH access and the VNC password can then connect without a fresh approval; `w0vncserver-forget` deletes the stored choice.
 
-The default value, `Session`, asks again after every restart. It is stricter, but if the server crashes while we are away, we cannot recover it remotely. To use the stricter behaviour, we remove the option from the service file.
+The default value, `Session`, asks again after every restart. That's stricter, but if the server crashes while we're away we can't bring it back remotely. To get the stricter behaviour, we remove the option from the service file.
 
 In either case, we make the first connection while at the ThinkPad, as Section 7 explains.
 
@@ -204,7 +204,7 @@ systemctl --user --no-pager status thinkpad-vnc
 ss -ltnp 'sport = :5900'
 ```
 
-The service should report `active (running)`, and the server should listen only on loopback (`127.0.0.1:5900` or `[::1]:5900`), never on `0.0.0.0:5900` or `[::]:5900`. If the service fails, the journal usually states the reason, and we resolve any compositor or portal errors before continuing:
+You should see `active (running)`, and the server listening on loopback only (`127.0.0.1:5900` or `[::1]:5900`), never on `0.0.0.0:5900` or `[::]:5900`. If the service fails, the journal usually says why, and any compositor or portal errors need fixing before we continue:
 
 ```bash
 journalctl --user -u thinkpad-vnc -n 80 --no-pager
@@ -223,21 +223,21 @@ ssh -NT \
     thinkpad
 ```
 
-The command produces no output and runs for as long as the tunnel stays open. In the second window:
+Nothing prints, and the command keeps running for as long as the tunnel is open. In the second window:
 
 ```bash
 open 'vnc://127.0.0.1:5901'
 ```
 
-Screen Sharing opens. If it asks for a user name, we leave the field empty and enter the VNC password from Section 6.2. On the first connection, the permission prompt appears on the ThinkPad, and someone must approve it there. Afterwards, keyboard input, pointer input and screen updates should all work. If Screen Sharing cannot connect, the tunnel window usually shows an error message; Section 10 covers the common cases.
+Screen Sharing opens. If it asks for a user name, we leave the field empty and enter the VNC password from Section 6.2. On the first connection the permission prompt appears on the ThinkPad, where someone has to approve it. After that, keyboard, pointer and screen updates should all work. If Screen Sharing can't connect, the tunnel window usually shows an error, and Section 10 covers the common cases.
 
-We use port 5901 on the Mac rather than 5900 because Screen Sharing refuses connections to the Mac's own port 5900.
+We use port 5901 on the Mac instead of 5900 because Screen Sharing refuses connections to the Mac's own port 5900.
 
 To disconnect, we close Screen Sharing and press `Control-C` in the tunnel window.
 
 ### 7.2 Helper functions (optional)
 
-Because two windows are inconvenient, we wrap the same steps in two shell functions in `~/.zshrc` on the Mac. Running `source ~/.zshrc` loads them into the current shell.
+Two windows get tedious, so we wrap the same steps in two shell functions in `~/.zshrc` on the Mac; `source ~/.zshrc` loads them into the current shell.
 
 ```bash
 thinkpad-vnc() {
@@ -256,7 +256,7 @@ thinkpad-vnc-stop() {
 
 `thinkpad-vnc` opens the tunnel in the background and starts Screen Sharing. `thinkpad-vnc-stop` locks the ThinkPad's desktop session and then closes the tunnel.
 
-We can test the locking step once with the lid open. The following command should print a session number, for example `2`:
+We can test the locking step once with the lid open. This command should print a session number, for example `2`:
 
 ```bash
 ssh thinkpad 'loginctl show-user "$USER" -p Display --value'
@@ -266,7 +266,7 @@ After `thinkpad-vnc-stop`, the ThinkPad should show its lock screen.
 
 ## 8. Keeping the ThinkPad awake on demand
 
-By default, the ThinkPad should sleep when the lid closes. We want it to stay awake only during remote work, so we add a remote mode that we can switch on and off.
+By default the ThinkPad should sleep when the lid closes. We want it awake only during remote work, so we add a remote mode that we can switch on and off.
 
 ### 8.1 The inhibitor service
 
@@ -283,11 +283,11 @@ EOF
 sudo systemctl daemon-reload
 ```
 
-We do not enable this service at boot. Its `handle-lid-switch` lock prevents systemd-logind from acting on the lid, and its `sleep` lock blocks suspend requests from desktop environments that handle the lid themselves. We deliberately leave idle actions unaffected, so that KDE can still lock the screen after a period of inactivity (Section 8.5). Desktop environments differ in these details, which is why Section 8.4 tests the actual behaviour.
+We don't enable this service at boot. Its `handle-lid-switch` lock stops systemd-logind from acting on the lid, and its `sleep` lock blocks suspend requests from desktop environments that handle the lid themselves. Idle actions stay unaffected, so KDE can still lock the screen after a period of inactivity (Section 8.5). Desktop environments differ in these details, which is why Section 8.4 tests the actual behaviour.
 
 ### 8.2 The remote-mode command
 
-A small script works both in an interactive shell and in a single SSH command. Shell functions defined in `~/.zshrc` would not, because only interactive shells read that file.
+We use a small script because it works both in an interactive shell and in a single SSH command, whereas shell functions in `~/.zshrc` wouldn't, since only interactive shells read that file.
 
 ```bash
 mkdir -p ~/.local/bin
@@ -317,11 +317,11 @@ EOF
 chmod +x ~/.local/bin/remote-mode
 ```
 
-If `~/.local/bin` is not on the `PATH`, the full path `~/.local/bin/remote-mode` works equally well.
+If `~/.local/bin` isn't on the `PATH`, the full path `~/.local/bin/remote-mode` works just as well.
 
 ### 8.3 Passwordless sudo for remote-mode (optional)
 
-To avoid entering the sudo password over SSH each time, a sudoers rule can permit exactly these two commands without it:
+To skip the sudo password over SSH each time, a sudoers rule can allow exactly these two commands without it:
 
 ```bash
 sudo visudo -f /etc/sudoers.d/remote-mode
@@ -342,20 +342,20 @@ remote-mode on
 systemd-inhibit --list --no-pager
 ```
 
-The output should report `ACTIVE`, and the list should include `RemoteSSH`. We then carry out four checks while watching from the Mac:
+You should see `ACTIVE`, and `RemoteSSH` should appear in the list. Then we run four checks while watching from the Mac:
 
-1. We lock the screen. Screen Sharing should continue to show the lock screen, and entering the Linux account password should unlock it remotely.
-2. We close the lid for a minute. The ThinkPad should remain on Tailscale, SSH should continue to work, and Screen Sharing should show a live desktop rather than a black or frozen image.
-3. We reopen the lid and run `remote-mode off`, which should report `INACTIVE`.
-4. We close the lid again. This time the laptop should suspend as usual.
+1. Lock the screen. Screen Sharing should keep showing the lock screen, and entering the Linux account password should unlock it remotely.
+2. Close the lid for a minute. The ThinkPad should stay on Tailscale, SSH should keep working, and Screen Sharing should show a live desktop, not a black or frozen image.
+3. Reopen the lid and run `remote-mode off`, which should report `INACTIVE`.
+4. Close the lid again. This time the laptop should suspend as usual.
 
-If step 1 fails, the compositor stops sharing while the screen is locked. The options are then to leave the screen unlocked, which is reasonable only in a physically secure location, or to use a different remote-desktop server. A black image in step 2 indicates that the compositor switches off the panel when the lid closes. Its lid or display settings may change this; otherwise, leaving the lid slightly open avoids it. If the laptop suspends in step 2, the desktop environment's power settings are the next thing to check. We do not leave the ThinkPad unattended until all four checks pass.
+If step 1 fails, the compositor stops sharing while the screen is locked. Then we either leave the screen unlocked, which makes sense only in a physically secure location, or switch to a different remote-desktop server. A black image in step 2 means the compositor switches off the panel when the lid closes; its lid or display settings may change that, and otherwise leaving the lid slightly open avoids it. If the laptop suspends in step 2, check the desktop environment's power settings next. We don't leave the ThinkPad unattended until all four checks pass.
 
 ### 8.5 Privacy during a session
 
 Remote access unlocks the actual desktop, so the ThinkPad's own display is unlocked as well. Anyone who opens the lid during a session can watch it and use the keyboard, and KDE provides no way to blank the local display for a shared session.
 
-Three measures limit this exposure. The `thinkpad-vnc-stop` helper from Section 7.2 locks the session before closing the tunnel; with the two-window method, we lock it manually using the command below. Because the inhibitor in Section 8.1 leaves idle actions unaffected, KDE still locks the screen after its usual timeout, which we verify once with remote mode enabled. During an active session, the only remaining protection is a closed lid and a private location.
+Three measures limit the exposure. The `thinkpad-vnc-stop` helper from Section 7.2 locks the session before closing the tunnel (with the two-window method we lock it by hand with the command below). Because the inhibitor in Section 8.1 leaves idle actions alone, KDE still locks the screen after its usual timeout, which we verify once with remote mode on. During an active session, a closed lid and a private location are all that protect the screen.
 
 To lock the ThinkPad from the Mac at any time:
 
@@ -363,21 +363,19 @@ To lock the ThinkPad from the Mac at any time:
 ssh thinkpad 'loginctl lock-session "$(loginctl show-user "$USER" -p Display --value)"'
 ```
 
-Keeping the local display private during a session would require a remote-desktop server that creates a separate session instead of sharing the existing one, which is outside the scope of this post.
+Keeping the local display private would take a remote-desktop server that creates a separate session instead of sharing the existing one, and that's outside this post.
 
 ## 9. A typical session
 
 Before leaving the ThinkPad, with the lid still open:
 
-1. We connect the power adapter.
-2. We check that `tailscale status` reports the ThinkPad as online.
-3. We confirm that the Wayland desktop session is logged in, and we do not log out.
-4. We start the server with `systemctl --user start thinkpad-vnc`.
-5. If the server has not yet stored the display choice, we connect once from the Mac and approve the prompt.
-6. We run `remote-mode on` and confirm that it reports `ACTIVE`.
-7. We lock the screen and close the lid.
-
-All of these steps take place before we lock the screen.
+1. Connect the power adapter.
+2. Check that `tailscale status` reports the ThinkPad as online.
+3. Confirm that the Wayland desktop session is logged in, and don't log out.
+4. Start the server with `systemctl --user start thinkpad-vnc`.
+5. If the server hasn't stored the display choice yet, connect once from the Mac and approve the prompt.
+6. Run `remote-mode on` and confirm that it reports `ACTIVE`.
+7. Lock the screen and close the lid.
 
 From the Mac, `thinkpad-vnc` (or the two-window method in Section 7.1) opens the session, and we unlock the ThinkPad through Screen Sharing if necessary.
 
@@ -389,13 +387,13 @@ ssh thinkpad 'systemctl --user stop thinkpad-vnc'
 ssh -t thinkpad '~/.local/bin/remote-mode off'
 ```
 
-We close Screen Sharing first. The stop helper then locks the ThinkPad before closing the tunnel. `remote-mode off` comes last because, with the lid closed, the ThinkPad may suspend immediately and drop the SSH connection, which is normal. If we intend to reconnect soon, we can leave the VNC server running.
+We close Screen Sharing first, and the stop helper then locks the ThinkPad before closing the tunnel. `remote-mode off` comes last because, with the lid closed, the ThinkPad may suspend at once and drop the SSH connection, which is normal. If we plan to reconnect soon, we can leave the VNC server running.
 
-In remote mode the laptop stays awake, produces heat and drains its battery, so it should not go into a bag or a closed space. Sustained GPU work increases the heat considerably, for example a long CUDA job or a game running on the NVIDIA GPU with the lid closed. During such work, we keep the ThinkPad on a laptop stand with the vents unobstructed and the charger connected.
+In remote mode the laptop stays awake, gets warm and drains its battery, so it shouldn't go into a bag or a closed space. Sustained GPU work, such as a long CUDA job or a game on the NVIDIA GPU with the lid closed, heats it considerably, so then we keep the ThinkPad on a laptop stand with the vents clear and the charger connected.
 
 ## 10. Troubleshooting
 
-Three checks from the Mac usually locate the problem:
+Three checks from the Mac usually find the problem:
 
 1. Is the ThinkPad online? The Tailscale menu-bar app shows its status, as does `tailscale ping 100.x.y.z` if the command-line tool is installed.
 2. Does SSH work? `ssh thinkpad 'echo ok'` tests this.
@@ -404,16 +402,16 @@ Three checks from the Mac usually locate the problem:
 | Symptom | Likely cause | Remedy |
 | --- | --- | --- |
 | ThinkPad offline in Tailscale | Suspended, powered off, without network, or with an expired key | No remote remedy; someone needs physical access. Mains power, disabled key expiry and the tests in Section 8.4 prevent most cases. |
-| SSH prints a sign-in URL and waits | Tailscale SSH check mode | Approving the sign-in at that URL on the Mac |
-| Screen Sharing cannot connect; the tunnel window shows `administratively prohibited` | The `tailscaled` on the ThinkPad refuses forwarding, usually because it is outdated | `ssh thinkpad 'tailscale version --daemon'` shows the running version. Updating at the ThinkPad (`sudo pacman -Syu`, then `sudo systemctl restart tailscaled`) is safest, because the restart ends all Tailscale SSH sessions. The fallback below works in the meantime. |
-| Screen Sharing cannot connect; the tunnel window shows `connect failed` | The VNC server is not running | Restarting it with `ssh thinkpad 'systemctl --user restart thinkpad-vnc'`, then reading `journalctl --user -u thinkpad-vnc -n 50` for the cause |
-| `Address already in use` for 5901 | A previous tunnel is still running | `thinkpad-vnc-stop`, or finding the process with `lsof -nP -iTCP:5901 -sTCP:LISTEN` and ending it with `kill` |
-| Restarted server, still no picture | The permission prompt is waiting on the ThinkPad's screen | Approval in person, unless the service already uses `RememberDisplayChoice=Always` |
+| SSH prints a sign-in URL and waits | Tailscale SSH check mode | Approve the sign-in at that URL on the Mac. |
+| Screen Sharing cannot connect; the tunnel window shows `administratively prohibited` | The `tailscaled` on the ThinkPad refuses forwarding, usually because it is outdated | `ssh thinkpad 'tailscale version --daemon'` shows the running version. Update at the ThinkPad itself (`sudo pacman -Syu`, then `sudo systemctl restart tailscaled`), because the restart ends all Tailscale SSH sessions. The fallback below works in the meantime. |
+| Screen Sharing cannot connect; the tunnel window shows `connect failed` | The VNC server is not running | Restart it with `ssh thinkpad 'systemctl --user restart thinkpad-vnc'`, then read `journalctl --user -u thinkpad-vnc -n 50` for the cause. |
+| `Address already in use` for 5901 | A previous tunnel is still running | Run `thinkpad-vnc-stop`, or find the process with `lsof -nP -iTCP:5901 -sTCP:LISTEN` and end it with `kill`. |
+| Restarted server, still no picture | The permission prompt is waiting on the ThinkPad's screen | Approve it in person, unless the service already uses `RememberDisplayChoice=Always`. |
 | Black or frozen picture | The lid switched the panel off, or capture paused while the screen was locked | Restarting the VNC service often helps. If the problem recurs, the compositor needs the lid open or the screen unlocked (Section 8.4). |
 | Service log: cannot connect to Wayland display | The session ended (logout or reboot), or systemd lacks the session environment | SSH still works, but someone needs to log in at the keyboard, after which we repeat Section 6.3. |
-| `Failed to connect to bus` over SSH | The SSH session lacks the user session variables | `export XDG_RUNTIME_DIR=/run/user/$(id -u)` before the `systemctl --user` command |
+| `Failed to connect to bus` over SSH | The SSH session lacks the user session variables | Run `export XDG_RUNTIME_DIR=/run/user/$(id -u)` before the `systemctl --user` command. |
 | Password rejected, then connections refused | Repeated wrong passwords triggered a temporary block | The block lifts after 10 seconds at first and lasts longer after further failures. Only the first eight characters count; `vncpasswd` over SSH resets the password. |
-| Remote mode left on | The inhibitor is still active | `ssh -t thinkpad '~/.local/bin/remote-mode off'` |
+| Remote mode left on | The inhibitor is still active | Run `ssh -t thinkpad '~/.local/bin/remote-mode off'`. |
 
 To end remote access and restore normal sleep with one command:
 
@@ -421,11 +419,11 @@ To end remote access and restore normal sleep with one command:
 ssh -t thinkpad 'systemctl --user stop thinkpad-vnc; ~/.local/bin/remote-mode off'
 ```
 
-If SSH forwarding fails, we can fall back temporarily to a direct connection over Tailscale. We replace `-localhost` with `-interface=100.x.y.z` in the service so that the server listens on the ThinkPad's Tailscale address, restart it, and connect to `vnc://100.x.y.z:5900`. Tailscale still encrypts the traffic and keeps it off the internet, but any tailnet device that the policy allows can now reach the VNC port, which only the eight-character VNC password protects. Restricting port 5900 to the Mac in the tailnet policy reduces this exposure, and we return to `-localhost` once forwarding works again. The VNC server should never listen on all interfaces or on the LAN address.
+If SSH forwarding fails, we can fall back temporarily to a direct connection over Tailscale: replace `-localhost` with `-interface=100.x.y.z` in the service so that the server listens on the ThinkPad's Tailscale address, restart it, and connect to `vnc://100.x.y.z:5900`. Tailscale still encrypts the traffic and keeps it off the internet, but any tailnet device the policy allows can now reach the VNC port, which only the eight-character VNC password protects. Restricting port 5900 to the Mac in the tailnet policy narrows that exposure, and we go back to `-localhost` once forwarding works again. The VNC server should never listen on all interfaces or on the LAN address.
 
 ## 11. OpenSSH on Arch (optional)
 
-Tailscale SSH does not need `sshd.service`. We install OpenSSH only if we need its client tools or a conventional SSH server for another purpose:
+Tailscale SSH doesn't need `sshd.service`, so we install OpenSSH only if we want its client tools or a conventional SSH server for some other purpose:
 
 ```bash
 sudo pacman -S --needed openssh
@@ -433,7 +431,7 @@ sudo ssh-keygen -A
 sudo sshd -t
 ```
 
-No output from `sshd -t` means that the configuration is valid. Nothing in this post requires `sshd.service` to run. If we use it later, we would configure public-key authentication and restrict it to the Tailscale interface.
+If `sshd -t` prints nothing, the configuration is valid. Nothing in this post needs `sshd.service` running, and if we use it later we'd set up public-key authentication and restrict it to the Tailscale interface.
 
 ## 12. Final checks
 
@@ -449,15 +447,15 @@ Before relying on this setup for real work, we confirm that:
 - Disconnecting locks the ThinkPad, and the ThinkPad locks itself when idle in remote mode (Section 8.5).
 - We know the single command in Section 10 that ends remote access and restores sleep.
 
-The two most likely sources of problems are compositor support for `w0vncserver` and the behaviour of the desktop after we lock the screen and close the lid. We test both before leaving the ThinkPad unattended.
+Compositor support for `w0vncserver` and the desktop's behaviour after we lock the screen and close the lid are the likeliest sources of trouble, and we test both before leaving the ThinkPad unattended.
 
 ## 13. High-performance mode with Sunshine and Moonlight (optional)
 
-VNC performs well for terminals, editors and most desktop work. It degrades when large parts of the screen change in every frame, as happens when we rotate a 3D plot in a Jupyter or Mathematica notebook, play an animation, or watch a video.
+VNC works well for terminals, editors and most desktop work, but it degrades when large parts of the screen change in every frame, as when we rotate a 3D plot in a Jupyter or Mathematica notebook, play an animation or watch a video.
 
-The reason lies in how VNC transmits the screen. It sends changed regions as compressed blocks of pixels, and the CPU performs the compression. For text, only a few small regions change at a time, so each update is small and the result stays sharp. When a 3D surface rotates, nearly the entire window changes in every frame; the compression cannot keep up, and the frame rate drops. In our setup, VNC also travels through an SSH tunnel over TCP, where a single lost packet delays all data queued behind it, so an unreliable connection causes the image to freeze and then jump. The compression also consumes CPU time that the notebook would otherwise use.
+VNC sends changed regions as compressed blocks of pixels, and the CPU does the compressing. For text only a few small regions change at a time, so each update is small and the result stays sharp. When a 3D surface rotates, nearly the whole window changes in every frame, the compression can't keep up and the frame rate drops. In our setup VNC also travels through an SSH tunnel over TCP, where one lost packet delays everything queued behind it, so on an unreliable connection the image freezes and then jumps. The compression also eats CPU time that the notebook could use.
 
-Sunshine and Moonlight work differently. Sunshine captures the entire desktop and encodes it as a video stream on the GPU's hardware encoder, whose purpose is to compress continuously changing images. Moonlight receives the stream at a steady 60 frames per second over UDP, uses error correction to compensate for lost packets instead of waiting for retransmission, and plays audio as well. Video compression softens fine text slightly, so we use this high-performance mode for visual work and VNC for everything else. Moonlight runs on the Mac, the iPad and the phone. Unlike VNC, Sunshine does not use the SSH tunnel; it listens on the ThinkPad's Tailscale address.
+Sunshine and Moonlight work differently. Sunshine captures the whole desktop and encodes it as a video stream on the GPU's hardware encoder, which exists to compress continuously changing images. Moonlight receives that stream at a steady 60 frames per second over UDP, repairs lost packets with error correction instead of waiting for retransmission, and plays audio too. Video compression softens fine text a little, so we use this mode for visual work and VNC for everything else. Moonlight runs on the Mac, the iPad and the phone, and unlike VNC, Sunshine skips the SSH tunnel and listens on the ThinkPad's Tailscale address.
 
 |  | VNC (Sections 6–7) | Sunshine + Moonlight |
 | --- | --- | --- |
@@ -470,7 +468,7 @@ Sunshine and Moonlight work differently. Sunshine captures the entire desktop an
 
 ### 13.1 Installing Sunshine
 
-Sunshine is not in the official Arch repositories. LizardByte, the team that develops Sunshine, maintains its own pacman repository and describes it as the only official source of its Arch packages. LizardByte has also withdrawn support for the AUR package and does not accept bug reports from AUR installations, so we use their repository. We add it to `/etc/pacman.conf`:
+Sunshine isn't in the official Arch repositories. LizardByte, the team that develops it, maintains its own pacman repository and describes it as the only official source of its Arch packages. LizardByte has also withdrawn support for the AUR package and doesn't accept bug reports from AUR installations, so we use their repository and add it to `/etc/pacman.conf`:
 
 ```ini
 [lizardbyte]
@@ -484,7 +482,7 @@ and install Sunshine from it:
 sudo pacman -Syu lizardbyte/sunshine
 ```
 
-`SigLevel = Optional` means that pacman does not require signatures for this repository, so we rely on LizardByte's GitHub releases being authentic. Subsequent Sunshine updates arrive with the regular `pacman -Syu`.
+`SigLevel = Optional` means pacman doesn't require signatures for this repository, so we're trusting LizardByte's GitHub releases to be authentic. Later Sunshine updates arrive with the regular `pacman -Syu`.
 
 Next, we check that the GPU can encode video:
 
@@ -493,26 +491,26 @@ sudo pacman -S --needed libva-utils
 vainfo --display drm --device /dev/dri/renderD128 | grep -i encslice
 ```
 
-The output should contain at least one `VAProfileH264` line with `VAEntrypointEncSlice`. If `vainfo` stops with `vaInitialize failed`, the VA-API driver for the GPU is missing. For Intel graphics from Broadwell (2015) onwards, the driver is `intel-media-driver`:
+You should see at least one `VAProfileH264` line with `VAEntrypointEncSlice`. If `vainfo` stops with `vaInitialize failed`, the VA-API driver for the GPU is missing, and for Intel graphics from Broadwell (2015) onwards that driver is `intel-media-driver`:
 
 ```bash
 sudo pacman -S --needed intel-media-driver
 ```
 
-On a laptop with two GPUs, the following commands show which render node belongs to which GPU. The Intel GPU usually has `renderD128`:
+On a laptop with two GPUs, these commands show which render node belongs to which GPU. The Intel GPU usually has `renderD128`:
 
 ```bash
 lspci -k | grep -EA3 'VGA|3D|Display'
 ls -l /dev/dri/by-path/
 ```
 
-Because we capture the screen through KDE's portal, Sunshine does not need the `cap_sys_admin` capability that KMS capture requires. That capability grants close to root-level privileges, so we check whether the package has set it:
+Because we capture the screen through KDE's portal, Sunshine doesn't need the `cap_sys_admin` capability that KMS capture requires. That capability grants close to root-level privileges, so we check whether the package set it:
 
 ```bash
 getcap "$(readlink -f "$(command -v sunshine)")"
 ```
 
-If the output includes `cap_sys_admin`, we remove it, and we repeat the check after each Sunshine update:
+If the output includes `cap_sys_admin`, we remove it, and we recheck after each Sunshine update:
 
 ```bash
 sudo setcap -r "$(readlink -f "$(command -v sunshine)")"
@@ -520,7 +518,7 @@ sudo setcap -r "$(readlink -f "$(command -v sunshine)")"
 
 ### 13.2 Capture and network settings
 
-`tailscale ip -4` prints the ThinkPad's Tailscale address. We substitute that address for `100.x.y.z` and add the following lines to `~/.config/sunshine/sunshine.conf`, creating the file if necessary:
+`tailscale ip -4` prints the ThinkPad's Tailscale address. We put that address in place of `100.x.y.z` and add the following lines to `~/.config/sunshine/sunshine.conf`, creating the file if necessary:
 
 ```ini
 capture = portal
@@ -530,38 +528,38 @@ csrf_allowed_origins = https://100.x.y.z:47990
 upnp = disabled
 ```
 
-If the placeholder remains in the file, the following command replaces it with the actual address on both lines and displays the result:
+If the placeholder is still in the file, this command replaces it with the actual address on both lines and prints the result:
 
 ```bash
 sed -i "s/100\.x\.y\.z/$(tailscale ip -4)/g" ~/.config/sunshine/sunshine.conf
 grep -E '^(bind_address|csrf_allowed_origins)' ~/.config/sunshine/sunshine.conf
 ```
 
-`capture = portal` captures the screen through KDE's screen-sharing portal; if the stream stays black, `capture = kwin`, which uses KDE's own screencast interface, is an alternative. `bind_address` restricts Sunshine to the Tailscale address, so in normal use no device on the laptop's local network can reach it. `origin_web_ui_allowed = lan` allows the Mac to open the web interface over Tailscale, because Sunshine treats Tailscale's 100.64.0.0/10 range as LAN. `upnp = disabled` is the default and prevents Sunshine from opening ports on the router.
+`capture = portal` captures the screen through KDE's screen-sharing portal; if the stream stays black, `capture = kwin`, which uses KDE's own screencast interface, is an alternative. `bind_address` restricts Sunshine to the Tailscale address, so in normal use no device on the laptop's local network can reach it. Because Sunshine treats Tailscale's 100.64.0.0/10 range as LAN, `origin_web_ui_allowed = lan` lets the Mac open the web interface over Tailscale. `upnp = disabled` is the default and stops Sunshine from opening ports on the router.
 
-The web interface accepts changes only from addresses that it recognises, by default `localhost` and its loopback variants. `csrf_allowed_origins` adds the address that we use from the Mac in Section 13.4. Without it, the page reports a CSRF protection error as soon as we try to save a setting. If we open the web interface by its MagicDNS name, that address goes on the same line, separated by a comma.
+The web interface accepts changes only from addresses it recognises, which by default means `localhost` and its loopback variants. `csrf_allowed_origins` adds the address we use from the Mac in Section 13.4, and without it the page reports a CSRF protection error as soon as we try to save a setting. If we open the web interface by its MagicDNS name, that address goes on the same line, separated by a comma.
 
-Laptops with an additional NVIDIA GPU need two further lines. Our ThinkPad combines Intel UHD Graphics with a Quadro RTX 3000. KDE renders the desktop on the Intel GPU, and according to Sunshine's documentation NVENC expects to encode on the GPU that performs the capture, so we keep encoding on the Intel GPU with VA-API. Without these lines, Sunshine uses the first encoder it finds, which may be NVENC:
+Laptops with an additional NVIDIA GPU need two more lines. Ours combines Intel UHD Graphics with a Quadro RTX 3000. KDE renders the desktop on the Intel GPU, and according to Sunshine's documentation NVENC expects to encode on the GPU that does the capture, so we keep encoding on the Intel GPU with VA-API. Without these lines Sunshine uses the first encoder it finds, which may be NVENC:
 
 ```ini
 adapter_name = /dev/dri/renderD128
 encoder = vaapi
 ```
 
-These lines determine only which GPU encodes the stream. The NVIDIA GPU remains available for CUDA jobs and for games that we start with `prime-run` (from the `nvidia-prime` package), and those games still appear in the stream. When no process uses the NVIDIA GPU, it stays idle, which keeps a laptop with a closed lid cooler.
+These lines only choose which GPU encodes the stream. The NVIDIA GPU stays available for CUDA jobs and for games started with `prime-run` (from the `nvidia-prime` package), and those games still appear in the stream. While no process uses the NVIDIA GPU it idles, which keeps a laptop with a closed lid cooler.
 
-Two further lines address problems we encountered with this Intel GPU (UHD Graphics, Comet Lake). Its HEVC encoder produced a corrupted, blocky image and crashed Sunshine at the start of a stream, so we disable HEVC in Sunshine, and clients fall back to H.264. For H.264, the driver does not support the bitrate control that Sunshine prefers, so Sunshine uses a constant quantisation parameter (QP) instead. The default of 28 produces a soft image; 20 is considerably sharper at the cost of more bandwidth:
+Two more lines deal with problems we ran into on this Intel GPU (UHD Graphics, Comet Lake). Its HEVC encoder produced a corrupted, blocky image and crashed Sunshine at the start of a stream, so we disable HEVC in Sunshine and clients fall back to H.264. For H.264 the driver doesn't support the bitrate control that Sunshine prefers, so Sunshine uses a constant quantisation parameter (QP) instead. The default of 28 gives a soft image, while 20 is considerably sharper at the cost of more bandwidth:
 
 ```ini
 hevc_mode = 1
 qp = 20
 ```
 
-With a constant QP, Moonlight's bitrate setting has little effect on H.264 streams. Lower QP values give a sharper image and use more bandwidth.
+With a constant QP, Moonlight's bitrate setting has little effect on H.264 streams.
 
-By default, Sunshine does not encrypt traffic that it classifies as LAN. Tailscale already encrypts all traffic end to end, so this is acceptable here; `lan_encryption_mode = 1` adds Sunshine's own encryption for those who want both layers.
+By default Sunshine doesn't encrypt traffic that it classifies as LAN. Tailscale already encrypts everything end to end, so that's fine here, and `lan_encryption_mode = 1` adds Sunshine's own encryption for anyone who wants both layers.
 
-Binding to the Tailscale address does not fully isolate Sunshine from the local network. Linux accepts packets addressed to the Tailscale IP on any interface, so a device on the same Wi-Fi network could still reach Sunshine by deliberately routing traffic to that address. A small nftables table drops traffic to Sunshine's ports (47984–48010) unless it arrives over Tailscale:
+Binding to the Tailscale address doesn't fully isolate Sunshine from the local network. Linux accepts packets addressed to the Tailscale IP on any interface, so a device on the same Wi-Fi network could still reach Sunshine by routing traffic to that address on purpose. A small nftables table drops traffic to Sunshine's ports (47984–48010) unless it arrives over Tailscale:
 
 ```bash
 sudo pacman -S --needed nftables
@@ -598,7 +596,7 @@ sudo systemctl enable --now sunshine-guard.service
 sudo nft list table inet sunshine_guard
 ```
 
-The last command should print the two drop rules. The table accepts all other traffic, so Tailscale, SSH and VNC are unaffected. We do not enable `nftables.service` for this purpose, because it loads Arch's separate default firewall from `/etc/nftables.conf`, which would need its own rules for Tailscale.
+The last command should print the two drop rules. Everything else is accepted, so Tailscale, SSH and VNC are unaffected. We don't enable `nftables.service` for this, because it loads Arch's separate default firewall from `/etc/nftables.conf`, which would need its own rules for Tailscale.
 
 ### 13.3 The Sunshine service
 
@@ -608,7 +606,7 @@ To find the user service that the package installs:
 systemctl --user list-unit-files | grep -i sunshine
 ```
 
-Current packages name it `app-dev.lizardbyte.app.Sunshine.service`, and older packages `sunshine.service`. The commands below use the current name. We prevent the service from starting at login and start it manually:
+Current packages name it `app-dev.lizardbyte.app.Sunshine.service` and older ones `sunshine.service`; the commands below use the current name. We stop the service from starting at login and start it by hand:
 
 ```bash
 systemctl --user disable app-dev.lizardbyte.app.Sunshine
@@ -621,15 +619,15 @@ Sunshine tests the available encoders before it opens its ports, so we wait abou
 ss -ltunp | grep -i sunshine
 ```
 
-No line should show `0.0.0.0`, `*` or `[::]`; Sunshine's ports should appear only on the ThinkPad's `100.` address. Repeating the check during a stream also covers ports that open only then. A wildcard address means that the installed version ignores `bind_address`; in that case we stop the service with `systemctl --user stop app-dev.lizardbyte.app.Sunshine` and update Sunshine before using it.
+No line should show `0.0.0.0`, `*` or `[::]`, and Sunshine's ports should appear only on the ThinkPad's `100.` address. Repeat the check during a stream, since some ports open only then. A wildcard address means the installed version ignores `bind_address`, and then we stop the service with `systemctl --user stop app-dev.lizardbyte.app.Sunshine` and update Sunshine before using it.
 
-If Sunshine fails to start, the journal records the reason:
+If Sunshine fails to start, the journal says why:
 
 ```bash
 journalctl --user -u app-dev.lizardbyte.app.Sunshine -n 80 --no-pager
 ```
 
-Sunshine crashed several times during our tests, mostly because of the HEVC problem from Section 13.2, and once during shutdown. After several crashes in quick succession, systemd stops restarting the service and refuses new starts until we reset it. A drop-in file makes systemd restart Sunshine a few seconds after any crash, without a limit:
+Sunshine crashed several times during our tests, mostly because of the HEVC problem from Section 13.2 and once during shutdown. After several crashes in quick succession, systemd stops restarting the service and refuses new starts until we reset it, so we add a drop-in file that makes systemd restart Sunshine a few seconds after any crash, without a limit:
 
 ```bash
 mkdir -p ~/.config/systemd/user/app-dev.lizardbyte.app.Sunshine.service.d
@@ -644,14 +642,14 @@ An explicit `systemctl --user stop`, such as the one in `thinkpad-stream-stop`, 
 1. Moonlight for the Mac is available from moonlight-stream.org or through `brew install --cask moonlight`; the iPad and phone versions are in the respective app stores.
 2. On the Mac, we open `https://100.x.y.z:47990` in a browser, accept the warning about the self-signed certificate, and create the web interface login. Sunshine requires the username in email form, such as name@example.com, and rejects a plain name such as admin. We choose a strong password, since every device on the tailnet can reach this page.
 3. In Moonlight, the **+** button at the top right ("Add PC manually") asks for an address. We enter the ThinkPad's Tailscale IP, and the ThinkPad appears as a tile with a padlock.
-4. A single click on the tile starts pairing, and Moonlight displays a four-digit PIN. In the Sunshine web interface, we open **PIN** in the top menu. The request may appear there as a device named "roth" at a different address, namely the Mac's Tailscale IP. This is expected, because Moonlight sends roth as a fixed device name with every pairing request. We enter the PIN together with a recognisable name, such as MacBook, and submit it. The padlock disappears once pairing succeeds. A second click on the tile while the PIN is displayed starts another attempt, which Moonlight rejects with Error 409; restarting Sunshine clears the pending attempt.
-5. A click on the ThinkPad tile now lists its applications, and **Desktop** streams the entire desktop. The first time Sunshine captures the screen, KDE displays a permission prompt on the ThinkPad that someone must approve in person. If KDE offers to remember the decision, we accept. Sunshine stores the approval and reuses it on later starts.
+4. A single click on the tile starts pairing, and Moonlight shows a four-digit PIN. In the Sunshine web interface we open **PIN** in the top menu, where the request may show up as a device named "roth" at a different address, the Mac's Tailscale IP. That's expected, because Moonlight sends roth as a fixed device name with every pairing request. We enter the PIN with a recognisable name, such as MacBook, and submit it, and the padlock disappears once pairing succeeds. A second click on the tile while the PIN is displayed starts another attempt, which Moonlight rejects with Error 409; restarting Sunshine clears the pending attempt.
+5. A click on the ThinkPad tile now lists its applications, and **Desktop** streams the whole desktop. The first time Sunshine captures the screen, KDE shows a permission prompt on the ThinkPad that someone has to approve in person. If KDE offers to remember the decision, we accept, and Sunshine reuses the approval on later starts.
 
 The iPad and phone apps work in the same way; we pair each device once with its own PIN.
 
-Keyboard and mouse input reach the ThinkPad through `/dev/uinput`. The Sunshine package configures access to this device, so input normally works without further steps. If the stream shows the desktop but keyboard and mouse input have no effect, Section 13.6 describes the fix.
+Keyboard and mouse input reach the ThinkPad through `/dev/uinput`, and the Sunshine package sets up access to that device, so input normally works without further steps. If the stream shows the desktop but the keyboard and mouse do nothing, Section 13.6 has the fix.
 
-In Moonlight's settings (the gear icon at the top right), we select 1080p to match the ThinkPad's display, 60 FPS, and **H.264** as the video codec. Higher resolutions would only upscale the 1920×1080 panel, and we have disabled HEVC on the Sunshine side (Section 13.2).
+In Moonlight's settings (the gear icon at the top right) we select 1080p to match the ThinkPad's display, 60 FPS and **H.264** as the video codec. Higher resolutions would only upscale the 1920×1080 panel, and HEVC is disabled on the Sunshine side anyway (Section 13.2).
 
 ### 13.5 Everyday use
 
@@ -670,7 +668,7 @@ thinkpad-stream-stop() {
 
 `thinkpad-stream` starts Sunshine and opens Moonlight, and `thinkpad-stream-stop` stops Sunshine and locks the ThinkPad. Remote mode and the lid work as in Section 9: we run `remote-mode on` before locking the screen and closing the lid. The privacy considerations in Section 8.5 apply equally, because Sunshine also shares the actual desktop.
 
-While a stream has keyboard focus, Moonlight responds to the following shortcuts. On the Mac, all of them begin with `Control-Option-Shift`:
+While a stream has keyboard focus, Moonlight responds to these shortcuts, all of which begin with `Control-Option-Shift` on the Mac:
 
 | Shortcut | Function |
 | --- | --- |
@@ -684,7 +682,7 @@ While a stream has keyboard focus, Moonlight responds to the following shortcuts
 | `Control-Option-Shift-C` | Show or hide the local cursor |
 | `Control-Option-Shift-L` | Confine the pointer to the stream window |
 
-The standard macOS screenshot shortcuts do not work during a stream, because Moonlight forwards them to the ThinkPad. We first press `Control-Option-Shift-Z` to return keyboard control to the Mac, take the screenshot with `Command-Shift-3`, `Command-Shift-4` or `Command-Shift-5`, and press `Control-Option-Shift-Z` again to return to the stream. Alternatively, the following command in Terminal takes a full-screen screenshot after a five-second delay, which leaves time to switch to the stream window:
+The standard macOS screenshot shortcuts don't work during a stream, because Moonlight forwards them to the ThinkPad. We first press `Control-Option-Shift-Z` to hand keyboard control back to the Mac, take the screenshot with `Command-Shift-3`, `Command-Shift-4` or `Command-Shift-5`, and press `Control-Option-Shift-Z` again to return to the stream. Alternatively, this command in Terminal takes a full-screen screenshot after a five-second delay, which leaves time to switch to the stream window:
 
 ```bash
 screencapture -T 5 ~/Desktop/stream.png
@@ -702,15 +700,15 @@ Before relying on the stream, we confirm that:
 
 | Symptom | Likely cause | Remedy |
 | --- | --- | --- |
-| Sunshine crashes right after starting, `ss` shows nothing, and the log says `Invalid bind address` | `bind_address` in `sunshine.conf` still contains the `100.x.y.z` placeholder or an outdated address | `sed -i "s/^bind_address = .*/bind_address = $(tailscale ip -4)/" ~/.config/sunshine/sunshine.conf` inserts the actual address. If systemd then refuses to start the service because it was "attempted too often", `systemctl --user reset-failed app-dev.lizardbyte.app.Sunshine` clears that state before the next start. |
-| The web interface shows "CSRF Protection Error" | `csrf_allowed_origins` is missing or does not match the address in the browser's address bar | Adding `csrf_allowed_origins = https://100.x.y.z:47990` with the actual address and restarting Sunshine with `systemctl --user restart app-dev.lizardbyte.app.Sunshine` |
-| Corrupted, blocky image, or Sunshine crashes at the start of a stream; the log shows `hevc_vaapi` warnings followed by `dumped core` | The HEVC encoder on older Intel GPUs | `hevc_mode = 1` in `sunshine.conf` and H.264 in Moonlight (Section 13.2) |
-| Soft H.264 image; the log says `Applying QP for compatible rate control method (QP value: 28)` | The driver lacks bitrate control for H.264, so Sunshine uses a constant QP | `qp = 20` in `sunshine.conf`; lower values give a sharper image and use more bandwidth |
-| `start of the service was attempted too often` | Sunshine crashed several times in succession and systemd stopped restarting it | `systemctl --user reset-failed app-dev.lizardbyte.app.Sunshine` before starting it again; the drop-in from Section 13.3 prevents this |
-| Moonlight cannot reach the PC, or the connection is refused | Sunshine stopped or crashed, or `bind_address` does not match the Tailscale IP | `ssh thinkpad 'systemctl --user status app-dev.lizardbyte.app.Sunshine'` shows the service state; `bind_address` should match `tailscale ip -4` |
-| Black stream | The portal prompt is unanswered, or the lid switched the panel off | Approving the prompt at the ThinkPad; the tests in Section 8.4 |
-| Desktop visible, but no keyboard or mouse input | Sunshine cannot open `/dev/uinput` | `getfacl /dev/uinput` should list our user with `rw-`; if it does not, the udev rule below the table fixes this |
-| Stuttering or lag | A weak connection, or Tailscale relaying traffic instead of connecting directly | A lower resolution in Moonlight or a higher `qp`; `ssh thinkpad tailscale status` shows `relay` instead of `direct` for the Mac when Tailscale relays the traffic |
+| Sunshine crashes right after starting, `ss` shows nothing, and the log says `Invalid bind address` | `bind_address` in `sunshine.conf` still contains the `100.x.y.z` placeholder or an outdated address | Run `sed -i "s/^bind_address = .*/bind_address = $(tailscale ip -4)/" ~/.config/sunshine/sunshine.conf` to insert the actual address. If systemd then refuses to start the service because it was "attempted too often", run `systemctl --user reset-failed app-dev.lizardbyte.app.Sunshine` before the next start. |
+| The web interface shows "CSRF Protection Error" | `csrf_allowed_origins` is missing or does not match the address in the browser's address bar | Add `csrf_allowed_origins = https://100.x.y.z:47990` with the actual address, then restart Sunshine with `systemctl --user restart app-dev.lizardbyte.app.Sunshine`. |
+| Corrupted, blocky image, or Sunshine crashes at the start of a stream; the log shows `hevc_vaapi` warnings followed by `dumped core` | The HEVC encoder on older Intel GPUs | Set `hevc_mode = 1` in `sunshine.conf` and choose H.264 in Moonlight (Section 13.2). |
+| Soft H.264 image; the log says `Applying QP for compatible rate control method (QP value: 28)` | The driver lacks bitrate control for H.264, so Sunshine uses a constant QP | Set `qp = 20` in `sunshine.conf`; lower values give a sharper image and use more bandwidth. |
+| `start of the service was attempted too often` | Sunshine crashed several times in succession and systemd stopped restarting it | Run `systemctl --user reset-failed app-dev.lizardbyte.app.Sunshine` before starting it again; the drop-in from Section 13.3 prevents this. |
+| Moonlight cannot reach the PC, or the connection is refused | Sunshine stopped or crashed, or `bind_address` does not match the Tailscale IP | Run `ssh thinkpad 'systemctl --user status app-dev.lizardbyte.app.Sunshine'` to see the service state, and check that `bind_address` matches `tailscale ip -4`. |
+| Black stream | The portal prompt is unanswered, or the lid switched the panel off | Approve the prompt at the ThinkPad, and run the tests in Section 8.4. |
+| Desktop visible, but no keyboard or mouse input | Sunshine cannot open `/dev/uinput` | Run `getfacl /dev/uinput`, which should list our user with `rw-`; if it doesn't, the udev rule below the table fixes it. |
+| Stuttering or lag | A weak connection, or Tailscale relaying traffic instead of connecting directly | Lower the resolution in Moonlight or raise `qp`; `ssh thinkpad tailscale status` shows `relay` instead of `direct` for the Mac when Tailscale relays the traffic |
 
 The udev rule from Sunshine's documentation grants the logged-in user access to `/dev/uinput`:
 
@@ -721,19 +719,19 @@ sudo udevadm trigger
 sudo modprobe uinput
 ```
 
-After we log out and back in, `getfacl /dev/uinput` should list our user, and a restart of Sunshine applies the change.
+After we log out and back in, `getfacl /dev/uinput` should list our user, and restarting Sunshine applies the change.
 
-Several log messages look alarming but are harmless in this setup. We expect `Failed to gain CAP_SYS_ADMIN`, because we removed that capability deliberately. `av1_vaapi … No usable encoding profile` means only that the GPU cannot encode AV1. `Failed to create client: Daemon not running` means that the Avahi daemon is not running, so Sunshine cannot announce itself on the local network; we do not need this, because Moonlight connects by IP address.
+Several log messages look alarming but are harmless here. `Failed to gain CAP_SYS_ADMIN` is expected, since we removed that capability on purpose. `av1_vaapi … No usable encoding profile` only means the GPU can't encode AV1. `Failed to create client: Daemon not running` means the Avahi daemon isn't running, so Sunshine can't announce itself on the local network, which we don't need because Moonlight connects by IP address.
 
 ## 14. File transfer between the Mac and the ThinkPad
 
-Screen Sharing and Moonlight do not transfer files, so we use one of two other methods: Taildrop, Tailscale's built-in file transfer, or `scp` over Tailscale SSH.
+Screen Sharing and Moonlight don't transfer files, so we use either Taildrop, Tailscale's built-in file transfer, or `scp` over Tailscale SSH.
 
 ### 14.1 Taildrop
 
 Taildrop is still in alpha, so we first enable it for the tailnet by turning on **Send Files** in the General settings of the Tailscale admin console. On the Mac, we also enable Tailscale's share extension under System Settings → General → Login Items & Extensions → Sharing.
 
-To send a file from the Mac to the ThinkPad, we right-click it in Finder, choose **Share** → **Tailscale**, and select the ThinkPad. On Linux, received files do not appear automatically. They remain inside `tailscaled` until we retrieve them, and because `tailscaled` runs as root, retrieving them requires `sudo`:
+To send a file from the Mac to the ThinkPad, we right-click it in Finder, choose **Share** → **Tailscale**, and select the ThinkPad. On Linux, received files don't appear on their own. They stay inside `tailscaled` until we retrieve them, and because `tailscaled` runs as root, retrieving them takes `sudo`:
 
 ```bash
 mkdir -p ~/Downloads/taildrop
@@ -741,13 +739,13 @@ sudo tailscale file get ~/Downloads/taildrop
 sudo chown -R "$USER": ~/Downloads/taildrop
 ```
 
-The last line returns ownership of the files to our user, because `sudo` writes them as root. From the Mac, the same retrieval works over SSH:
+The last line gives the files back to our user, since `sudo` writes them as root. From the Mac, the same retrieval works over SSH:
 
 ```bash
 ssh -t thinkpad 'mkdir -p ~/Downloads/taildrop && sudo tailscale file get ~/Downloads/taildrop && sudo chown -R "$USER": ~/Downloads/taildrop'
 ```
 
-To send a file from the ThinkPad to the Mac, we use the Mac's machine name from `tailscale status`, followed by a colon. If the command reports an access error, prefixing it with `sudo` resolves this:
+To send a file from the ThinkPad to the Mac, we use the Mac's machine name from `tailscale status`, followed by a colon, and if the command reports an access error, prefixing it with `sudo` fixes it:
 
 ```bash
 tailscale file cp ./results.pdf mac-name:
@@ -764,25 +762,25 @@ scp ./data.csv thinkpad:~/Downloads/
 scp thinkpad:~/results/plot.png ~/Downloads/
 ```
 
-`scp -r` copies entire directories, which makes this the simpler method for results and datasets. For large transfers, `rsync` over the same alias works better, because it resumes an interrupted transfer and skips the files that have not changed. For its options, see the [[2026-07-06-transfer-files-ubuntu-arch|rsync guide]].
+`scp -r` copies entire directories, which makes it the simpler method for results and datasets. For large transfers `rsync` over the same alias works better, because it resumes an interrupted transfer and skips files that haven't changed; the [[2026-07-06-transfer-files-ubuntu-arch|rsync guide]] covers its options.
 
 ## 15. Sharing the clipboard
 
-Neither Tailscale SSH nor Moonlight, as far as we know, copies the clipboard from one machine to the other, so we use three small methods that suit different situations. Moonlight types the Mac's clipboard text on the ThinkPad. Two shell functions send the clipboard through SSH, in either direction. A terminal escape sequence copies text from a shell on the ThinkPad to the Mac's clipboard. Section 15.4 mentions the shared clipboard of Screen Sharing for the VNC session.
+As far as we know, neither Tailscale SSH nor Moonlight copies the clipboard from one machine to the other, so we use three small methods that suit different situations: Moonlight types the Mac's clipboard text on the ThinkPad, two shell functions send the clipboard through SSH in either direction, and a terminal escape sequence copies text from a shell on the ThinkPad to the Mac's clipboard. Section 15.4 adds the shared clipboard of Screen Sharing for the VNC session.
 
 ### 15.1 Moonlight: typing the clipboard
 
-We copy the text on the Mac, click into the stream so that it has keyboard focus, and press `Control-Option-Shift-V` (Section 13.5). Moonlight then types the text on the ThinkPad as keystrokes, into whichever window has focus. This works for text only, and a very long text or an unusual character might not arrive intact. Moonlight has no counterpart for the other direction that we know of, so for text from the ThinkPad to the Mac we use Section 15.2 or 15.3.
+We copy the text on the Mac, click into the stream so that it has keyboard focus, and press `Control-Option-Shift-V` (Section 13.5), and Moonlight types the text on the ThinkPad as keystrokes, into whichever window has focus. It works for text only, and a very long text or an unusual character might not arrive intact. As far as we know, Moonlight has no counterpart for the other direction, so for text from the ThinkPad to the Mac we use Section 15.2 or 15.3.
 
 ### 15.2 Through SSH
 
-The KDE session on the ThinkPad runs on Wayland, where the program `wl-copy` writes to the clipboard and `wl-paste` reads it. On the ThinkPad, we install both, which come in one package:
+The KDE session on the ThinkPad runs on Wayland, where `wl-copy` writes to the clipboard and `wl-paste` reads it. Both come in one package, which we install on the ThinkPad:
 
 ```bash
 sudo pacman -S --needed wl-clipboard
 ```
 
-A command that we start with `ssh` does not belong to the desktop session, so it does not know where the session's clipboard is. We therefore give it the two variables that name the session's socket. On the Mac, we add the following to `~/.zshrc`, next to the functions of Sections 7.2 and 13.5:
+A command started with `ssh` doesn't belong to the desktop session, so it doesn't know where the session's clipboard is, and we give it the two variables that name the session's socket. On the Mac, we add the following to `~/.zshrc`, next to the functions of Sections 7.2 and 13.5:
 
 ```bash
 _tp_wl='WAYLAND_DISPLAY=wayland-0 XDG_RUNTIME_DIR=/run/user/$(id -u)'
@@ -802,20 +800,20 @@ After `source ~/.zshrc`, `tp-copy` replaces the ThinkPad's clipboard with the Ma
 ls /run/user/$(id -u)
 ```
 
-The listing should contain `wayland-0`. The option `-n` of `wl-paste` leaves out the newline that it would otherwise append, and the redirection after `wl-copy` lets the SSH command return, since `wl-copy` keeps a background process that holds the clipboard. `wl-copy` also needs a compositor that implements a data-control protocol, which KDE Plasma should provide in its recent versions. If `wl-copy` reports a missing protocol, the compositor is the cause, and we use Section 15.3 instead.
+You should see `wayland-0` in the listing. The option `-n` of `wl-paste` leaves out the newline it would otherwise append, and the redirection after `wl-copy` lets the SSH command return, since `wl-copy` keeps a background process that holds the clipboard. `wl-copy` also needs a compositor that implements a data-control protocol, which recent versions of KDE Plasma should provide; if `wl-copy` reports a missing protocol, the compositor is the cause and we use Section 15.3 instead.
 
 In place of `pbpaste`, any command that prints text can feed the pipe, for example `ls | ssh thinkpad "$_tp_wl wl-copy"`. KDE's clipboard manager, Klipper, keeps a history of what we copy, so a password sent this way stays in that history until we clear it.
 
 ### 15.3 Copying from a terminal on the ThinkPad
 
-Many terminals accept the escape sequence OSC 52, which sets the clipboard of the machine that the terminal runs on. When we send it from a shell on the ThinkPad, through SSH, the clipboard of the Mac changes. iTerm2, kitty, WezTerm and Ghostty support it, and Terminal.app does not. iTerm2 also asks us to allow it, under Settings → General → Selection, with **Applications in terminal may access clipboard**. To test it, run in an SSH session on the ThinkPad, outside `tmux`:
+Many terminals accept the escape sequence OSC 52, which sets the clipboard of the machine the terminal runs on, so when we send it from a shell on the ThinkPad through SSH, the Mac's clipboard changes. iTerm2, kitty, WezTerm and Ghostty support it, and Terminal.app doesn't; iTerm2 also needs permission under Settings → General → Selection, with **Applications in terminal may access clipboard**. To test it, run this in an SSH session on the ThinkPad, outside `tmux`:
 
 ```bash
 printf '\033]52;c;%s\a' \
     "$(printf 'hello from the ThinkPad' | base64 -w0)"
 ```
 
-A paste on the Mac should now give `hello from the ThinkPad`. Inside `tmux`, the line
+Pasting on the Mac should now give `hello from the ThinkPad`. Inside `tmux`, the line
 
 ```text
 set -g set-clipboard on
@@ -829,7 +827,7 @@ The Screen Sharing app of the Mac has a shared-clipboard setting in its Edit men
 
 ### 15.5 Checks
 
-To confirm that each method works, we try the following.
+To confirm that each method works, we try these:
 
 - Copy a short text on the Mac, run `tp-copy`, and paste it into a text field on the ThinkPad.
 - Copy a short text on the ThinkPad, run `tp-paste`, and paste it on the Mac.
