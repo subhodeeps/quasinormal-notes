@@ -10,9 +10,9 @@
 # high as a square and as wide as two (HomeTiles.sizes); the grid closes without a gap in every
 # number of columns, and the last page may end with an empty cell. A tile shows the title, the
 # description and a quiet line "date · category" (the last name of the main path of the note,
-# `category_paths`, _plugins/category-tree.rb); a rectangle shows no description. Every card takes
-# the colour of its subject from --graph-node-<category> (_sass/amore/) as a thin stripe, and an
-# unpublished note gets a dashed outline in that colour.
+# `category_paths`, _plugins/category-tree.rb); in a rectangle the title and the description take one
+# line each. Every card takes the colour of its subject from --graph-node-<category> (_sass/amore/)
+# as a thin stripe, and an unpublished note gets a dashed outline in that colour.
 #
 # The button Pinned of assets/js/list-sort.js keeps Chirpy's order, with the pinned tiles first; the
 # other buttons sort all posts and the category cards together, a card by the last change of the

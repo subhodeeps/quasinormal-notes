@@ -77,20 +77,26 @@
     }
   }
 
-  // A rectangle is half as high as a square: the title on one line, and the quiet line below it
+  // A rectangle is half as high as a square, so it is compact: the title on one line, the
+  // description on one line, and the quiet line below them
   .tile-wide .card-body {
-    padding-top: 0.55rem;
-    padding-bottom: 0.5rem;
+    padding-top: 0.5rem;
+    padding-bottom: 0.45rem;
 
     .card-title {
       margin-top: 0 !important;
-      margin-bottom: 0.25rem !important;
+      margin-bottom: 0.1rem !important;
+      font-size: 0.95rem;
       -webkit-line-clamp: 1;
     }
 
-    // Chirpy sets display: inherit !important on the description, which only !important beats
     .card-text {
-      display: none !important;
+      margin-bottom: 0.2rem !important;
+
+      p {
+        font-size: 0.8rem;
+        -webkit-line-clamp: 1;
+      }
     }
   }
 
@@ -116,12 +122,19 @@
       grid-row: auto;
     }
 
-    .tile-wide .card-body .card-text {
-      display: inherit !important;
+    .card .card-body .card-text p,
+    .tile-wide .card-body .card-text p {
+      -webkit-line-clamp: 2;
     }
 
-    .card .card-body .card-text p {
+    .tile-wide .card-body {
+      padding-top: 0.8rem;
+      padding-bottom: 0.7rem;
+    }
+
+    .tile-wide .card-body .card-title {
       -webkit-line-clamp: 2;
+      font-size: 0.98rem;
     }
 
     .tile-category .post-meta .me-auto {
