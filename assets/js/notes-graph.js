@@ -19,8 +19,9 @@
  * The right panel is a quiet map of where a note sits, beside the text it accompanies.
  *
  * - The layout is flat, and the springs of a node with many connections are longer and weaker
- *   (SPREAD_FLAT and LOOSEN_FLAT), so that the interlinked notes of a long series do not gather
- *   into a clump of overlapping discs. Each node drifts a few pixels around its place, slowly and out of step
+ *   (SPREAD_FLAT and LOOSEN_FLAT) and the discs of well-linked notes are a little smaller
+ *   (GROWTH_FLAT), so that the interlinked notes of a long series do not gather into a clump of
+ *   touching discs. Each node drifts a few pixels around its place, slowly and out of step
  *   with the others, so that the graph is not frozen (SWAY). The drift stops while the pointer
  *   rests on a node, while the graph is out of view or the page hidden, and for a reader whose
  *   system asks for less motion (data-drift in _includes/notes-graph.html).
@@ -114,8 +115,10 @@
   const TAG_LENGTH_3D = 80; // on the Graph tab, where weak, long tag springs give a rounder, even spread
   const MEMBER_LENGTH = 45; // from a note to a tag node, on the Graph tab
   const SPREAD = 0.4; // on the Graph tab, how much longer the springs of a node with many connections are, for each e-fold of connections
-  const SPREAD_FLAT = 0.4; // the same in the right panel
-  const LOOSEN_FLAT = 0.3; // and how much weaker those springs are there, for each e-fold of connections
+  const SPREAD_FLAT = 0.8; // the same in the right panel
+  const LOOSEN_FLAT = 0.6; // and how much weaker those springs are there, for each e-fold of connections
+  const GROWTH = 1.2; // px that a note's disc grows with the square root of its links, on the Graph tab
+  const GROWTH_FLAT = 0.9; // and in the right panel, where the discs of a long series would touch
   const TAG_GLOW = 14; // px: the blur of the warm glow around a tag node
   const ITERATIONS = 400;
   const HIT = 9; // px: how close the pointer must be to a node
@@ -561,7 +564,7 @@
         ? 1.8 + Math.sqrt(n.count) * 0.55
         : n.id === current
           ? 5.5
-          : 3.2 + Math.sqrt(degree.get(n.id)) * 1.2) * (big ? 1.6 * proj.get(n).f * Math.sqrt(turn.zoom) : 1);
+          : 3.2 + Math.sqrt(degree.get(n.id)) * (big ? GROWTH : GROWTH_FLAT)) * (big ? 1.6 * proj.get(n).f * Math.sqrt(turn.zoom) : 1);
     const short = (title, max) => (title.length > max ? `${title.slice(0, max - 2)}…` : title);
 
     function readColours() {
