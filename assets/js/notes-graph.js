@@ -18,7 +18,9 @@
  *
  * The right panel is a quiet map of where a note sits, beside the text it accompanies.
  *
- * - The layout is flat. Each node drifts a few pixels around its place, slowly and out of step
+ * - The layout is flat, and the springs of a node with many connections are longer and weaker
+ *   (SPREAD_FLAT and LOOSEN_FLAT), so that the interlinked notes of a long series do not gather
+ *   into a clump of overlapping discs. Each node drifts a few pixels around its place, slowly and out of step
  *   with the others, so that the graph is not frozen (SWAY). The drift stops while the pointer
  *   rests on a node, while the graph is out of view or the page hidden, and for a reader whose
  *   system asks for less motion (data-drift in _includes/notes-graph.html).
@@ -112,6 +114,8 @@
   const TAG_LENGTH_3D = 80; // on the Graph tab, where weak, long tag springs give a rounder, even spread
   const MEMBER_LENGTH = 45; // from a note to a tag node, on the Graph tab
   const SPREAD = 0.4; // on the Graph tab, how much longer the springs of a node with many connections are, for each e-fold of connections
+  const SPREAD_FLAT = 0.4; // the same in the right panel
+  const LOOSEN_FLAT = 0.3; // and how much weaker those springs are there, for each e-fold of connections
   const TAG_GLOW = 14; // px: the blur of the warm glow around a tag node
   const ITERATIONS = 400;
   const HIT = 9; // px: how close the pointer must be to a node
@@ -361,9 +365,9 @@
       const member = e.kind === 'member';
       // On the Graph tab, a node with many connections holds them further away, so that a hub, such
       // as the overview of a series or a broad tag, does not gather its notes into a clump
-      const crowd = depth && (link || member) ? Math.max(a.crowd, b.crowd, 1) : 1;
-      const rest = (link ? LINK_LENGTH : member ? MEMBER_LENGTH : depth ? TAG_LENGTH_3D : TAG_LENGTH) * (1 + SPREAD * Math.log(crowd));
-      const k = (link ? 0.08 : member ? 0.02 : (depth ? 0.004 : 0.015) * (e.weight || 1)) * alpha;
+      const crowd = link || member ? Math.max(a.crowd, b.crowd, 1) : 1;
+      const rest = (link ? LINK_LENGTH : member ? MEMBER_LENGTH : depth ? TAG_LENGTH_3D : TAG_LENGTH) * (1 + (depth ? SPREAD : SPREAD_FLAT) * Math.log(crowd));
+      const k = ((link ? 0.08 : member ? 0.02 : (depth ? 0.004 : 0.015) * (e.weight || 1)) * alpha) / (1 + (depth ? 0 : LOOSEN_FLAT) * Math.log(crowd));
       const dx = b.x - a.x;
       const dy = b.y - a.y;
       const dz = b.z - a.z;
