@@ -254,6 +254,13 @@ details[open] > summary > .category-chevron {
     }
   }
 
+  // Folder rows a little closer together
+  #page-category .category-explorer .category-row,
+  .categories .list-group-item.category-folder {
+    padding-top: 0.35rem;
+    padding-bottom: 0.35rem;
+  }
+
   // A note of a category page: the title wraps whole on its own line, with the date under it
   // (Chirpy cuts the title with an ellipsis and keeps the date on the same line)
   #page-category ul.content > li,
@@ -272,6 +279,19 @@ details[open] > summary > .category-chevron {
 
     > .dash {
       display: none;
+    }
+
+    // Compact: less space around a row, and no dot, which would stand above a wrapped title
+    padding-top: 0.4rem;
+    padding-bottom: 0.4rem;
+    line-height: 1.35;
+
+    &::before {
+      display: none;
+    }
+
+    > a {
+      margin-bottom: 0.05rem;
     }
 
     .date-kind,
