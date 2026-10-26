@@ -15,8 +15,8 @@ math: true
 > 
 > — S. L. Detweiler, 1978 {: .text-right }
 
-![Ringdown waveform of a black hole compared with that of a horizonless compact object](/assets/images/reviews-on-quasinormal-modes/ringdown-echoes-light.png){: .light width="1800" height="1200" }
-![Ringdown waveform of a black hole compared with that of a horizonless compact object](/assets/images/reviews-on-quasinormal-modes/ringdown-echoes-dark.png){: .dark width="1800" height="1200" }
+![Ringdown waveform of a black hole compared with that of a horizonless compact object](/assets/images/reviews-on-quasinormal-modes/ringdown-echoes-light.png){: .light width="620" height="413" }
+![Ringdown waveform of a black hole compared with that of a horizonless compact object](/assets/images/reviews-on-quasinormal-modes/ringdown-echoes-dark.png){: .dark width="620" height="413" }
 
 <span class="aps-label">Fig. 1.</span> Ringdown waveform of a black hole (dashed) compared with that of a horizonless compact object (solid), from our own simulation after Fig. 9 of [V. Cardoso and P. Pani](#Cardoso:2019rvt), [*Living Rev. Rel.* **22** (2019) 4](https://doi.org/10.1007/s41114-019-0020-4).
 {: .aps-caption .aps-figure}
