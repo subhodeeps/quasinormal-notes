@@ -16,6 +16,9 @@
 # stop (JHEP.web_links), and `note` as a sentence after the reference; the check against BibTeX
 # leaves them out.
 #
+# The tag {% jhep_list Key1 Key2 %} prints chosen references in the order given (a box of recommended
+# reading).
+#
 # Also collapses the citations of a page, [1, 2, 3] to [1-3] (hook :post_render at the end).
 # Check: `bundle exec ruby tools/bib/check.rb` compares the output with BibTeX (needs TeX).
 # Source of the entries: _bibliography/references.bib.
@@ -837,6 +840,41 @@ if defined?(Liquid)
   end
 
   Liquid::Template.register_filter(Jekyll::JHEPFilter)
+
+  module Jekyll
+    # Liquid tag {% jhep_list Key1 Key2 ... %}: the references of the given keys, in the order in which
+    # they are written, as a list (ol.bibliography) without numbers and ids. A list of {% bibliography %}
+    # follows the order of the .bib file; this tag is for a list in an order of its own, such as the
+    # box of recommended reading in "Reviews on Quasinormal Modes". An unknown key gives a build
+    # warning and is left out.
+    class JHEPListTag < Liquid::Tag
+      # @param markup [String] the keys, separated by spaces
+      def initialize(tag_name, markup, tokens)
+        super
+        @keys = markup.split
+      end
+
+      # @param context [Liquid::Context]
+      # @return [String] HTML of the list
+      def render(context)
+        site = context.registers[:site]
+        scholar = site.config['scholar'] || {}
+        path = File.join(site.source, scholar['source'] || '_bibliography', scholar['bibliography'] || 'references.bib')
+        table = JHEP.entries(path)
+        items = @keys.filter_map do |key|
+          fields = table[key]
+          unless fields
+            Jekyll.logger.warn 'jhep_list:', "no entry #{key} in #{File.basename(path)}"
+            next
+          end
+          %(<li><span class="bib-text">#{JHEP.format(fields)}</span></li>)
+        end
+        %(<ol class="bibliography">#{items.join("\n")}</ol>)
+      end
+    end
+  end
+
+  Liquid::Template.register_tag('jhep_list', Jekyll::JHEPListTag)
 end
 
 # The citations of jekyll-scholar on each rendered page, [1, 2, 3] -> [1–3]

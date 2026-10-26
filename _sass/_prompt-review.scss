@@ -27,7 +27,7 @@ blockquote.prompt-review {
     margin-bottom: 0;
   }
 
-  // the references of the box (_layouts/bib-box.html) as a bulleted list; the numbered lists of
+  // the references of the box (the jhep_list tag of _plugins/jhep.rb) as a bulleted list; the numbered lists of
   // _sass/_bibliography.scss have no bullets
   ol.bibliography {
     margin-bottom: 0;

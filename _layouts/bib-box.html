@@ -1,9 +1,0 @@
-{%- comment -%}
-  Template of one reference inside a callout, for the option --template of
-  {% bibliography %} (jekyll-scholar). The reference is the one of _plugins/jhep.rb, as in the
-  numbered lists of _config.yml (bibliography_template), but without a number and without an id,
-  so that a reference may stand in a box and in a list on the same page. Used by the box at the
-  top of _posts/2026-07-06-reviews-on-quasinormal-modes.md; the entries of the box have the
-  keyword qnm-start in _bibliography/references.bib.
-{%- endcomment -%}
-<span class="bib-text">{{ entry | jhep }}</span>
