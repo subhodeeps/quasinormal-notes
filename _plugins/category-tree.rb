@@ -14,8 +14,8 @@
 # After rendering, it replaces the cards of Chirpy's Categories tab, which show two levels, with
 # the whole tree, deeper levels in closed folders (<details>). A category page gets its parent
 # categories in Chirpy's breadcrumb. With subcategories it becomes an explorer: the subcategories
-# as closed folders that open on their subtopics and their notes in order, then its own notes,
-# without dates. A category
+# as closed folders that open on their subtopics and their notes in order, then its own notes, all
+# notes as Chirpy's own items of the list (title, dotted leader, date). A category
 # without subcategories keeps Chirpy's list of its notes, in order; those items are Chirpy's own,
 # picked out and reordered. post-topics-top.rb and home-tiles.rb show the paths on a post and on
 # its card (CategoryTree.trail).
@@ -199,9 +199,13 @@ module CategoryTree
     %(<span class="text-muted small font-weight-light">#{parts.join(', ')}</span>)
   end
 
-  # A note in the explorer of a category page, without a date.
+  # A note in the explorer of a category page: Chirpy's own item of the note (title, dotted
+  # leader, date) from the list of the page, or a plain link if the list lacks it.
   # @return [String] an <li>
   def file(site, doc)
+    li = @items && (@items["#{site.baseurl}#{doc.url}"] || @items[doc.url])
+    return li.sub(/\A<li\b/) { %(<li data-date="#{doc.date.iso8601}") } if li
+
     css = defined?(NoteStage) && NoteStage.stage(doc) ? ' note-unpublished' : ''
     %(<li class="category-note#{css}"><i class="far fa-file-lines fa-fw"></i> ) +
       %(<a href="#{CGI.escapeHTML("#{site.baseurl}#{doc.url}")}">#{doc.data['title']}</a></li>)
@@ -283,8 +287,8 @@ module CategoryTree
       parents.map { |parent| link(site, parent.name) }.join(SEP) + SEP + '</nav>']
   end
 
-  # A category page with the path above its title. A category with subcategories becomes an
-  # explorer: its subcategories as closed folders, then its own notes, without dates. A category
+  # A category page with its parents in the breadcrumb. A category with subcategories becomes an
+  # explorer: its subcategories as closed folders, then its own notes, as Chirpy's items. A category
   # without subcategories keeps Chirpy's list, with only its own notes, in order, and the sort
   # buttons of assets/js/list-sort.js.
   # @param page [Jekyll::Page] the page of jekyll-archives
@@ -303,6 +307,9 @@ module CategoryTree
     list = out.index(LIST, top)
     close = out.index('</ul>', list)
     start = top + PAGE.length
+    # Chirpy lists every note under the category, so the explorer takes the items of its notes from here
+    @items = out[(list + LIST.length)...close].split(ITEM).select { |li| li.start_with?('<li') }
+                                               .to_h { |li| [CGI.unescape(li[/href="([^"]+)"/, 1].to_s), li] }
     subs = children(node)
     unless subs.empty?
       explorer = %(<ul class="category-tree category-explorer">) +
@@ -311,10 +318,8 @@ module CategoryTree
       return out[0...start] + crumbs + out[start...list] + explorer + out[(close + '</ul>'.length)..]
     end
 
-    items = out[(list + LIST.length)...close].split(ITEM).select { |li| li.start_with?('<li') }
-                                              .to_h { |li| [CGI.unescape(li[/href="([^"]+)"/, 1].to_s), li] }
     own = notes_of(node).filter_map do |doc|
-      li = items["#{site.baseurl}#{doc.url}"] || items[doc.url]
+      li = @items["#{site.baseurl}#{doc.url}"] || @items[doc.url]
       next unless li
 
       main = node.notes.any? { |d, first| d == doc && first }
