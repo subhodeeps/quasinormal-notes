@@ -251,8 +251,12 @@ details[open] > summary > .category-chevron {
     > a {
       min-width: 0;
       overflow-wrap: anywhere;
-      font-size: 1.2rem;
     }
+  }
+
+  // The folder names of a category page a step larger; the Categories tab keeps its own sizes
+  #page-category .category-row > a {
+    font-size: 1.2rem;
   }
 
   // The subfolders inside a card of the Categories tab keep their own size and spacing
