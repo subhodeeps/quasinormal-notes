@@ -190,6 +190,17 @@ Jekyll::Hooks.register :pages, :post_render do |page|
   page.output = "#{page.output[0...start]}#{grid}#{categories}#{page.output[start...stop]}</div>#{script}#{page.output[stop..]}"
 end
 
+# MathJax, a large script, is loaded on the home page only when a description or an excerpt of a post
+# has math in it
+Jekyll::Hooks.register :pages, :pre_render do |page|
+  next unless page.respond_to?(:pager) && page.url.to_s.match?(%r{\A/(page\d+/)?\z})
+
+  posts = page.site.posts.docs.reject { |post| post.data['hidden'] }
+  page.data['math'] = posts.any? do |post|
+    [post.data['description'], HomeTiles.excerpt(post, 150)].any? { |text| text.to_s.match?(/\$|\\\(/) }
+  end
+end
+
 # The number of posts a page (HomeTiles.per_page), before jekyll-paginate builds the pages
 Jekyll::Hooks.register :site, :post_read do |site|
   HomeTiles.instance_variable_set(:@preferred, site.config['paginate'].to_i) unless HomeTiles.instance_variable_get(:@preferred)

@@ -44,11 +44,17 @@
   const HIDDEN = 0.06;
   const SECOND = 0.6;
 
+  // The graph of the right panel starts when the panel is shown: Chirpy hides it below 1200 px, so a
+  // phone or a narrow window neither loads the data nor runs the layout
+  const wide = window.matchMedia('(min-width: 1200px)');
   document.querySelectorAll('.notes-graph').forEach((section) => {
-    fetch(section.querySelector('canvas').dataset.src)
-      .then((res) => res.json())
-      .then((data) => start(section, data))
-      .catch(() => section.remove()); // no graph is better than a broken one
+    const load = () =>
+      fetch(section.querySelector('canvas').dataset.src)
+        .then((res) => res.json())
+        .then((data) => start(section, data))
+        .catch(() => section.remove()); // no graph is better than a broken one
+    if (section.classList.contains('notes-graph-page') || wide.matches) return load();
+    wide.addEventListener('change', () => wide.matches && !section.dataset.started && ((section.dataset.started = '1'), load()), { once: false });
   });
 
   const slugify = (s) => s.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-');
