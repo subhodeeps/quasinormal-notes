@@ -1,0 +1,18 @@
+// The colour of a link under the pointer, or just tapped on a touch screen (where the hover stays
+// until the next tap), in the accent of the theme. Chirpy hard-codes an orange, #d2603a, for it in
+// one rule for these ten selectors; the same selectors here come later in the cascade and win.
+// --link-hover-color is set per theme in _sass/amore/.
+
+#page-category a:hover,
+#page-tag a:hover,
+#access-lastmod a:hover,
+.post-tail-wrapper .license-wrapper > a:hover,
+.post-edit > a:hover,
+#search-results a:hover,
+footer a:hover,
+#topbar #breadcrumb a:hover,
+.post-meta a:not([class]):hover,
+.content a:not(.img-link):hover {
+  color: var(--link-hover-color) !important;
+  border-bottom-color: var(--link-hover-color);
+}

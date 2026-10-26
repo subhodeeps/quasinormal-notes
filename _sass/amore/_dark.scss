@@ -37,6 +37,7 @@ $tint: 0.14;
   --blockquote-border-color: #{p.alpha($accent-muted, 0.5)};
   --blockquote-text-color: #{$muted-foreground};
   --link-color: #{$accent};
+  --link-hover-color: #cdb6e3; // a link under the pointer or just tapped: Chirpy's own is a fixed orange
   --link-underline-color: #{p.alpha($accent-muted, 0.5)};
   --button-bg: #{$surface};
   --btn-border-color: #{$border};
