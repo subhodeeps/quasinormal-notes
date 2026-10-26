@@ -19,7 +19,7 @@ math: true
 
 These are all the reviews on quasinormal modes that I know of, along with some lecture notes and the book chapters, which I gathered in one place while writing my thesis. They differ wildly in their style, motivation and pedagogy, but they are all pretty fun to read, and I hope that at least one of them suits the way you like to learn. For lecture notes on black holes and general relativity, see [[2026-07-06-lecture-notes]].
 
-<details class="prompt-fold prompt-review" markdown="1">
+<details class="prompt-fold prompt-review" open markdown="1">
 <summary markdown="span">I would recommend the following resources as a starting point.</summary>
 
 {% bibliography --template bib-box --query @*[keywords ~= qnm-start] %}

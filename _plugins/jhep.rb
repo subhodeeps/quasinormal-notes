@@ -771,16 +771,17 @@ module JHEP
   # The sites that get a name instead of their address as the text of a link
   SITES = {
     'inspirehep.net' => 'INSPIRE', 'ui.adsabs.harvard.edu' => 'ADS',
-    'archive.org' => 'Internet Archive', 'web.archive.org' => 'Internet Archive'
+    'archive.org' => 'Internet Archive', 'web.archive.org' => 'Internet Archive', 'dropbox.com' => 'Dropbox'
   }.freeze
 
   # The links of the fields `url` and `adsurl`, which JHEP.bst does not print for most entry types:
-  # "[INSPIRE, ADS]", placed before the final full stop. The text of a link is the name of its site
+  # "[INSPIRE, ADS]", placed before the final full stop; a field may hold several addresses
+  # separated by spaces. The text of a link is the name of its site
   # (SITES), or its host.
   # @param fields [Hash] one entry of entries
   # @return [String] HTML, or an empty string if the entry has neither field
   def web_links(fields)
-    urls = %w[url adsurl].map { |name| fields[name].to_s.strip }.reject(&:empty?)
+    urls = %w[url adsurl].flat_map { |name| fields[name].to_s.split }
     return '' if urls.empty?
 
     links = urls.map do |url|
