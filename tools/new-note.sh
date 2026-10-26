@@ -32,7 +32,7 @@ title: "$title"
 short_title: "$title" # in the note graph
 description: ""
 date: $(date '+%Y-%m-%d %H:%M:00 %z')
-categories: []
+categories: [] # a path from the primary category down, such as [Physics, Black Holes, Black Hole Shadows]
 tags: []
 primary_tags: [] # one to three tags for the note graph; empty means the first two tags
 math: false

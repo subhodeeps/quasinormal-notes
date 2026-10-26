@@ -5,7 +5,8 @@
 # Pinned posts stay full-width bands. The other posts become a grid of tiles whose size follows
 # the length of the post without its code (HomeTiles.size). Every card takes the colour of its
 # subject from --graph-node-<category> (_sass/amore/), and an unpublished note gets a dashed
-# border. A tall, wide or large tile also shows the opening paragraphs of the post
+# border. The card names the paths of the note (CategoryTree.trail, _plugins/category-tree.rb),
+# such as Physics › Black Holes › Black Hole Shadows, after the stage of an unpublished note. A tall, wide or large tile also shows the opening paragraphs of the post
 # (HomeTiles.excerpt). The tiles of all pages are written to assets/data/home-tiles.json for
 # assets/js/list-sort.js, and assets/js/home-tiles.js closes the gaps at the end of the grid.
 #
@@ -13,8 +14,9 @@
 # they are missing, the hook prints a build warning and leaves the list as Chirpy renders it.
 #
 # Hooks: :pages, :post_render; :site, :pre_render and :post_write. Styles: _sass/_home-tiles.scss
-# and _sass/_note-cards.scss. Needs NoteStage from draft-category.rb.
+# and _sass/_note-cards.scss. Needs NoteStage from draft-category.rb and CategoryTree.
 
+require 'cgi'
 require 'fileutils'
 require 'json'
 require 'zlib'
@@ -107,14 +109,16 @@ Jekyll::Hooks.register :pages, :post_render do |page|
 
     category = HomeTiles.slug(NoteStage.subject(post))
     colour = %(style="--note: var(--graph-node-#{category}, var(--graph-node))")
-    unpublished = NoteStage.stage(post) ? ' note-unpublished' : ''
-    card = card.sub('class="post-preview', %(#{colour} class="post-preview note-card#{unpublished}))
+    stage = NoteStage.stage(post)
+    card = card.sub('class="post-preview', %(#{colour} class="post-preview note-card#{stage ? ' note-unpublished' : ''}))
+    # The paths of the note in place of Chirpy's list of names, after the stage of an unpublished note
+    trail = [stage, CategoryTree.trail(post)].compact.join(' · ')
+    card = card.sub(%r{<span class="categories">.*?</span>}m) { %(<span class="categories">#{CGI.escapeHTML(trail)}</span>) }
     next card if post.data['pin']
 
     size = HomeTiles.size(post)
-    if size == 'tile-small' && post.draft?
+    if size == 'tile-small' && stage
       # A small square hides the categories, but a draft still names its stage there
-      stage = NoteStage.stage(post)
       card = card.sub(%r{<span class="categories">.*?</span>}m, %(<span class="categories">#{stage}</span>))
       size += ' tile-stage'
     end

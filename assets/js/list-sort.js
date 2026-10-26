@@ -7,7 +7,10 @@
  * date is Chirpy's own order or its reverse: Chirpy's date script removes the timestamps (data-ts)
  * from the page once it has formatted the dates, so the dates themselves cannot be read back.
  *
- * On a category or a tag page, the buttons reorder the items of the list in place.
+ * On a category or a tag page, the buttons reorder the items of the list in place. On a category
+ * page, _plugins/category-tree.rb lists the notes in their order and writes the date of each item
+ * (data-date), so that Newest and Oldest go by the dates there. If some notes of the category have
+ * an order of their own (data-order), the page gets a fifth button, Order, which is its default.
  *
  * The home page shows ten posts to a page, so its buttons sort the latest posts of all pages:
  * they load the tiles of every page from assets/data/home-tiles.json (the grid's data-all, which
@@ -17,8 +20,8 @@
  * stay where they are. After a sort, the script asks assets/js/home-tiles.js to pack the grid
  * again (the event tiles:reorder) and MathJax to typeset the excerpts of the new tiles.
  *
- * The browser keeps the choice (localStorage), one for the category and tag pages and one for the
- * home page, so the next page opens in the same order.
+ * The browser keeps the choice (localStorage), one for the category and tag pages, one for the
+ * category pages with an order, and one for the home page, so the next page opens in the same order.
  *
  * The script edits no layout of the theme. If a Chirpy release changes the markup of a list, it
  * finds nothing to sort and leaves the page as Chirpy renders it.
@@ -40,20 +43,25 @@
   };
 
   const byTitle = (a, b) => a.title.localeCompare(b.title, undefined, { sensitivity: 'base', numeric: true });
+  // By the dates of a category page; elsewhere by Chirpy's order, which is newest first
+  const byDate = (a, b) => (a.date && b.date ? b.date - a.date : a.rank - b.rank);
   const ORDERS = {
-    newest: { label: 'Newest', compare: (a, b) => a.rank - b.rank },
-    oldest: { label: 'Oldest', compare: (a, b) => b.rank - a.rank },
+    order: { label: 'Order', compare: (a, b) => a.rank - b.rank },
+    newest: { label: 'Newest', compare: byDate },
+    oldest: { label: 'Oldest', compare: (a, b) => byDate(b, a) },
     az: { label: 'A–Z', compare: byTitle },
     za: { label: 'Z–A', compare: (a, b) => byTitle(b, a) }
   };
 
-  // The buttons above `container`; `apply(order)` shows the posts in that order
-  function buttons(container, key, apply) {
+  // The buttons above `container`; `apply(order)` shows the posts in that order, and `first` is
+  // the default, which is Order only where the page has one
+  function buttons(container, key, apply, first = 'newest') {
     const bar = document.createElement('div');
     bar.className = 'list-sort';
     bar.setAttribute('role', 'group');
     bar.setAttribute('aria-label', 'Sort the posts');
-    const all = Object.entries(ORDERS).map(([order, { label }]) => {
+    const shown = Object.entries(ORDERS).filter(([order]) => order !== 'order' || first === 'order');
+    const all = shown.map(([order, { label }]) => {
       const button = document.createElement('button');
       button.type = 'button';
       button.dataset.order = order;
@@ -71,7 +79,7 @@
     }
     container.before(bar);
     const saved = read(key);
-    choose(ORDERS[saved] ? saved : 'newest');
+    choose(shown.some(([order]) => order === saved) ? saved : first);
   }
 
   // A category or a tag page: the items of its list, in place
@@ -79,11 +87,16 @@
   if (list) {
     const items = [...list.children]
       .filter((li) => li.querySelector('a'))
-      .map((node, rank) => ({ node, rank, title: node.querySelector('a').textContent.trim() }));
+      .map((node, rank) => ({
+        node,
+        rank,
+        title: node.querySelector('a').textContent.trim(),
+        date: Date.parse(node.dataset.date || '') || 0
+      }));
+    const ordered = items.some((item) => item.node.dataset.order !== undefined);
     if (items.length > 1) {
-      buttons(list, 'list-sort', (order) => {
-        list.append(...[...items].sort(ORDERS[order].compare).map((item) => item.node));
-      });
+      const apply = (order) => list.append(...[...items].sort(ORDERS[order].compare).map((item) => item.node));
+      buttons(list, ordered ? 'list-sort-ordered' : 'list-sort', apply, ordered ? 'order' : 'newest');
     }
   }
 

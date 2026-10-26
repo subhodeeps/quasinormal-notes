@@ -1,0 +1,85 @@
+// Category tree (_plugins/category-tree.rb): the deeper levels on the Categories tab, the parent
+// categories and the subcategories of a category page, the paths of a post's categories, and the
+// stage of an unpublished note in the post's header (_plugins/post-topics-top.rb).
+
+.category-sep {
+  margin: 0 0.4rem;
+  color: var(--text-muted-color);
+}
+
+// The levels below a subcategory, indented under it, on the tab and on a category page
+.category-tree {
+  list-style: none;
+  margin: 0.35rem 0 0;
+  padding-left: 1.75rem;
+
+  > li {
+    padding: 0.2rem 0;
+  }
+}
+
+.category-tree,
+.category-children {
+  i {
+    color: gray;
+    font-size: 86%;
+  }
+
+  a:not(:hover) {
+    border-bottom: none;
+  }
+}
+
+// The parent categories above the title of a category page
+.category-crumbs {
+  margin-bottom: 0.25rem;
+  padding-left: 0.5rem;
+  font-size: 0.85rem;
+  color: var(--text-muted-color);
+
+  a {
+    color: inherit;
+  }
+}
+
+// The subcategories of a category page, above its own notes. Chirpy draws a dot before every
+// item of a list in #page-category, so the items here need their own spacing and no dot.
+#page-category .category-children {
+  list-style: none;
+  margin: 1rem 0 1.25rem;
+  padding-left: 0;
+
+  li {
+    display: block;
+    padding: 0.3rem 0;
+    line-height: 1.5rem;
+
+    &::before {
+      content: none;
+    }
+  }
+
+  > li {
+    padding-left: 0.5rem;
+  }
+
+  li > a {
+    font-size: 1rem;
+  }
+}
+
+// Paths of a post's categories, one after the other
+.category-path + .category-path::before {
+  content: '·';
+  margin: 0 0.5rem;
+  color: var(--text-muted-color);
+}
+
+// The stage of an unpublished note, first in the post's header, outlined as in the note graph
+.note-stage {
+  margin-right: 0.6rem;
+  padding: 0.1rem 0.55rem;
+  border: 1px dashed var(--text-muted-color);
+  border-radius: 1rem;
+  font-size: 0.8rem;
+}

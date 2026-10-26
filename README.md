@@ -16,7 +16,7 @@ bash tools/run.sh -d         # preview at http://127.0.0.1:4000, drafts included
 
 Published notes are in `_posts/`. Unfinished ones are in `_drafts/`, a separate private repository that the site does not build for the public (`git clone git@github.com:subhodeeps/quasinormal-notes-private-notes.git _drafts`, then `ln -s _drafts/.claude .claude` so that Claude Code finds its rules). To publish a draft, move it to `_posts/YYYY-MM-DD-slug.md` and move its files from `_drafts/_includes/` and `_drafts/assets/` to the same places at the root.
 
-Notes link to each other with `[[slug]]`, and the build turns these into links, backlinks and the graph. Figures, tables and citations follow the examples in the existing posts. The citations come from `_bibliography/references.bib`.
+The categories of a note are a path from the general to the specific, such as `[Physics, Black Holes, Black Hole Shadows]`, and `order: 3` puts a note third in its category. Notes link to each other with `[[slug]]`, and the build turns these into links, backlinks and the graph. Figures, tables and citations follow the examples in the existing posts. The citations come from `_bibliography/references.bib`.
 
 ## Changes to Chirpy
 
@@ -24,7 +24,7 @@ Two theme files are replaced: `assets/css/jekyll-theme-chirpy.scss` and `_includ
 
 | Folder | New files |
 | --- | --- |
-| `_plugins/` | home page, wikilinks and graph data, post head and panel, drafts, references (`jhep.rb`), footer and page titles |
+| `_plugins/` | home page, wikilinks and graph data, the category tree (`category-tree.rb`), post head and panel, drafts, references (`jhep.rb`), footer and page titles |
 | `_sass/` | one partial for each feature, and the colours in `amore/` |
 | `assets/js/` | note graph, home page tiles, sort buttons, lightbox |
 | `_includes/`, `_tabs/` | hero, footer, backlinks, graph, the Note Graph tab |

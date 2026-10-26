@@ -1,0 +1,284 @@
+#!/usr/bin/env ruby
+#
+# Categories as a tree of any depth, on the Categories tab and on the category pages.
+#
+# The `categories` of a note is a path from the primary category down:
+# [Physics, Black Holes, Black Hole Shadows] puts the note in Black Hole Shadows, inside Black
+# Holes, inside Physics. `also_in` gives more paths, one ([Coding, Julia]) or several
+# ([[Coding, Julia], [Physics, Classical Mechanics]]), and `order` places the note among the notes
+# of its own category, the last name of `categories`. Notes without `order` follow, newest first.
+#
+# At :post_read the plugin stores the paths of every post in `category_paths` and appends the
+# names of `also_in` to `categories`, so that jekyll-archives builds their pages and Chirpy links
+# them. The first category, which colours a note in the graph and on the home page, stays first.
+# After rendering, it replaces the cards of Chirpy's Categories tab, which show two levels, with
+# the whole tree, and gives each category page the path above its title, its subcategories, and
+# only the notes of the category itself, in order. The items of that list are Chirpy's own,
+# picked out and reordered. post-topics-top.rb and home-tiles.rb show the paths on a post and on
+# its card (CategoryTree.trail).
+#
+# jekyll-archives builds one page for each name, so a name has one place in the tree; a name
+# under two parents gives a build warning, and the tree keeps its first place. If Chirpy's markup
+# is missing (`<div class="card categories">`, `<div id="page-category">`,
+# `<ul class="content ps-0">`), the hooks print a build warning and leave the page as Chirpy
+# renders it.
+#
+# Hooks: :site, :post_read; :documents (the tab) and :pages (jekyll-archives), :post_render. Styles: _sass/_category-tree.scss. Sort buttons
+# of the category pages: assets/js/list-sort.js. Design: .claude/DESIGN.md.
+
+require 'cgi'
+require 'set'
+
+# The tree of the categories of one build. `module_function` methods.
+module CategoryTree
+  # One category: the name of its parent (nil for a primary category), the names of its
+  # subcategories, and its own notes as [doc, main] pairs, where main is true when the category
+  # ends the note's first path.
+  Node = Struct.new(:name, :parent, :children, :notes)
+
+  # Chirpy's markup on the Categories tab and on a category page.
+  CARD = '<div class="card categories">'
+  PAGE = '<div id="page-category">'
+  LIST = '<ul class="content ps-0">'
+  # The start of an item; the compressed HTML of a production build drops the optional </li>
+  ITEM = /(?=<li\b)/
+
+  # Separator between the names of a path.
+  SEP = '<span class="category-sep">›</span>'
+
+  @nodes = {}
+
+  module_function
+
+  # @param doc [Jekyll::Document]
+  # @return [Array<Array<String>>] the path of `categories`, then those of `also_in`
+  def paths(doc)
+    extra = Array(doc.data['also_in'])
+    extra = [extra] unless extra.empty? || extra.first.is_a?(Array)
+    [doc.data['categories'], *extra].map { |path| Array(path).map(&:to_s).reject(&:empty?).uniq }.reject(&:empty?)
+  end
+
+  # Reads the paths of every post and builds the tree.
+  # @param site [Jekyll::Site]
+  # @return [Hash{String=>Node}] the categories by name
+  def build(site)
+    @nodes = {}
+    @warned = Set.new
+    site.posts.docs.each do |doc|
+      doc.data['category_paths'] = paths(doc)
+      doc.data['categories'] = doc.data['category_paths'].flatten.uniq
+      next if doc.data['hidden']
+
+      doc.data['category_paths'].each_with_index do |path, i|
+        path.each_with_index do |name, depth|
+          node = place(name, depth.zero? ? nil : path[depth - 1], doc)
+          node.notes << [doc, i.zero?] if depth == path.length - 1 && node.notes.none? { |d, _| d == doc }
+        end
+      end
+    end
+    @nodes
+  end
+
+  # The node of a category, made at its first appearance under its first parent.
+  # @param name [String]
+  # @param parent [String, nil]
+  # @param doc [Jekyll::Document] the note, for the warning
+  # @return [Node]
+  def place(name, parent, doc)
+    node = @nodes[name]
+    unless node
+      node = @nodes[name] = Node.new(name, parent, [], [])
+      @nodes[parent].children << name if parent
+      return node
+    end
+    if node.parent != parent && @warned.add?([name, parent])
+      Jekyll.logger.warn 'Categories:', "#{doc.relative_path}: '#{name}' sits under '#{parent || 'the top'}' here " \
+                                        "and under '#{node.parent || 'the top'}' elsewhere; give it one place"
+    end
+    node
+  end
+
+  # @param name [String]
+  # @return [Node, nil]
+  def node(name)
+    @nodes[name]
+  end
+
+  # @param node [Node]
+  # @return [Array<Node>] the subcategories, by name
+  def children(node)
+    node.children.map { |name| @nodes[name] }.sort_by { |child| child.name.downcase }
+  end
+
+  # @param node [Node]
+  # @return [Array<Node>] the ancestors, from the primary category down
+  def ancestors(node)
+    chain = []
+    while (parent = (chain.first || node).parent)
+      chain.unshift(@nodes[parent])
+    end
+    chain
+  end
+
+  # @param node [Node]
+  # @return [Set<Jekyll::Document>] the notes of the category and of all its subcategories
+  def notes_under(node)
+    node.children.reduce(node.notes.to_set(&:first)) { |all, child| all | notes_under(@nodes[child]) }
+  end
+
+  # The notes of the category itself: those whose first path ends here and that have `order`, by
+  # order, then the others, newest first.
+  # @param node [Node]
+  # @return [Array<Jekyll::Document>]
+  def notes_of(node)
+    ordered, rest = node.notes.partition { |doc, main| main && !doc.data['order'].nil? }
+    ordered.map(&:first).sort_by { |doc| [doc.data['order'].to_f, doc.data['title'].to_s] } +
+      rest.map(&:first).sort_by { |doc| -doc.date.to_f }
+  end
+
+  # @param site [Jekyll::Site]
+  # @param name [String]
+  # @return [String] the address of the category's page, as jekyll-archives builds it, with the
+  #   slug encoded as Chirpy encodes it (`slugify | url_encode`)
+  def url(site, name)
+    config = site.config['jekyll-archives'] || {}
+    permalink = config.dig('permalinks', 'category') || '/categories/:name/'
+    slug = CGI.escape(Jekyll::Utils.slugify(name, mode: config['slug_mode']))
+    "#{site.config['baseurl']}#{permalink.sub(':name', slug)}"
+  end
+
+  # @return [String] a link to the category's page
+  def link(site, name, css = nil)
+    %(<a href="#{CGI.escapeHTML(url(site, name))}"#{css ? %( class="#{css}") : ''}>#{CGI.escapeHTML(name)}</a>)
+  end
+
+  # @param count [Integer]
+  # @param key [String] category_measure or post_measure, from Chirpy's locale file
+  # @return [String] such as "3 posts"
+  def measure(site, count, key)
+    words = site.data.dig('locales', site.config['lang'] || 'en', 'categories', key)
+    word = words.is_a?(Hash) ? words[count == 1 ? 'singular' : 'plural'] : words
+    "#{count} #{word || (key == 'post_measure' ? 'posts' : 'categories')}"
+  end
+
+  # @return [String] the counts after a category's name, as Chirpy writes them
+  def counts(site, node)
+    parts = []
+    parts << measure(site, node.children.size, 'category_measure') unless node.children.empty?
+    parts << measure(site, notes_under(node).size, 'post_measure')
+    %(<span class="text-muted small font-weight-light">#{parts.join(', ')}</span>)
+  end
+
+  # A subcategory with its own subcategories nested below it.
+  # @return [String] an <li>
+  def item(site, node, css = nil)
+    nested = children(node)
+    sub = nested.empty? ? '' : %(<ul class="category-tree">#{nested.map { |child| item(site, child) }.join}</ul>)
+    %(<li#{css ? %( class="#{css}") : ''}><i class="far fa-folder fa-fw"></i> ) \
+      "#{link(site, node.name, 'mx-2')} #{counts(site, node)}#{sub}</li>"
+  end
+
+  # The cards of the Categories tab: one card for each primary category, in Chirpy's markup, with
+  # every level below it.
+  # @param site [Jekyll::Site]
+  # @return [String]
+  def tab(site)
+    roots = @nodes.values.select { |node| node.parent.nil? }.sort_by { |node| node.name.downcase }
+    roots.each_with_index.map do |root, i|
+      subs = children(root)
+      icon = subs.empty? ? 'fa-folder' : 'fa-folder-open'
+      head = %(<span class="ms-2"><i class="far #{icon} fa-fw"></i> #{link(site, root.name, 'mx-2')} #{counts(site, root)}</span>)
+      if subs.empty?
+        trigger = '<span data-bs-toggle="collapse" class="category-trigger hide-border-bottom disabled">' \
+                  '<i class="fas fa-fw fa-angle-right"></i></span>'
+        body = ''
+      else
+        trigger = %(<a href="#l_#{i}" data-bs-toggle="collapse" aria-expanded="true" aria-label="h_#{i}-trigger" ) +
+                  'class="category-trigger hide-border-bottom"><i class="fas fa-fw fa-angle-down"></i></a>'
+        body = %(<div id="l_#{i}" class="collapse show" aria-expanded="true"><ul class="list-group">) +
+               subs.map { |sub| item(site, sub, 'list-group-item') }.join + '</ul></div>'
+      end
+      %(<div class="card categories"><div id="h_#{i}" class="card-header d-flex justify-content-between ) +
+        %(hide-border-bottom">#{head}#{trigger}</div>#{body}</div>)
+    end.join
+  end
+
+  # The paths of a note as text, such as "Physics › Black Holes · Coding › Julia", for its card.
+  # With html, each name is the link that `links` gives it (Chirpy's own), for the post's header.
+  # @param doc [Jekyll::Document]
+  # @param links [Hash{String=>String}, nil] the HTML link of each name
+  # @return [String, nil] nil if the note has no categories
+  def trail(doc, links = nil)
+    paths = doc.data['category_paths']
+    return nil if paths.nil? || paths.empty?
+    return paths.map { |path| path.join(' › ') }.join(' · ') unless links
+
+    paths.map do |path|
+      %(<span class="category-path">#{path.map { |name| links[name] || CGI.escapeHTML(name) }.join(SEP)}</span>)
+    end.join
+  end
+
+  # A category page with the path above its title, its subcategories, and its own notes in order.
+  # @param page [Jekyll::Page] the page of jekyll-archives
+  # @return [String, nil] the new output, or nil if Chirpy's markup is missing
+  def page(page)
+    site = page.site
+    node = @nodes[page.title.to_s]
+    out = page.output
+    top = out.index(PAGE)
+    list = top && out.index(LIST, top)
+    close = list && out.index('</ul>', list)
+    return nil unless node && close
+
+    items = out[(list + LIST.length)...close].split(ITEM).select { |li| li.start_with?('<li') }
+                                              .to_h { |li| [CGI.unescape(li[/href="([^"]+)"/, 1].to_s), li] }
+    own = notes_of(node).filter_map do |doc|
+      li = items["#{site.baseurl}#{doc.url}"] || items[doc.url]
+      next unless li
+
+      main = node.notes.any? { |d, first| d == doc && first }
+      order = main && !doc.data['order'].nil? ? %( data-order="#{CGI.escapeHTML(doc.data['order'].to_s)}") : ''
+      li.sub(/\A<li\b/) { %(<li data-date="#{doc.date.iso8601}"#{order}) }
+    end
+
+    path = ancestors(node)
+    crumbs = path.empty? ? '' : %(<nav class="category-crumbs" aria-label="Parent categories">) +
+                                path.map { |parent| link(site, parent.name) }.join(SEP) + SEP + '</nav>'
+    subs = children(node)
+    under = subs.empty? ? '' : %(<ul class="category-children">#{subs.map { |sub| item(site, sub) }.join}</ul>)
+    start = top + PAGE.length
+    out[0...start] + crumbs + out[start...list] + under + LIST + own.join + out[close..]
+  end
+end
+
+Jekyll::Hooks.register :site, :post_read do |site|
+  CategoryTree.build(site)
+end
+
+# The Categories tab, a document of Chirpy's collection of tabs: everything between its first card
+# and the end of its content
+Jekyll::Hooks.register :documents, :post_render do |page|
+  next unless page.data['layout'] == 'categories' && page.output_ext == '.html'
+
+  out = page.output
+  start = out.index(CategoryTree::CARD)
+  stop = start && out.index('</article>', start)
+  stop &&= out.rindex('</div>', stop)
+  unless stop && stop > start
+    Jekyll.logger.warn 'Categories:', "no Chirpy cards found in #{page.url}; the theme's markup may have changed"
+    next
+  end
+
+  page.output = out[0...start] + CategoryTree.tab(page.site) + out[stop..]
+end
+
+Jekyll::Hooks.register :pages, :post_render do |page|
+  next unless page.data['layout'] == 'category' && page.respond_to?(:title) && page.output_ext == '.html'
+
+  output = CategoryTree.page(page)
+  if output
+    page.output = output
+  elsif CategoryTree.node(page.title.to_s)
+    Jekyll.logger.warn 'Categories:', "no Chirpy list found in #{page.url}; the theme's markup may have changed"
+  end
+end
