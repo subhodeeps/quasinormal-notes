@@ -251,6 +251,17 @@ module CategoryTree
       %(<a href="#{CGI.escapeHTML("#{site.baseurl}#{doc.url}")}">#{doc.data['title']}</a></li>)
   end
 
+  # The dates of a folder for the sort buttons of a category page, as a file explorer has them: the
+  # latest change and the latest creation of any note under it, and its name.
+  # @return [String] attributes for its <li>
+  def folder_dates(node)
+    docs = notes_under(node)
+    return '' if docs.empty?
+
+    %( data-title="#{CGI.escapeHTML(node.name)}" data-updated="#{docs.map { |doc| updated(doc) }.max.iso8601}") +
+      %( data-created="#{docs.map(&:date).max.iso8601}")
+  end
+
   # A subcategory as a folder, closed at first, that opens on its own subcategories and, with
   # notes, on its notes in order. A folder with nothing to open is a plain row.
   # @param notes [Boolean] list the notes too (category pages) or only the subcategories (tab)
@@ -259,7 +270,7 @@ module CategoryTree
     inner = children(node).map { |child| folder(site, child, notes: notes) }.join
     inner += notes_of(node).map { |doc| file(site, doc) }.join if notes
     label = %(<i class="far fa-folder fa-fw"></i> #{link(site, node.name, 'mx-2')} #{counts(site, node)}#{pin(node)})
-    li = %(<li class="category-folder#{css ? " #{css}" : ''}">)
+    li = %(<li class="category-folder#{css ? " #{css}" : ''}"#{notes ? folder_dates(node) : ''}>)
     return %(#{li}<span class="category-row"><i class="fas fa-fw category-chevron"></i>#{label}</span></li>) if inner.empty?
 
     %(#{li}<details><summary class="category-row"><i class="fas fa-angle-right fa-fw category-chevron"></i>#{label}) +

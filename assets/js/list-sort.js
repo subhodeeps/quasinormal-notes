@@ -11,7 +11,10 @@
  * page, _plugins/category-tree.rb writes the date of creation and of the last change of each note
  * (data-created, data-updated), and the buttons are Updated and Created, newest first and, after a
  * second click, oldest first, A–Z and Z–A, and first Order where some notes of the category have an
- * order of their own (data-order); Order is then the default, and Updated otherwise.
+ * order of their own (data-order); Order is then the default, and Updated otherwise. A category
+ * page with subcategories gets the same buttons, with Order as the default, and sorts every list of
+ * its explorer, the lists of open folders included, with the folders first, as a file explorer
+ * does: by the latest change or creation of the notes under a folder, or by its name.
  *
  * The home page shows ten posts to a page, so its buttons sort the latest posts of all pages:
  * they load the tiles of every page from assets/data/home-tiles.json (the grid's data-all, which
@@ -123,6 +126,32 @@
     } else if (items.length > 1) {
       buttons(list, 'list-sort', apply, 'newest');
     }
+  }
+
+  // A category page with subcategories (the explorer of _plugins/category-tree.rb): every list in
+  // it, the open folders' lists included, sorted with its folders first, as in a file explorer. A
+  // folder carries the latest change and creation of the notes under it, and its name.
+  const explorer = document.querySelector('#page-category ul.category-explorer');
+  if (explorer) {
+    const lists = [explorer, ...explorer.querySelectorAll('ul.category-tree')].map((ul) => ({
+      ul,
+      items: [...ul.children]
+        .filter((li) => li.dataset.updated)
+        .map((node, rank) => ({
+          node,
+          rank,
+          folder: node.classList.contains('category-folder') ? 1 : 0,
+          title: node.dataset.title || node.querySelector('a').textContent.trim(),
+          updated: Date.parse(node.dataset.updated) || 0,
+          created: Date.parse(node.dataset.created) || 0
+        }))
+    }));
+    const apply = (compare) =>
+      lists.forEach(({ ul, items }) => {
+        const sorted = [...items].sort((a, b) => b.folder - a.folder || compare(a, b));
+        ul.append(...sorted.map((item) => item.node));
+      });
+    if (lists.some(({ items }) => items.length > 1)) buttons(explorer, 'explorer-sort', apply, 'order', CATEGORY);
   }
 
   // The home page: the tiles of all its pages
