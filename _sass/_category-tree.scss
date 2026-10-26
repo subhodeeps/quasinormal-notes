@@ -251,6 +251,7 @@ details[open] > summary > .category-chevron {
     > a {
       min-width: 0;
       overflow-wrap: anywhere;
+      font-size: 1.2rem;
     }
   }
 
@@ -292,11 +293,12 @@ details[open] > summary > .category-chevron {
 
     > a {
       margin-bottom: 0.05rem;
+      font-size: 1.2rem;
     }
 
     .date-kind,
     time {
-      font-size: 0.75rem;
+      font-size: 0.85rem;
     }
   }
 }
