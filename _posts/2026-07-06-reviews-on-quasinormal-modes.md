@@ -17,9 +17,9 @@ math: true
 
 ![Quasinormal Mode Ringdown](/assets/images/ringdownl2s2.png "For Whom The Bell Tolls: Quasinormal Mode Ringdown"){: width="400" }
 
-I have collected the reviews, lecture notes, book chapters and books on quasinormal modes and black hole perturbation theory that I know of, and list them below in four groups, each in chronological order. For lecture notes on black holes and general relativity in general, see [[2026-07-06-lecture-notes]].
+These are all the reviews on quasinormal modes that I know of! For lecture notes on black holes and general relativity, see [[2026-07-06-lecture-notes]].
 
-> I would start with the following five reviews.
+> I would recommend the following five reviews as a starting point.
 >
 > - [S. L. Detweiler (1979)](#Detweiler:1979jra), *Black holes and gravitational waves: perturbation analysis*
 > - [E. Berti, V. Cardoso and A. O. Starinets (2009)](#Berti:2009kk), *Quasinormal modes of black holes and black branes*
