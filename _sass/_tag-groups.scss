@@ -1,0 +1,59 @@
+// The Tags tab in groups by subject (_plugins/tag-groups.rb) and the category colour and path of
+// the Archives tab (_plugins/archive-categories.rb).
+
+.tag-groups {
+  .tag-group {
+    margin-bottom: 1.5rem;
+    padding: 0.25rem 0 0.25rem 1rem;
+    border-left: 3px solid var(--note);
+  }
+
+  .tag-group-title {
+    margin: 0 0 0.6rem;
+    font-size: 1rem;
+    font-weight: 400;
+    color: var(--text-muted-color);
+
+    a {
+      color: inherit;
+      border-bottom: none;
+    }
+  }
+
+  .tag-group-count {
+    margin-left: 0.75rem;
+    font-size: 0.75rem;
+    opacity: 0.7;
+  }
+
+  // Chirpy's tag pills, a little more compact in a group
+  .tag {
+    display: inline-block;
+    margin: 0 0.5rem 0.5rem 0;
+    padding: 0 0.6rem;
+    line-height: 2.2rem;
+    border-radius: 4px;
+    font-size: 0.9rem;
+  }
+}
+
+// The dot of the timeline in the colour of the subject, and the muted path after the title
+#archives {
+  li > a::before {
+    background-color: var(--note, var(--timeline-node-bg));
+  }
+
+  .archive-path {
+    margin-left: 0.75rem;
+    font-size: 0.75rem;
+    color: var(--text-muted-color);
+    opacity: 0.8;
+    white-space: nowrap;
+  }
+
+  @media (max-width: 575.98px) {
+    .archive-path {
+      display: none;
+    }
+  }
+}

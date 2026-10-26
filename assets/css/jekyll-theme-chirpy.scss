@@ -66,6 +66,9 @@
 /* Buttons that sort the posts of a category or a tag page */
 @use 'list-sort';
 
+/* The Tags tab in groups by subject, and the category colour and path of the Archives tab */
+@use 'tag-groups';
+
 /* Categories as a tree: the Categories tab, the category pages, the paths on a post */
 @use 'category-tree';
 
