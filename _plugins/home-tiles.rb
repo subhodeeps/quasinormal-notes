@@ -38,7 +38,7 @@ module HomeTiles
   EXCERPT = { 'tile-tall' => 90, 'tile-wide' => 150, 'tile-large' => 150 }.freeze # words of the opening
   BLOCK = /\A\s*<(?:pre|details|blockquote|figure|table|div|ul|ol|h[1-6])\b/ # ends the opening run
   DATA = 'assets/data/home-tiles.json' # the tiles of all pages, for the sort buttons
-  STEPS = [0, 2, -2, 4, 6].freeze # tried in turn around the preferred number of posts a page
+  STEPS = [0, 2, 4, 6].freeze # tried in turn around the preferred number of posts a page
   PAGES = {} # page number -> its tiles, collected during the build
 
   module_function
