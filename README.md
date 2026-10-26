@@ -31,7 +31,7 @@ Two theme files are replaced: `assets/css/jekyll-theme-chirpy.scss` and `_includ
 | `_data/categories.yml` | pins and order of the categories |
 | `vercel.json` | cache times of the deployment |
 | `docs/` | notes on writing for the site, such as the guide to categories and tags, mirrored in the wiki by `tools/docs-to-wiki.rb` |
-| `tools/` | setup and run scripts, the category tree (`categories.rb`), push to the ThinkPad, style sheet for calibre, bibliography check |
+| `tools/` | setup and run scripts, the category tree (`categories.rb`), push to the ThinkPad, style sheet for calibre, bibliography check, the gist of the bib file of the quasinormal modes reviews (`sync-qnm-bib.sh`) |
 
 ## Credits
 
