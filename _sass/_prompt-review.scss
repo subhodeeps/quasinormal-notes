@@ -9,7 +9,8 @@
 // of the icon; this file adds the colour and the icon of this one. The colours are
 // --prompt-review-bg and --prompt-review-icon-color of _sass/amore/_light.scss and _dark.scss.
 // If a theme update drops the shared rule, the box is a plain tinted quotation. The links in the
-// box take the accent of the theme, as elsewhere in a post.
+// box take the accent of the theme, as elsewhere in a post. A list of references in the box
+// (ol.bibliography) gets bullets.
 
 blockquote.prompt-review {
   background-color: var(--prompt-review-bg);
@@ -22,5 +23,17 @@ blockquote.prompt-review {
 
   ul {
     margin-bottom: 0;
+  }
+
+  // the references of the box (_layouts/bib-box.html) as a bulleted list; the numbered lists of
+  // _sass/_bibliography.scss have no bullets
+  ol.bibliography {
+    margin-bottom: 0;
+    padding-left: 1.1rem;
+    list-style: disc;
+
+    li::marker {
+      color: var(--prompt-review-icon-color);
+    }
   }
 }
