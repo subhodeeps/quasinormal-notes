@@ -63,3 +63,7 @@ The study of linear perturbations to black hole spacetimes has been a remarkably
 ## Mathematical relativity
 
 {% bibliography --query @*[keywords ~= qnm-math] %}
+
+## The gravitational self-force problem
+
+{% bibliography --query @*[keywords ~= qnm-selfforce] %}
