@@ -339,8 +339,9 @@ module CategoryTree
   end
 
   # Chirpy's "Recently Updated" in the right panel, which lists the whole site, with the five notes
-  # under the category that changed last (`updated`, the same dates as the list). Without that
-  # section (`<section id="access-lastmod">`), the page stays as it is.
+  # under the category that changed last (`updated`, the same dates as the list), and the name of
+  # the category in its heading ("Recently Updated in Classical Mechanics"). Without that section
+  # (`<section id="access-lastmod">`), the page stays as it is.
   # @return [String] the page
   def with_recent(out, node, site)
     section = out.index('<section id="access-lastmod">')
@@ -352,7 +353,11 @@ module CategoryTree
     items = notes_under(node).sort_by { |doc| -updated(doc).to_f }.first(5).map do |doc|
       %(<li class="text-truncate lh-lg"> <a href="#{CGI.escapeHTML("#{site.baseurl}#{doc.url}")}">#{doc.data['title']}</a> </li>)
     end
-    out[0..open] + items.join + out[close..]
+    head = out.index('</h2>', section)
+    out = out[0..open] + items.join + out[close..]
+    return out unless head && head < open
+
+    out[0...head] + " in #{CGI.escapeHTML(node.name)}" + out[head..]
   end
 
   # A category page with its parents in the breadcrumb. A category with subcategories becomes an
