@@ -104,6 +104,26 @@ details[open] > summary > .category-chevron {
   }
 }
 
+// The cards of the Categories tab in the look of the home tiles: square and flat, a stripe in the
+// colour of the primary category (--note, set by the plugin), a hairline edge, and a slight lift
+// on hover
+.card.categories.category-card {
+  border: 1px solid var(--main-border-color);
+  border-left: 3px solid var(--note);
+  border-radius: 0;
+  transition: box-shadow 150ms ease;
+
+  &:hover {
+    box-shadow: 0 3px 10px rgb(0 0 0 / 18%);
+  }
+
+  .card-header,
+  .list-group,
+  .list-group-item {
+    border-radius: 0;
+  }
+}
+
 // The parent categories above the title of a category page
 .category-crumbs {
   margin-bottom: 0.25rem;

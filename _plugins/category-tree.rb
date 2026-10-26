@@ -291,7 +291,7 @@ module CategoryTree
   end
 
   # The cards of the Categories tab: one card for each primary category, in Chirpy's markup, with
-  # every level below it.
+  # every level below it, and the colour of the category in --note (_sass/_category-tree.scss).
   # @param site [Jekyll::Site]
   # @return [String]
   def tab(site)
@@ -309,7 +309,8 @@ module CategoryTree
         body = %(<div id="l_#{i}" class="collapse show" aria-expanded="true"><ul class="list-group">) +
                subs.map { |sub| folder(site, sub, 'list-group-item') }.join + '</ul></div>'
       end
-      %(<div class="card categories"><div id="h_#{i}" class="card-header d-flex justify-content-between ) +
+      colour = %(style="--note: var(--graph-node-#{root.name.downcase.strip.gsub(/[^a-z0-9]+/, '-')}, var(--graph-node))")
+      %(<div class="card categories category-card" #{colour}><div id="h_#{i}" class="card-header d-flex justify-content-between ) +
         %(hide-border-bottom">#{head}#{trigger}</div>#{body}</div>)
     end.join
   end
