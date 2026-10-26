@@ -20,6 +20,12 @@
       background-color: var(--footnote-target-bg);
       transition: background-color 1.75s ease-in-out;
     }
+
+    // a web address in the text of a reference may break anywhere
+    .bib-text {
+      min-width: 0;
+      overflow-wrap: anywhere;
+    }
   }
 }
 

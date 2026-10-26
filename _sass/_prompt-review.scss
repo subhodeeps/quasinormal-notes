@@ -1,0 +1,26 @@
+// A fifth callout beside Chirpy's tip, info, warning and danger: a muted purple box with a book
+// icon, written in a post as
+//
+//   > text
+//   {: .prompt-review }
+//
+// Chirpy's rule blockquote[class^='prompt-'] (_sass/base/_typography.scss) already gives every
+// box whose class starts with "prompt-" its padding, rounded corners, text colour and the place
+// of the icon; this file adds the colour and the icon of this one. The colours are
+// --prompt-review-bg and --prompt-review-icon-color of _sass/amore/_light.scss and _dark.scss.
+// If a theme update drops the shared rule, the box is a plain tinted quotation. The links in the
+// box take the accent of the theme, as elsewhere in a post.
+
+blockquote.prompt-review {
+  background-color: var(--prompt-review-bg);
+
+  &::before {
+    content: '\f02d'; // the book of Font Awesome 6 Free (solid), which Chirpy loads
+    color: var(--prompt-review-icon-color);
+    font: var(--fa-font-solid);
+  }
+
+  ul {
+    margin-bottom: 0;
+  }
+}
