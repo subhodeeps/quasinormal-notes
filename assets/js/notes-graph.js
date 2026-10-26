@@ -763,7 +763,7 @@
         const g = onMain ? first : soft;
         const glowColour = g?.kind === 'tag' ? colours.tag : colours.category[g?.category] || colours.node;
         ctx.strokeStyle = glow ? glowColour : link ? colours.edge : colours.faint;
-        ctx.lineWidth = glow ? (onMain ? 2 : 1.6) : (link ? 1.2 : 0.8) * (big ? 1.25 : 1);
+        ctx.lineWidth = glow ? (onMain ? 2 : 1.6) : (link ? (big ? 1.2 : 0.8) : 0.8) * (big ? 1.25 : 1);
         ctx.setLineDash(link ? [] : [2, 3]);
         ctx.beginPath();
         ctx.moveTo(ax, ay);

@@ -146,8 +146,8 @@ $tint: 0.3;
   --graph-node-code-carpentry: #{p.$amber-main};
   --graph-node-homelab: #{p.$indigo-main};
   --graph-node-personal: #{p.$plum-main};
-  --graph-edge: #{p.$slate-light};
-  --graph-edge-faint: #{p.alpha(p.$slate-main, 0.55)};
+  --graph-edge: #{p.alpha(p.$slate-main, 0.55)}; // a thin line of the slate, as the pale slate-light looked thick on white
+  --graph-edge-faint: #{p.alpha(p.$slate-main, 0.35)};
   // The tag nodes: a gray disc is too dull on white, so the light theme fills them with
   // eggshell inside a ring in the glow colour, with a more saturated orange than the palette's
   // amber (too pale for a glow on white), a third pass of the halo, and tags without a line
