@@ -8,9 +8,10 @@
  * from the page once it has formatted the dates, so the dates themselves cannot be read back.
  *
  * On a category or a tag page, the buttons reorder the items of the list in place. On a category
- * page, _plugins/category-tree.rb lists the notes in their order and writes the date of each item
- * (data-date), so that Newest and Oldest go by the dates there. If some notes of the category have
- * an order of their own (data-order), the page gets a fifth button, Order, which is its default.
+ * page, _plugins/category-tree.rb writes the date of creation and of the last change of each note
+ * (data-created, data-updated), and the buttons are Updated and Created, newest first and, after a
+ * second click, oldest first, A–Z and Z–A, and first Order where some notes of the category have an
+ * order of their own (data-order); Order is then the default, and Updated otherwise.
  *
  * The home page shows ten posts to a page, so its buttons sort the latest posts of all pages:
  * they load the tiles of every page from assets/data/home-tiles.json (the grid's data-all, which
@@ -20,8 +21,8 @@
  * stay where they are. After a sort, the script asks assets/js/home-tiles.js to pack the grid
  * again (the event tiles:reorder) and MathJax to typeset the excerpts of the new tiles.
  *
- * The browser keeps the choice (localStorage), one for the category and tag pages, one for the
- * category pages with an order, and one for the home page, so the next page opens in the same order.
+ * The browser keeps the choice (localStorage), one each for the tag pages, the category pages, the
+ * category pages with an order and the home page, so the next page opens in the same order.
  *
  * The script edits no layout of the theme. If a Chirpy release changes the markup of a list, it
  * finds nothing to sort and leaves the page as Chirpy renders it.
@@ -43,43 +44,61 @@
   };
 
   const byTitle = (a, b) => a.title.localeCompare(b.title, undefined, { sensitivity: 'base', numeric: true });
-  // By the dates of a category page; elsewhere by Chirpy's order, which is newest first
-  const byDate = (a, b) => (a.date && b.date ? b.date - a.date : a.rank - b.rank);
+  // Chirpy's order, which is newest first, on a tag page and on the home page
+  const byRank = (a, b) => a.rank - b.rank;
   const ORDERS = {
-    order: { label: 'Order', compare: (a, b) => a.rank - b.rank },
-    newest: { label: 'Newest', compare: byDate },
-    oldest: { label: 'Oldest', compare: (a, b) => byDate(b, a) },
+    newest: { label: 'Newest', compare: byRank },
+    oldest: { label: 'Oldest', compare: (a, b) => byRank(b, a) },
     az: { label: 'A–Z', compare: byTitle },
     za: { label: 'Z–A', compare: (a, b) => byTitle(b, a) }
   };
+  // A category page (_plugins/category-tree.rb): the order of a series, and the date of the last
+  // change or of the creation, newest first and, after a second click, oldest first (dated)
+  const CATEGORY = {
+    order: { label: 'Order', compare: byRank },
+    updated: { label: 'Updated', compare: (a, b) => b.updated - a.updated, dated: true },
+    created: { label: 'Created', compare: (a, b) => b.created - a.created, dated: true },
+    az: ORDERS.az,
+    za: ORDERS.za
+  };
 
-  // The buttons above `container`; `apply(order)` shows the posts in that order, and `first` is
-  // the default, which is Order only where the page has one
-  function buttons(container, key, apply, first = 'newest') {
+  // The buttons above `container` for the orders of `orders`; `apply(compare)` shows the posts in
+  // that order, and `first` is the default. A dated order is stored as "updated" or "updated-asc".
+  function buttons(container, key, apply, first, orders = ORDERS) {
     const bar = document.createElement('div');
     bar.className = 'list-sort';
     bar.setAttribute('role', 'group');
     bar.setAttribute('aria-label', 'Sort the posts');
-    const shown = Object.entries(ORDERS).filter(([order]) => order !== 'order' || first === 'order');
-    const all = shown.map(([order, { label }]) => {
+    let current = null;
+    const all = Object.entries(orders).map(([order, { label }]) => {
       const button = document.createElement('button');
       button.type = 'button';
       button.dataset.order = order;
       button.textContent = label;
       button.addEventListener('click', () => {
-        choose(order);
-        write(key, order);
+        const flip = orders[order].dated && current === order;
+        const choice = flip ? order + '-asc' : order;
+        choose(choice);
+        write(key, choice);
       });
       bar.append(button);
       return button;
     });
-    function choose(order) {
-      all.forEach((button) => button.setAttribute('aria-pressed', String(button.dataset.order === order)));
-      apply(order);
+    function choose(choice) {
+      const [order, asc] = choice.split('-');
+      current = asc ? null : order;
+      all.forEach((button) => {
+        const on = button.dataset.order === order;
+        button.setAttribute('aria-pressed', String(on));
+        const { label, dated } = orders[button.dataset.order];
+        button.textContent = on && dated ? `${label} ${asc ? '↑' : '↓'}` : label;
+      });
+      const { compare } = orders[order];
+      apply(asc ? (a, b) => compare(b, a) : compare);
     }
     container.before(bar);
-    const saved = read(key);
-    choose(shown.some(([order]) => order === saved) ? saved : first);
+    const saved = read(key) || '';
+    choose(orders[saved.split('-')[0]] ? saved : first);
   }
 
   // A category or a tag page: the items of its list, in place
@@ -91,12 +110,18 @@
         node,
         rank,
         title: node.querySelector('a').textContent.trim(),
-        date: Date.parse(node.dataset.date || '') || 0
+        updated: Date.parse(node.dataset.updated || '') || 0,
+        created: Date.parse(node.dataset.created || '') || 0
       }));
-    const ordered = items.some((item) => item.node.dataset.order !== undefined);
-    if (items.length > 1) {
-      const apply = (order) => list.append(...[...items].sort(ORDERS[order].compare).map((item) => item.node));
-      buttons(list, ordered ? 'list-sort-ordered' : 'list-sort', apply, ordered ? 'order' : 'newest');
+    const apply = (compare) => list.append(...[...items].sort(compare).map((item) => item.node));
+    if (items.length > 1 && items[0].node.dataset.created) {
+      // A category page: Order only where some notes have one
+      const ordered = items.some((item) => item.node.dataset.order !== undefined);
+      const { order, ...rest } = CATEGORY;
+      const orders = ordered ? CATEGORY : rest;
+      buttons(list, ordered ? 'category-sort-ordered' : 'category-sort', apply, ordered ? 'order' : 'updated', orders);
+    } else if (items.length > 1) {
+      buttons(list, 'list-sort', apply, 'newest');
     }
   }
 
@@ -124,23 +149,23 @@
     };
 
     let latest = 0; // a later click wins over a slow load
-    const apply = async (order) => {
+    const apply = async (compare) => {
       const call = ++latest;
-      if (order === 'newest') return show(own);
+      if (compare === ORDERS.newest.compare) return show(own);
       const all = await load();
       if (call !== latest) return;
-      if (!all) return show([...local].sort(ORDERS[order].compare).map((item) => item.node));
+      if (!all) return show([...local].sort(compare).map((item) => item.node));
 
       // Every tile, in Chirpy's order, then the slice of the sorted order that falls on this page
       const tiles = all.flatMap((page) => page.tiles).map((tile, rank) => ({ ...tile, rank }));
       const before = all.filter((page) => page.page < number).reduce((sum, page) => sum + page.tiles.length, 0);
       const here = all.find((page) => page.page === number)?.tiles.length ?? own.length;
-      const slice = tiles.sort(ORDERS[order].compare).slice(before, before + here);
+      const slice = tiles.sort(compare).slice(before, before + here);
       const holder = document.createElement('div');
       holder.innerHTML = slice.map((tile) => tile.html).join('');
       show([...holder.children]);
     };
 
-    if (own.length > 1) buttons(grid, 'home-sort', apply);
+    if (own.length > 1) buttons(grid, 'home-sort', apply, 'newest');
   }
 })();

@@ -6,7 +6,8 @@
 # [Physics, Black Holes, Black Hole Shadows] puts the note in Black Hole Shadows, inside Black
 # Holes, inside Physics. `also_in` gives more paths, one ([Coding, Julia]) or several
 # ([[Coding, Julia], [Physics, Classical Mechanics]]), and `order` places the note among the notes
-# of its own category, the last name of `categories`. Notes without `order` follow, newest first.
+# of its own category, the last name of `categories`. Notes without `order` follow, the most
+# recently changed first.
 #
 # At :post_read the plugin stores the paths of every post in `category_paths` and appends the
 # names of `also_in` to `categories`, so that jekyll-archives builds their pages and Chirpy links
@@ -15,7 +16,8 @@
 # the whole tree, deeper levels in closed folders (<details>). A category page gets its parent
 # categories in Chirpy's breadcrumb. With subcategories it becomes an explorer: the subcategories
 # as closed folders that open on their subtopics and their notes in order, then its own notes, all
-# notes as Chirpy's own items of the list (title, dotted leader, date). A category
+# notes as Chirpy's own items of the list (title, dotted leader, date). The date of a note is that
+# of its last change, marked Updated, or else of its creation, marked Created. A category
 # without subcategories keeps Chirpy's list of its notes, in order; those items are Chirpy's own,
 # picked out and reordered. post-topics-top.rb and home-tiles.rb show the paths on a post and on
 # its card (CategoryTree.trail).
@@ -34,6 +36,7 @@
 
 require 'cgi'
 require 'set'
+require 'time'
 
 # The tree of the categories of one build. `module_function` methods.
 module CategoryTree
@@ -69,6 +72,7 @@ module CategoryTree
   # @return [Hash{String=>Node}] the categories by name
   def build(site)
     @nodes = {}
+    @updated = {}
     @warned = Set.new
     @meta = site.data['categories'].is_a?(Hash) ? site.data['categories'] : {}
     site.posts.docs.each do |doc|
@@ -157,13 +161,49 @@ module CategoryTree
   end
 
   # The notes of the category itself: those whose first path ends here and that have `order`, by
-  # order, then the others, newest first.
+  # order, then the others, the most recently changed first.
   # @param node [Node]
   # @return [Array<Jekyll::Document>]
   def notes_of(node)
     ordered, rest = node.notes.partition { |doc, main| main && !doc.data['order'].nil? }
     ordered.map(&:first).sort_by { |doc| [doc.data['order'].to_f, doc.data['title'].to_s] } +
-      rest.map(&:first).sort_by { |doc| -doc.date.to_f }
+      rest.map(&:first).sort_by { |doc| -updated(doc).to_f }
+  end
+
+  # The date of the last change of a note, `last_modified_at` in its front matter, or nil if it
+  # has none or none later than the day of its date. Git plays no part: a commit may come long
+  # after the change it records.
+  # @param doc [Jekyll::Document]
+  # @return [Time, nil]
+  def changed(doc)
+    @updated.fetch(doc) do
+      lastmod = doc.data['last_modified_at']
+      time = lastmod && (lastmod.is_a?(Time) ? lastmod : Time.parse(lastmod.to_s))
+      @updated[doc] = time && time.to_date > doc.date.to_date ? time : nil
+    rescue ArgumentError
+      @updated[doc] = nil
+    end
+  end
+
+  # @return [Time] the last change of a note, or its date if it has none
+  def updated(doc)
+    changed(doc) || doc.date
+  end
+
+  # Chirpy's item of a note with its date of creation and of its last change in `data-created`
+  # and `data-updated`, for the sort buttons, and in its <time>, which Chirpy's script formats from
+  # `data-ts`, the last change or else the creation, with a word that says which.
+  # @param li [String] Chirpy's <li>
+  # @param extra [String] more attributes for the <li>
+  # @return [String]
+  def dated(li, doc, extra = '')
+    time = updated(doc)
+    kind = changed(doc) ? 'Updated' : 'Created'
+    li = li.sub(/\A<li\b/) { %(<li data-created="#{doc.date.iso8601}" data-updated="#{time.iso8601}"#{extra}) }
+    li.sub(%r{<time\b([^>]*?)data-ts="\d+"([^>]*)>.*?</time>}m) do
+      m = Regexp.last_match
+      %(<span class="date-kind">#{kind}</span><time#{m[1]}data-ts="#{time.to_i}"#{m[2]}> #{time.strftime('%b %-d, %Y')} </time>)
+    end
   end
 
   # @param site [Jekyll::Site]
@@ -204,7 +244,7 @@ module CategoryTree
   # @return [String] an <li>
   def file(site, doc)
     li = @items && (@items["#{site.baseurl}#{doc.url}"] || @items[doc.url])
-    return li.sub(/\A<li\b/) { %(<li data-date="#{doc.date.iso8601}") } if li
+    return dated(li, doc) if li
 
     css = defined?(NoteStage) && NoteStage.stage(doc) ? ' note-unpublished' : ''
     %(<li class="category-note#{css}"><i class="far fa-file-lines fa-fw"></i> ) +
@@ -324,7 +364,7 @@ module CategoryTree
 
       main = node.notes.any? { |d, first| d == doc && first }
       order = main && !doc.data['order'].nil? ? %( data-order="#{CGI.escapeHTML(doc.data['order'].to_s)}") : ''
-      li.sub(/\A<li\b/) { %(<li data-date="#{doc.date.iso8601}"#{order}) }
+      dated(li, doc, order)
     end
     out[0...start] + crumbs + out[start...list] + LIST + own.join + out[close..]
   end

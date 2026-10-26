@@ -125,6 +125,16 @@ details[open] > summary > .category-chevron {
   }
 }
 
+// The word before the date of a note in a category list: Updated or Created
+#page-category .date-kind {
+  margin-right: 0.35rem;
+  font-size: 0.75rem;
+  color: var(--text-muted-color);
+  opacity: 0.75;
+  white-space: nowrap;
+  line-height: 1.6rem;
+}
+
 // The thumbtack of a pinned category (_data/categories.yml), after its counts
 .category-pin {
   margin-left: 0.4rem;

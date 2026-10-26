@@ -60,7 +60,7 @@ Tags follow the science. They name the objects, the subjects, the methods and th
 
 ## 7. Seeing the current tree
 
-The Categories tab of the preview (`bash tools/run.sh -d`) shows the whole tree, drafts included, with the deeper levels in folders that open on a click. A category page with subcategories shows them as folders, each of which opens on its subtopics and its notes in order, and then the notes filed in the category itself; a category without subcategories lists its notes in order, with buttons that sort them by date or title. In a terminal, after `source .venv/bin/activate`, run:
+The Categories tab of the preview (`bash tools/run.sh -d`) shows the whole tree, drafts included, with the deeper levels in folders that open on a click. A category page with subcategories shows them as folders, each of which opens on its subtopics and its notes in order, and then the notes filed in the category itself; a category without subcategories lists its notes in order. Every note there shows the date of its last change, marked Updated, or else of its creation, marked Created. The last change is `last_modified_at` in the front matter of the note, which you set by hand when you revise it (`last_modified_at: 2026-10-26 12:00:00 +0530`); Chirpy shows the same date as Updated on the post itself. The buttons above such a list sort by the order of a series, by the last change, by the creation (a second click turns newest first into oldest first) or by title. In a terminal, after `source .venv/bin/activate`, run:
 
 ```shell
 ruby tools/categories.rb            # the tree with the number of notes in each category
