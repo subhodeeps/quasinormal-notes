@@ -255,9 +255,9 @@ details[open] > summary > .category-chevron {
     }
   }
 
-  // Folder rows a little closer together
-  #page-category .category-explorer .category-row,
-  .categories .list-group-item.category-folder {
+  // Folder rows of a category page a little closer together; the cards of the Categories tab keep
+  // their padding
+  #page-category .category-explorer .category-row {
     padding-top: 0.35rem;
     padding-bottom: 0.35rem;
   }
