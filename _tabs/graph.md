@@ -10,7 +10,7 @@ This graph shows every note on the site, coloured by its category. Two notes are
 
 {% include notes-graph.html page=true %}
 
-The graph turns slowly by itself, and you are welcome to play with it. You can drag it to move it, hold Shift while you drag to turn it, and scroll to zoom. A first click on a note or a tag selects it, and a second click opens its page.
+The graph turns slowly by itself, and you are welcome to play with it. You can drag it to move it, hold Shift while you drag to turn it, and scroll to zoom. A first click on a note or a tag selects it and keeps its neighbours lit, and the node under the pointer then lights its own neighbours more softly. A click on that node moves the selection, and a second click on the selected node opens its page.
 
 A click on a category in the legend below the graph shows only the notes of that category, and a click on Tags only shows the tags on their own, joined by a line when they share at least two notes. With the buttons in the corner of the graph, you can zoom, reset the view, pause the turning and clear the filters.
 

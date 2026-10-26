@@ -49,7 +49,9 @@
  *   number of notes, and a click opens the tag's page (tag_url in _plugins/notes-graph.rb) in
  *   two steps, as for a note.
  * - A first click on a note or a tag selects it: the graph stops turning, and the node keeps
- *   its title and its highlight after the pointer moves on. A second click opens its page, and
+ *   its title and the highlight of its cluster after the pointer moves on. The node under the
+ *   pointer then lights its own cluster more softly (SECOND), and a click on it moves the
+ *   selection there. A second click opens its page, and
  *   a click on empty space or Escape clears the selection. The right panel, which has no depth,
  *   opens a note on the first click. The tag nodes
  *   keep the colour neutral, since colour stands for the category of a note, and their glow
@@ -76,8 +78,11 @@
  *   slowly, so that the depth reads without any interaction. Notes farther back fade a little,
  *   a second cue for depth, and nodes are drawn from back to front.
  * - The forces differ from the flat ones. Notes repel more strongly, since three dimensions
- *   have more room. Tag springs are weaker and longer, because the many shared tags would
- *   otherwise pull the notes into one clump. The pull to the centre is firmer and brings loosely
+ *   have more room, and the springs of a node with many connections are longer (SPREAD), so that
+ *   a hub, such as the overview of a series or a broad tag, does not gather its notes into a clump.
+ *   On the notes of this site, this spreads the 34 notes of the shadow series by about a third,
+ *   and the whole cloud grows by less than 5 %. Tag springs are weaker and longer, because the many
+ *   shared tags would otherwise pull the notes into one clump. The pull to the centre is firmer and brings loosely
  *   linked notes in from the edge. On the notes of this site, these choices give a rounder and
  *   more even cloud with fewer stragglers, and linked notes still sit closer together than
  *   unlinked ones.
@@ -106,6 +111,7 @@
   const TAG_LENGTH = 60;
   const TAG_LENGTH_3D = 80; // on the Graph tab, where weak, long tag springs give a rounder, even spread
   const MEMBER_LENGTH = 45; // from a note to a tag node, on the Graph tab
+  const SPREAD = 0.4; // on the Graph tab, how much longer the springs of a node with many connections are, for each e-fold of connections
   const TAG_GLOW = 14; // px: the blur of the warm glow around a tag node
   const ITERATIONS = 400;
   const HIT = 9; // px: how close the pointer must be to a node
@@ -119,6 +125,7 @@
   const SWAY = [2.5, 5]; // px: the range of the amplitudes of the drift in the right panel
   const FAR = 0.4; // opacity of the notes and edges that the panel draws faintly
   const HIDDEN = 0.06; // opacity of the notes that the legend's filter leaves out
+  const SECOND = 0.6; // opacity of the cluster that the pointer lights while another node is selected
 
   document.querySelectorAll('.notes-graph').forEach((section) => {
     fetch(section.querySelector('canvas').dataset.src)
@@ -313,6 +320,10 @@
       .map((e) => [byId.get(e.source), byId.get(e.target), e])
       .filter(([a, b]) => a && b);
 
+    // How many connections each node has, for the length of its springs: the links of a note, the
+    // notes of a tag
+    for (const n of nodes) n.crowd = n.kind === 'tag' ? n.count : 0;
+    for (const [a, b, e] of springs) if (e.kind === 'link') [a.crowd, b.crowd] = [a.crowd + 1, b.crowd + 1];
     for (let i = 0; i < ITERATIONS; i++) step(nodes, springs, depth, 1 - i / ITERATIONS);
     return springs;
   }
@@ -348,7 +359,10 @@
     for (const [a, b, e] of springs) {
       const link = e.kind === 'link';
       const member = e.kind === 'member';
-      const rest = link ? LINK_LENGTH : member ? MEMBER_LENGTH : depth ? TAG_LENGTH_3D : TAG_LENGTH;
+      // On the Graph tab, a node with many connections holds them further away, so that a hub, such
+      // as the overview of a series or a broad tag, does not gather its notes into a clump
+      const crowd = depth && (link || member) ? Math.max(a.crowd, b.crowd, 1) : 1;
+      const rest = (link ? LINK_LENGTH : member ? MEMBER_LENGTH : depth ? TAG_LENGTH_3D : TAG_LENGTH) * (1 + SPREAD * Math.log(crowd));
       const k = (link ? 0.08 : member ? 0.02 : (depth ? 0.004 : 0.015) * (e.weight || 1)) * alpha;
       const dx = b.x - a.x;
       const dy = b.y - a.y;
@@ -497,7 +511,11 @@
     let colours = {};
     let hover = null;
     let selected = null; // the node clicked last on the Graph tab, which stays highlighted until it is cleared
-    const focus = () => hover || selected;
+    // The cluster of the selected node, or of the node under the pointer when none is selected, is
+    // at full strength. While a node is selected, the node under the pointer lights its own cluster
+    // more softly (SECOND), and a click on it moves the selection there
+    const main = () => selected || hover;
+    const second = () => (selected && hover && hover !== selected ? hover : null);
     let touch = false; // whether the last pointer was a finger
     // The legend's filter: the categories and the stages to show (an empty set means all), and
     // whether to show the tags. A note must pass both sets, and a tag stays in view while one of
@@ -681,10 +699,16 @@
       const s = dpr();
       ctx.setTransform(s, 0, 0, s, 0, 0);
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      // The note or tag under the pointer is highlighted with its neighbours, and otherwise the
-      // selected tag
-      const lit = focus() ? adjacent(focus().id) : null;
-      const dim = (id) => focus() && id !== focus().id && !lit.has(id);
+      // The selected node is highlighted with its neighbours, and otherwise the node under the
+      // pointer. While one is selected, the node under the pointer shows its cluster at a lower
+      // strength. The level of a node: 1 in the main cluster (and with no focus at all), SECOND in
+      // the softer one, and 0.3 outside both
+      const first = main();
+      const soft = second();
+      const litMain = first ? adjacent(first.id) : null;
+      const litSecond = soft ? adjacent(soft.id) : null;
+      const level = (id) =>
+        !first || id === first.id || litMain.has(id) ? 1 : soft && (id === soft.id || litSecond.has(id)) ? SECOND : 0.3;
 
       if (tagsOnly) {
         // The tag map: a thin line for each pair of tags, in the style of its number of notes
@@ -694,15 +718,16 @@
           if (!shown.has(a.id) || !shown.has(b.id)) continue;
           const [ax, ay] = screen(a);
           const [bx, by] = screen(b);
-          const f = focus();
-          const lit = f && (a === f || b === f);
+          const onMain = first && (a === first || b === first);
+          const onSecond = !onMain && soft && (a === soft || b === soft);
           const line = tagLine(shared);
-          ctx.globalAlpha = (f && !lit ? 0.25 : lit ? 1 : line.alpha) * depth((proj.get(a).z + proj.get(b).z) / 2);
+          const out = first && !onMain && !onSecond; // the line of neither cluster
+          ctx.globalAlpha = (out ? 0.25 : onMain ? 1 : onSecond ? SECOND : line.alpha) * depth((proj.get(a).z + proj.get(b).z) / 2);
           ctx.strokeStyle = mix(colours.node, colours.glow, line.tint);
-          ctx.lineWidth = (lit ? 1.8 : 1.2) * scale;
+          ctx.lineWidth = (onMain ? 1.8 : onSecond ? 1.5 : 1.2) * scale;
           ctx.setLineDash(line.dash.map((d) => d * scale));
           ctx.save();
-          if (line.halo && !(f && !lit)) {
+          if (line.halo && !out) {
             ctx.shadowColor = colours.glow;
             ctx.shadowBlur = 7 * scale;
           }
@@ -721,14 +746,17 @@
         const [bx, by] = screen(b);
         const link = e.kind === 'link';
         const fade = depth((proj.get(a).z + proj.get(b).z) / 2);
-        // On the Graph tab, the links of the note under the pointer take its colour
-        const f = focus();
-        const glow = big && f && (a === f || b === f);
+        // On the Graph tab, the lines of a focused node take its colour, at full strength for the
+        // main one and softer for the one under the pointer
+        const onMain = first && (a === first || b === first);
+        const onSecond = !onMain && soft && (a === soft || b === soft);
+        const glow = big && (onMain || onSecond);
         const remote = far.has(a.id) || far.has(b.id) ? FAR : 1;
-        ctx.globalAlpha = (f && !(a === f || b === f) ? 0.25 : 1) * fade * remote;
-        const glowColour = f?.kind === 'tag' ? colours.tag : colours.category[f?.category] || colours.node;
+        ctx.globalAlpha = (first && !onMain && !onSecond ? 0.25 : onSecond ? SECOND : 1) * fade * remote;
+        const g = onMain ? first : soft;
+        const glowColour = g?.kind === 'tag' ? colours.tag : colours.category[g?.category] || colours.node;
         ctx.strokeStyle = glow ? glowColour : link ? colours.edge : colours.faint;
-        ctx.lineWidth = glow ? 2 : (link ? 1.2 : 0.8) * (big ? 1.25 : 1);
+        ctx.lineWidth = glow ? (onMain ? 2 : 1.6) : (link ? 1.2 : 0.8) * (big ? 1.25 : 1);
         ctx.setLineDash(link ? [] : [2, 3]);
         ctx.beginPath();
         ctx.moveTo(ax, ay);
@@ -742,7 +770,7 @@
       for (const n of order) {
         const [x, y] = screen(n);
         if (n.kind === 'tag') {
-          if (shown.has(n.id)) tagNode(n, x, y, dim(n.id), tagsOnly && weak.has(n.id) && n !== focus());
+          if (shown.has(n.id)) tagNode(n, x, y, level(n.id), tagsOnly && weak.has(n.id) && n !== first);
           continue;
         }
         if (tagsOnly) continue; // the tag map has no notes, not even faint ones
@@ -753,7 +781,7 @@
         ctx.globalAlpha = 1;
         ctx.fillStyle = colours.bg;
         ctx.fill();
-        ctx.globalAlpha = (hidden ? HIDDEN : dim(n.id) ? 0.3 : 1) * depth(proj.get(n).z) * (far.has(n.id) ? FAR : 1);
+        ctx.globalAlpha = (hidden ? HIDDEN : level(n.id)) * depth(proj.get(n).z) * (far.has(n.id) ? FAR : 1);
         ctx.fillStyle = colours.category[n.category] || colours.node;
         ctx.fill();
         if (hidden) continue;
@@ -799,13 +827,13 @@
     // A tag node: a disc in the muted text colour with a warm glow around it. A disc of the
     // background colour goes first, so that the node hides the lines behind it, and a ring marks
     // it while the pointer rests on it
-    function tagNode(n, x, y, faded, weakTag) {
+    function tagNode(n, x, y, level, weakTag) {
       const r = radius(n);
       const disc = (grow) => {
         ctx.beginPath();
         ctx.arc(x, y, r + grow, 0, 2 * Math.PI);
       };
-      const alpha = (faded ? 0.3 : weakTag ? colours.weak : 1) * depth(proj.get(n).z);
+      const alpha = (level < 1 ? level : weakTag ? colours.weak : 1) * depth(proj.get(n).z);
       ctx.globalAlpha = 1;
       ctx.fillStyle = colours.bg;
       disc(1);
