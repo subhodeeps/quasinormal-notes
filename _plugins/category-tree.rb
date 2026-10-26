@@ -338,6 +338,23 @@ module CategoryTree
       parents.map { |parent| link(site, parent.name) }.join(SEP) + SEP + '</nav>']
   end
 
+  # Chirpy's "Recently Updated" in the right panel, which lists the whole site, with the five notes
+  # under the category that changed last (`updated`, the same dates as the list). Without that
+  # section (`<section id="access-lastmod">`), the page stays as it is.
+  # @return [String] the page
+  def with_recent(out, node, site)
+    section = out.index('<section id="access-lastmod">')
+    list = section && out.index('<ul', section)
+    open = list && out.index('>', list)
+    close = open && out.index('</ul>', open)
+    return out unless close && close < out.index('</section>', section)
+
+    items = notes_under(node).sort_by { |doc| -updated(doc).to_f }.first(5).map do |doc|
+      %(<li class="text-truncate lh-lg"> <a href="#{CGI.escapeHTML("#{site.baseurl}#{doc.url}")}">#{doc.data['title']}</a> </li>)
+    end
+    out[0..open] + items.join + out[close..]
+  end
+
   # A category page with its parents in the breadcrumb. A category with subcategories becomes an
   # explorer: its subcategories as closed folders, then its own notes, as Chirpy's items. A category
   # without subcategories keeps Chirpy's list, with only its own notes, in order, and the sort
@@ -354,6 +371,7 @@ module CategoryTree
     return nil unless node && close
 
     out, crumbs = with_parents(out, ancestors(node), site)
+    out = with_recent(out, node, site)
     top = out.index(PAGE)
     list = out.index(LIST, top)
     close = out.index('</ul>', list)

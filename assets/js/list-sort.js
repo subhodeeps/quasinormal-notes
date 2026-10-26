@@ -9,12 +9,13 @@
  *
  * On a category or a tag page, the buttons reorder the items of the list in place. On a category
  * page, _plugins/category-tree.rb writes the date of creation and of the last change of each note
- * (data-created, data-updated), and the buttons are Updated and Created, newest first and, after a
- * second click, oldest first, A–Z and Z–A, and first Order where some notes of the category have an
- * order of their own (data-order); Order is then the default, and Updated otherwise. A category
- * page with subcategories gets the same buttons, with Order as the default, and sorts every list of
- * its explorer, the lists of open folders included, with the folders first, as a file explorer
- * does: by the latest change or creation of the notes under a folder, or by its name.
+ * (data-created, data-updated). The buttons there are Updated and Created, newest first and,
+ * after a second click, oldest first, then A–Z and Z–A, and first Reading order where some notes
+ * of the category have an order of their own (data-order); Reading order is then the default, and
+ * Updated otherwise. A category page with subcategories gets the same buttons, with Reading order
+ * as the default, and sorts every list of its explorer, the lists of open folders included, with
+ * the folders first, as a file explorer does: by the latest change or creation of the notes under
+ * a folder, or by its name.
  *
  * The home page shows ten posts to a page, so its buttons sort the latest posts of all pages:
  * they load the tiles of every page from assets/data/home-tiles.json (the grid's data-all, which
@@ -58,7 +59,7 @@
   // A category page (_plugins/category-tree.rb): the order of a series, and the date of the last
   // change or of the creation, newest first and, after a second click, oldest first (dated)
   const CATEGORY = {
-    order: { label: 'Order', compare: byRank },
+    order: { label: 'Reading order', compare: byRank },
     updated: { label: 'Updated', compare: (a, b) => b.updated - a.updated, dated: true },
     created: { label: 'Created', compare: (a, b) => b.created - a.created, dated: true },
     az: ORDERS.az,
@@ -118,7 +119,7 @@
       }));
     const apply = (compare) => list.append(...[...items].sort(compare).map((item) => item.node));
     if (items.length > 1 && items[0].node.dataset.created) {
-      // A category page: Order only where some notes have one
+      // A category page: Reading order only where some notes have one
       const ordered = items.some((item) => item.node.dataset.order !== undefined);
       const { order, ...rest } = CATEGORY;
       const orders = ordered ? CATEGORY : rest;
