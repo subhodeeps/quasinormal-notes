@@ -11,9 +11,10 @@
 # \textbf <strong>, \texttt and \textsc a span of class bib-tt or bib-sc, and ~ a no-break
 # space. Math in $...$ passes through to MathJax. Cross-references (crossref) are not supported.
 #
-# JHEP.bst prints no web address for most entry types. The fields `url` and `adsurl` of an entry are
-# printed here as links, "[INSPIRE, ADS]", before the final full stop (JHEP.web_links); the
-# check against BibTeX leaves them out.
+# JHEP.bst prints no web address for most entry types, and it leaves out the field `note`. The fields
+# `url` and `adsurl` of an entry are printed here as links, "[INSPIRE, ADS]", before the final full
+# stop (JHEP.web_links), and `note` as a sentence after the reference; the check against BibTeX
+# leaves them out.
 #
 # Also collapses the citations of a page, [1, 2, 3] to [1-3] (hook :post_render at the end).
 # Check: `bundle exec ruby tools/bib/check.rb` compares the output with BibTeX (needs TeX).
@@ -800,8 +801,10 @@ module JHEP
     return Entry.new(fields).to_html unless extras
 
     links = web_links(fields)
-    html = Entry.new(fields.reject { |name, _| %w[url adsurl].include?(name) }).to_html
-    links.empty? ? html : html.sub(/\.?\z/) { "#{links}." }
+    out = Entry.new(fields.reject { |name, _| %w[url adsurl].include?(name) }).to_html
+    out = out.sub(/\.?\z/) { "#{links}." } unless links.empty?
+    note = fields['note'].to_s.strip
+    note.empty? ? out : "#{out} #{add_period(html(note))}"
   end
 
   # Joins runs of three or more consecutive citation numbers.

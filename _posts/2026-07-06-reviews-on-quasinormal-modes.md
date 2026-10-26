@@ -59,3 +59,7 @@ The study of linear perturbations to black hole spacetimes has been a remarkably
 ## Books
 
 {% bibliography --query @*[keywords ~= qnm-books] %}
+
+## Mathematical relativity
+
+{% bibliography --query @*[keywords ~= qnm-math] %}
