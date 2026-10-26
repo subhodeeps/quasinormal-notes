@@ -3,9 +3,10 @@
 # Hero of the home page and the headings of its post list.
 #
 # Inserts _includes/home-hero.html above the post list and, when the front matter of
-# index.html gives `hero.pinned_heading` and `hero.list_heading`, puts the second heading
-# after the pinned posts. Chirpy's home layout lists pinned and other posts as one run of
-# cards, so the hook edits the rendered page and leaves the layout alone.
+# index.html gives `hero.pinned_heading` and `hero.list_heading`, folds the pinned posts under the
+# first heading (<details class="home-pinned">, open at first) and puts the second after them.
+# Chirpy's home layout lists pinned and other posts as one run of cards, so the hook edits the
+# rendered page and leaves the layout alone.
 #
 # Depends on Chirpy's markup `<div id="post-list"` and `<article class="card-wrapper card">`.
 # If either is missing, the hook prints a build warning and leaves the page unchanged.
@@ -44,7 +45,9 @@ Jekyll::Hooks.register :pages, :post_render do |page|
     next
   end
 
-  heading = %(<h2 class="home-list-heading">#{hero['list_heading']}</h2>\n)
-  cards[pinned] += heading
+  # The pinned posts fold under their heading; assets/js/home-tiles.js remembers the choice
+  cards[0] += %(<details class="home-pinned" open><summary class="home-list-heading">#{hero['pinned_heading']}) +
+              %(<i class="fas fa-angle-right"></i></summary>\n)
+  cards[pinned] += %(</details>\n<h2 class="home-list-heading">#{hero['list_heading']}</h2>\n)
   page.output = cards.join(CARD)
 end

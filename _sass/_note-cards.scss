@@ -1,16 +1,9 @@
-// Cards of the post list in the colour of their subject. The --note variable, set inline by
-// _plugins/home-tiles.rb from --graph-node-<category>, gives the stripe and the tint.
+// Cards of the post list in the colour of their subject, flat: a thin stripe on the left, and a
+// dashed outline for an unpublished note. The --note variable, set inline by
+// _plugins/home-tiles.rb from --graph-node-<category>, gives the colour.
 
 #post-list .post-preview.note-card {
-  --card-hover-bg: color-mix(in srgb, var(--note) var(--card-tint-hover), transparent);
-
-  background-image: linear-gradient(
-    color-mix(in srgb, var(--note) var(--card-tint), transparent),
-    color-mix(in srgb, var(--note) var(--card-tint), transparent)
-  );
-  box-shadow:
-    inset 4px 0 0 var(--note),
-    var(--card-shadow);
+  box-shadow: inset 3px 0 0 var(--note); // flat, without Chirpy's drop shadow
 }
 
 #post-list .post-preview.note-card.note-unpublished {

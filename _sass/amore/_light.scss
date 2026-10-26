@@ -157,8 +157,6 @@ $tint: 0.3;
 
 
   /* Cards of the home page (_sass/_note-cards.scss): the share of the note's colour in the tint */
-  --card-tint: 6%;
-  --card-tint-hover: 13%;
 
   @include syntax.styles(p.$inks, $accent, $muted-foreground, $muted, 0.25);
 }

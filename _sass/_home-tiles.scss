@@ -1,6 +1,6 @@
 // The grid of tiles on the home page (_plugins/home-tiles.rb, assets/js/home-tiles.js).
 // Defines the tile sizes (tile-small, tile-wide, tile-tall, tile-large), the excerpt that fades out
-// towards the date, and the dashed border of unpublished notes.
+// towards the date, and the quiet meta line of every card on the list.
 
 #post-list .home-tiles {
   display: grid;
@@ -104,8 +104,8 @@
     font-size: 1.3rem;
   }
 
-  .tile-small:not(.tile-stage) .post-meta .categories,
-  .tile-small:not(.tile-stage) .post-meta .fa-folder-open {
+  // A small tile shows only the date, so that its title has the room
+  .tile-small .post-meta .categories {
     display: none;
   }
 
@@ -119,5 +119,43 @@
       grid-column: auto;
       grid-row: auto;
     }
+  }
+}
+
+// The meta line of every card on the home page, the pinned ones included: the date and the
+// category as one quiet line of text, "Oct 25, 2026 · Black Hole Environments", without
+// Chirpy's calendar and folder icons
+#post-list .card .post-meta {
+  .fa-calendar,
+  .fa-folder-open {
+    display: none;
+  }
+
+  // Chirpy leaves a space before the categories, so the dot needs a margin on its right only
+  .categories::before {
+    content: '·';
+    margin-right: 0.4rem;
+  }
+}
+
+// The pinned posts, folded under their heading (_plugins/home-hero.rb)
+.home-pinned {
+  > summary {
+    cursor: pointer;
+    list-style: none;
+
+    &::-webkit-details-marker {
+      display: none;
+    }
+
+    .fa-angle-right {
+      margin-left: 0.35rem;
+      font-size: 0.8em;
+      transition: transform 200ms ease;
+    }
+  }
+
+  &[open] > summary .fa-angle-right {
+    transform: rotate(90deg);
   }
 }
