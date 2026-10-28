@@ -2,20 +2,31 @@
 // holds every rule that applies to it). Change a size or a font here and every page follows.
 //
 //   _tokens.scss      these values
-//   _type.scss        the sizes applied to every kind of text (the fonts, on every width, are in
-//                     _sass/_typefaces.scss)
+//   _fonts.scss       the font files (Literata, JetBrains Mono NL) and their fallbacks
+//   _type.scss        the fonts and sizes applied to every kind of text
 //   _components.scss  the folded hero, the bars, the scroll-to-top button, the graph lightbox,
 //                     the head of a post
 //   _index.scss       loads them, last in assets/css/jekyll-theme-chirpy.scss so that the phone
 //                     rules win over the partials of the rest of the site
 
-// Type scale in rem (1 rem is 16 px). The body of a post is 15 px in Literata, which fits about 50
-// characters to a phone line, the density of the author's other site. JetBrains Mono is 0.6 em wide
+// Fonts. The body text of a post (paragraphs, lists, quotations, captions, tables) is set in Literata,
+// to read beside the math. Every other text on the phone is set in JetBrains Mono NL, the cut of
+// JetBrains Mono without ligatures, as on the author's other site (subhodeeps.vercel.app): titles,
+// headings, the interface, categories, tags, the home page, the bars, the sidebar, the footer, and the
+// prose of pages that are not posts. Code is monospace in its own rules.
+$body-font: 'Literata', 'Literata Fallback', Georgia, serif;
+$ui-font: 'JetBrains Mono NL', 'JetBrains Mono NL Fallback', monospace;
+$heading-weight: 700; // JetBrains Mono NL is loaded in 400 and 700
+
+// Type scale in rem (1 rem is 16 px). The body of a post is 12.5 px in Literata, which is 5.7 px to a
+// character, the width of a character of the references (10 px in the mono), so that a post is as compact
+// as its list of references. JetBrains Mono is 0.6 em wide
 // to a letter against Literata's 0.47, so a mono size is worth about 1.27 times its Literata
 // equivalent: the sizes below follow that site (title 20 px, body 12 to 13 px, meta 10 to 11 px) and
-// keep the order of headings above a 15 px body.
+// keep the order of headings above the body.
 //
-//   Body of a post (Literata):  15 px text, 13 px captions and tables
+//   Body of a post (Literata):  12.5 px text, 11 px captions and tables
+//   Headings of a post:         17 px title, 13.5 px h2, 12 px h3, 11 px h4
 //   Everything else (mono):     20 px titles, the title of the sidebar
 //                               16 px h2, the years of the Archives tab
 //                               14 px h3, the tagline, the top bar, the primary categories
@@ -23,8 +34,14 @@
 //                               12 px buttons, tags, tile descriptions, the intro line, the sidebar
 //                               11 px bylines, dates, counts, credits
 //                               10 px the footer and the labels of the graph's scale
-$body: 0.9375rem;
-$body-small: 0.8125rem;
+$body: 0.78125rem;
+$body-small: 0.6875rem;
+
+// Headings of a post or a page, and its title: the scale of the body of 12.5 px, kept in the same order
+$post-title: 1.0625rem;
+$post-h2: 0.84375rem;
+$post-h3: 0.75rem;
+$post-h4: 0.6875rem;
 $title: 1.25rem;
 $h2: 1rem;
 $h3: 0.875rem;
@@ -32,3 +49,7 @@ $h4: 0.8125rem;
 $text: 0.75rem;
 $meta: 0.6875rem;
 $foot: 0.625rem;
+
+// Math (MathJax, New Computer Modern) is scaled up so that its x-height matches that of Literata,
+// which has a large one: the guideline is to match x-heights, which gives about 1.1 to 1.15.
+$math-scale: 110%;
