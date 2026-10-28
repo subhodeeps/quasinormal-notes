@@ -11,7 +11,9 @@
  * Colours come from the CSS variables --pocket-separatrix and --pocket-photon (amore blue
  * and red, set per theme in _sass/amore), and are read again when the theme changes.
  * With prefers-reduced-motion, the finished picture is drawn once, without motion. The animation
- * stops while the figure is off screen, the page is hidden or the sidebar of a phone is open.
+ * stops while the figure is off screen (also when the hero is folded on a phone), the page is hidden
+ * or the sidebar of a phone is open. On a phone it is fetched and started at the first opening of
+ * the hero only (assets/js/home-hero-fold.js).
  */
 (() => {
   const canvas = document.querySelector('.home-hero-canvas');
@@ -30,10 +32,21 @@
   const ratio = () => Math.min(window.devicePixelRatio || 1, 2);
   const FRAME = 30; // ms between two frames
 
-  fetch(canvas.dataset.src)
-    .then((res) => res.json())
-    .then(start)
-    .catch(() => {}); // no figure is better than a broken one
+  // On a phone the figure is folded (assets/js/home-hero-fold.js sets `hidden` on it): nothing is
+  // fetched or drawn until the first "Know more". The same script sends `hero:toggle`.
+  const figure = canvas.closest('figure') || canvas;
+  const hero = document.getElementById('home-hero');
+  let begun = false;
+  function begin() {
+    if (begun || figure.hidden) return;
+    begun = true;
+    fetch(canvas.dataset.src)
+      .then((res) => res.json())
+      .then(start)
+      .catch(() => {}); // no figure is better than a broken one
+  }
+  begin();
+  if (hero) hero.addEventListener('hero:toggle', begin);
 
   function start(data) {
     const { width: W, height: H, scale } = data.view;

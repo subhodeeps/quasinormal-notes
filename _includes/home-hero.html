@@ -1,6 +1,7 @@
 <!-- Figure and a line about the site, inserted above the home page's post list by _plugins/home-hero.rb -->
 {% assign hero = page.hero %}
 <section id="home-hero" aria-label="About this site">
+  <script defer src="{{ '/assets/js/home-hero-fold.js' | relative_url }}"></script>
   {% if hero.figure %}
     {% include {{ hero.figure }} alt=hero.alt %}
   {% elsif hero.image %}
@@ -24,6 +25,12 @@
       </p>
     {% endif %}
   </div>
+  <!-- Phones and tablets: the button that opens the figure and the intro line (assets/js/home-hero-fold.js);
+       hidden until the script has folded the hero, so that without JavaScript the whole hero shows -->
+  <button type="button" class="home-hero-toggle" aria-expanded="false" hidden>
+    <i class="fas fa-circle-info" aria-hidden="true"></i>
+    <span class="home-hero-toggle-label">Know more</span>
+  </button>
 </section>
 {% comment %} The heading of the grid, which the pinned categories and notes open (_plugins/home-tiles.rb) {% endcomment %}
 {% if hero.list_heading %}
