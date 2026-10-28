@@ -128,9 +128,19 @@
     }
   }
 
-  // --- Head of a post: a category name or a date does not break inside itself
+  // --- Head of a post: a category name or a date does not break inside itself, and a path breaks
+  // only after a separator (the markup has no spaces there, so a zero-width space is the break
+  // opportunity), or after the dot between two paths
   .post-topics .category-path a,
   header > .post-meta > .d-flex > * {
     white-space: nowrap;
+  }
+
+  .category-path .category-sep::after {
+    content: '\200b';
+  }
+
+  .category-path + .category-path::before {
+    content: '·\200b';
   }
 }
