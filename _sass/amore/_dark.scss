@@ -152,6 +152,7 @@ $tint: 0.14;
   --graph-node-code-carpentry: #{p.$amber-main};
   --graph-node-homelab: #{p.$indigo-main};
   --graph-node-personal: #{p.$plum-main};
+  --graph-node-history-of-science: #{p.$olive-main};
   --graph-edge: #{p.alpha(p.$slate-main, 0.7)};
   --graph-edge-faint: #{p.alpha(p.$slate-main, 0.45)};
   --graph-bg: #100d19; // the canvas of the Graph tab: a flat violet-black, clearly apart from the page

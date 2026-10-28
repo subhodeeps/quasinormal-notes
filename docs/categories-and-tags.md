@@ -73,10 +73,10 @@ The tree on the date of the last `--write`, with an asterisk on the categories t
 
 <!-- tree:start -->
 ```text
-- Physics (78, pinned)
-  - Black Holes (58)
+- Physics (79, pinned)
+  - Black Holes (59)
     - Black Hole Environments * (4)
-    - Black Hole Shadows * (35)
+    - Black Hole Shadows * (36)
     - Pseudospectra * (4)
     - Quasinormal Modes (8)
     - Superradiance * (3)
@@ -98,6 +98,8 @@ The tree on the date of the last `--write`, with an asterisk on the categories t
   - Environments (2)
   - Remote Access (5)
   - Version Control * (2)
+- History of Science * (1)
+  - History of Physics * (1)
 - Homelab (4)
   - Laptop Cluster (4)
 - Personal (1)
