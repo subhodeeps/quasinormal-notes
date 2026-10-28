@@ -261,13 +261,6 @@ details[open] > summary > .category-chevron {
     }
   }
 
-  // The names and the titles of a category page a step larger, all of one size; the Categories tab
-  // keeps its own sizes
-  #page-category .category-row > a,
-  #page-category li:not(.category-folder) > a {
-    font-size: 1.2rem;
-  }
-
   // The subfolders inside a card of the Categories tab keep their own spacing
   .categories .category-tree .category-row {
     padding: 0.45rem 0 0;

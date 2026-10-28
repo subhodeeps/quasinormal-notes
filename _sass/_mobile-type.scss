@@ -1,0 +1,197 @@
+// One scale of type sizes for the whole site on a phone or a tablet (below 992 px), so that the same
+// kind of text has the same size on every page. The fonts stay the site's own: Lato for titles and
+// headings (and for the folders of the category lists, which head the notes under them), Source
+// Sans Pro for text and controls, JetBrains Mono for code and the footer. Only sizes, line heights,
+// spacing and two weights change: the description under a post's title and the label "Explore" take
+// weight 400, since Chirpy loads Lato in 300 and 400 only (300 is thin on a phone, and 600 was faked).
+//
+//   28 px  titles of posts, pages and category pages
+//   22 px  h2, the years of the Archives tab
+//   19 px  h3, the folders of category lists, the tagline of the home page
+//   17 px  text, h4, descriptions, the titles of notes in lists, the titles of the home tiles
+//   14 px  captions, tables, buttons, the descriptions of the home tiles, dates of the Archives tab
+//   13 px  bylines, tags, dates and counts
+//   12 px  the footer
+//
+// The home tiles take the scale below 576 px only, where they are one column of short tiles; from
+// 576 to 991 px they are squares of fixed size (_home-tiles.scss). Code blocks keep Chirpy's 13.6 px.
+// Loaded last in assets/css/jekyll-theme-chirpy.scss, so that it wins over the partials it overrides
+// (_home-tiles.scss, _category-tree.scss, _tag-groups.scss, _footer.scss, _headings.scss) and over
+// Chirpy. Depends on Chirpy's markup for posts (article > div.content, header .post-desc), the Archives
+// tab (#archives) and the footer; a selector that no longer matches leaves Chirpy's size.
+
+$title: 1.75rem;
+$h2: 1.375rem;
+$h3: 1.1875rem;
+$text: 1.0625rem;
+$small: 0.875rem;
+$meta: 0.8125rem;
+$foot: 0.75rem;
+$heading-font: Lato, 'Microsoft Yahei', sans-serif;
+
+@media (max-width: 991.98px) {
+  // --- Titles
+  #main-wrapper h1:not(.card-title) {
+    font-size: $title;
+    line-height: 1.25;
+  }
+
+  article > header > .post-desc {
+    font-size: $text;
+    font-weight: 400 !important; // Bootstrap's fw-light is !important
+    line-height: 1.5;
+  }
+
+  #page-category .category-description {
+    font-size: $text;
+    line-height: 1.5;
+  }
+
+  // --- The text of posts and pages: a line height of 1.6, which leaves room for inline math with
+  // sub- and superscripts, and more space above a heading than below it
+  article > div.content {
+    font-size: $text;
+    line-height: 1.6;
+
+    p {
+      margin-bottom: 1rem;
+    }
+
+    li {
+      margin: 0.25rem 0;
+    }
+
+    h2 {
+      margin-top: 2.25rem;
+      margin-bottom: 0.75rem;
+      font-size: $h2;
+      line-height: 1.3;
+    }
+
+    h3 {
+      margin-top: 1.75rem;
+      margin-bottom: 0.5rem;
+      font-size: $h3;
+      line-height: 1.3;
+    }
+
+    :is(h4, h5) {
+      margin-top: 1.5rem;
+      margin-bottom: 0.5rem;
+      font-size: $text;
+      line-height: 1.35;
+    }
+
+    :is(figcaption, .aps-caption) {
+      font-size: $small;
+      line-height: 1.5;
+    }
+
+    table,
+    :is(td, th) {
+      font-size: $small;
+    }
+
+    :not(pre) > code {
+      font-size: 0.875em;
+    }
+  }
+
+  header > .post-meta,
+  .post-topics .post-meta,
+  .post-topics .post-tags .post-tag {
+    font-size: $meta;
+  }
+
+  :is(#toc-bar, #toc-solo-trigger) .label,
+  .list-sort button,
+  .home-hero-toggle,
+  #main-wrapper .pagination :is(span, a) {
+    font-size: $small;
+  }
+
+  #main-wrapper .note-stage {
+    font-size: $meta;
+  }
+
+  // --- Category pages and the Categories tab: folders in the heading font, a step above the notes
+  // (#main-wrapper outranks the rules of _category-tree.scss)
+  #main-wrapper #page-category .category-row > a,
+  #main-wrapper .categories .card-header > span > a {
+    font-family: $heading-font;
+    font-size: $h3;
+  }
+
+  #main-wrapper .categories .list-group-item.category-folder .category-row > a {
+    font-family: $heading-font;
+    font-size: $text;
+  }
+
+  #main-wrapper #page-category li:not(.category-folder) > a {
+    font-size: $text;
+  }
+
+  #main-wrapper .category-row > span.small,
+  #main-wrapper #page-category time,
+  #main-wrapper #page-category .date-kind {
+    font-size: $meta;
+  }
+
+  // --- The Tags and Archives tabs
+  .tag-groups .tag-group-title {
+    font-size: $text;
+  }
+
+  .tag-groups .tag-group-count,
+  #archives .archive-path {
+    font-size: $meta;
+  }
+
+  .tag-groups .tag {
+    font-size: $small;
+  }
+
+  #archives .year {
+    font-size: $h2;
+  }
+
+  #main-wrapper #archives .date {
+    font-size: $small;
+  }
+
+  #archives li > a {
+    font-size: $text;
+  }
+
+  // --- The footer
+  footer {
+    font-size: $foot;
+  }
+}
+
+// --- The home page: one column of short tiles below 576 px
+@media (max-width: 575.98px) {
+  .home-hero-text {
+    font-size: $h3;
+  }
+
+  .home-list-heading {
+    font-size: $small;
+    font-weight: 400;
+  }
+
+  #post-list .home-tiles .card .card-body,
+  #post-list .home-tiles .tile-wide .card-body {
+    .card-title {
+      font-size: $text;
+    }
+
+    .card-text p {
+      font-size: $small;
+    }
+
+    .post-meta {
+      font-size: $meta;
+    }
+  }
+}

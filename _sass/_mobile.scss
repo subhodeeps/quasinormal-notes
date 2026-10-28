@@ -94,30 +94,7 @@
     }
   }
 
-  // --- Reading: a line height of about 1.55 in place of Chirpy's 1.75, tighter gaps between
-  // paragraphs, and more room above a heading than below it
-  main .content {
-    line-height: 1.55;
-
-    p {
-      margin-bottom: 0.85rem;
-    }
-
-    li {
-      margin: 0.1rem 0;
-    }
-
-    h2 {
-      margin-top: 2rem;
-      margin-bottom: 0.6rem;
-    }
-
-    h3,
-    h4 {
-      margin-top: 1.6rem;
-      margin-bottom: 0.5rem;
-    }
-  }
+  // --- Reading: the sizes, line heights and spacing of text are in _mobile-type.scss
 
   // --- Scroll to top: smaller, at the edge, and half transparent while it shows (44 px is
   // the smallest comfortable touch target)
@@ -170,5 +147,55 @@
 
   .on-mouse {
     display: none;
+  }
+}
+
+// The bars of a phone (below 850 px, where Chirpy shows the title of its top bar), with the buttons of
+// assets/js/topbar.js. One bar stays at the top while the page scrolls: on a post Chirpy's bar of
+// contents (#toc-bar), which it shows once the head of the post has scrolled away, with the hamburger
+// and the theme added at its left; on a page without that bar, the top bar itself, with the theme
+// beside the hamburger. The title of the top bar stays centred between the buttons.
+#topbar-mode-toggle,
+.toc-bar-buttons {
+  display: none;
+}
+
+@media (max-width: 849.98px) {
+  body:not(:has(#toc-bar)) #topbar-wrapper {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: var(--main-bg); // Chirpy's own is see-through, and the page would show behind it
+    border-bottom: 1px solid var(--main-border-color);
+  }
+
+  #topbar {
+    position: relative;
+  }
+
+  #topbar-mode-toggle {
+    display: block;
+    margin-right: auto;
+  }
+
+  #topbar-title {
+    position: absolute;
+    left: 50%;
+    width: calc(100% - 13rem);
+    transform: translateX(-50%);
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  .toc-bar-buttons {
+    display: flex;
+    flex: none;
+  }
+
+  #toc-bar > .label {
+    flex: 1;
+    min-width: 0;
+    margin-left: 0.25rem;
   }
 }
