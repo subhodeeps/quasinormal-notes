@@ -146,7 +146,7 @@ $tint: 0.3;
   --graph-node-code-carpentry: #{p.$amber-main};
   --graph-node-homelab: #{p.$indigo-main};
   --graph-node-personal: #{p.$plum-main};
-  --graph-node-history-of-science: #{p.$olive-main};
+  --graph-node-history-of-science: #{p.$red-main};
   --graph-edge: #{p.alpha(p.$slate-main, 0.55)}; // a thin line of the slate, as the pale slate-light looked thick on white
   --graph-edge-faint: #{p.alpha(p.$slate-main, 0.35)};
   --graph-bg: #f1edf6; // the canvas of the Graph tab: a flat, cool eggshell with a tint of the purple accent
