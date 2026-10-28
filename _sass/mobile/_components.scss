@@ -9,6 +9,8 @@
 // .show when it appears) and the head of a post (.post-topics, header > .post-meta). A selector
 // that no longer matches only leaves that part as Chirpy renders it.
 
+@use 'tokens' as *;
+
 @media (max-width: 991.98px) {
   // --- No pinch-zoom of the page: a finger may pan, never scale (a canvas that sets its own
   // touch-action, as the note graph does, still handles its pinch itself)
@@ -151,6 +153,32 @@
 
   #toc-solo-trigger + #toc-popup + .content {
     margin-top: 1.25rem;
+  }
+}
+
+// The dark theme on a phone: the text of a post and its grey text brighter (_tokens.scss), under Chirpy's
+// theme attribute and under the system preference, as _sass/amore/_index.scss applies the theme
+@mixin dark-text {
+  #main-wrapper article {
+    --text-color: #{$dark-text};
+    --text-muted-color: #{$dark-muted};
+    --blockquote-text-color: #{$dark-muted};
+    --prompt-text-color: #{$dark-text};
+    --highlighter-rouge-color: #{$dark-text}; // inline code
+
+    color: var(--text-color);
+  }
+}
+
+@media (max-width: 991.98px) {
+  :root[data-bs-theme='dark'] {
+    @include dark-text;
+  }
+}
+
+@media (max-width: 991.98px) and (prefers-color-scheme: dark) {
+  :root:not([data-bs-theme]) {
+    @include dark-text;
   }
 }
 

@@ -62,3 +62,10 @@ $foot: 0.625rem;
 // (0.546 em), as MathJax itself would do; the rule needs
 // !important to win over the size that MathJax writes on each equation.
 $math-scale: 127%;
+
+// The dark theme on a phone: light text on a dark screen reads thinner and softer than dark text on
+// white, and the theme's text (#c2c9d1, 10.9:1 on #12161c) looked dim beside its headings (16.6:1). The
+// text of a post takes the contrast of the light theme (13:1), and its grey text (captions, bylines,
+// 4.8:1) about 6:1.
+$dark-text: #d5dbe1;
+$dark-muted: #8794a1;
