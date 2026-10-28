@@ -6,7 +6,7 @@
 {% if include.page %}
 <section class="notes-graph notes-graph-page">
 {% else %}
-<section id="notes-graph" class="notes-graph">
+<section id="notes-graph" class="notes-graph" data-script="{{ '/assets/js/notes-graph.js' | relative_url }}">
   <h2 class="panel-heading">{% if current %}Connections{% else %}Note Graph{% endif %}</h2>
 {% endif %}
   <div class="notes-graph-stage">

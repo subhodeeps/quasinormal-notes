@@ -1,6 +1,12 @@
 /*
- * Two buttons for a phone (below 850 px): the theme beside the hamburger of the top bar, and, on a
- * post, the hamburger and the theme at the left of Chirpy's bar of contents.
+ * Buttons for a phone (below 850 px): the theme beside the hamburger of the top bar, the graph beside
+ * search, and, on a post, the hamburger and the theme at the left of Chirpy's bar of contents and the
+ * graph beside its button of contents.
+ *
+ * Graph: Chirpy hides the right panel below 1200 px, and with it the note graph (#notes-graph, the
+ * neighbourhood of a post). The graph button opens that section in a lightbox (a <dialog>), starts
+ * its script, which only starts on a wide screen, and puts the section back in the panel when the
+ * lightbox closes.
  *
  * Theme: Chirpy keeps its switch in the sidebar (#mode-toggle, a menu of light, dark and system),
  * which a phone hides. The theme buttons turn the theme the page shows into the other one by pressing
@@ -35,8 +41,14 @@
   const shown = () =>
     document.documentElement.getAttribute('data-bs-theme') ||
     (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+  // The same three icons as Chirpy's switch in the sidebar; _sass/_mobile.scss shows the one that the
+  // sidebar shows (the sun, the moon, or the display of the system's own setting)
   const themeButton = (id) => {
     const b = button(id, 'fas fa-circle-half-stroke', '');
+    b.innerHTML =
+      '<i class="fa-regular fa-sun" data-theme-mode="light"></i>' +
+      '<i class="fa-regular fa-moon" data-theme-mode="dark"></i>' +
+      '<i class="fa-solid fa-display" data-theme-mode="system"></i>';
     const label = () => b.setAttribute('aria-label', shown() === 'dark' ? 'Switch to the light theme' : 'Switch to the dark theme');
     label();
     b.addEventListener('click', () => {
@@ -49,6 +61,43 @@
   // The top bar: the theme beside the hamburger
   if (hasTheme) trigger.after(themeButton('topbar-mode-toggle'));
 
+  // The graph in a lightbox
+  const graph = document.getElementById('notes-graph');
+  let dialog = null;
+  let home = null;
+  const openGraph = () => {
+    if (!dialog) {
+      dialog = document.createElement('dialog');
+      dialog.className = 'graph-dialog';
+      dialog.setAttribute('aria-label', 'Note graph');
+      const close = button('graph-dialog-close', 'fas fa-xmark', 'Close');
+      close.addEventListener('click', () => dialog.close());
+      dialog.append(close);
+      dialog.addEventListener('click', (event) => event.target === dialog && dialog.close());
+      dialog.addEventListener('close', () => home.parent.insertBefore(graph, home.next));
+      document.body.append(dialog);
+    }
+    home = { parent: graph.parentNode, next: graph.nextSibling };
+    dialog.append(graph);
+    dialog.showModal();
+    if (document.querySelector('script[data-notes-graph]')) {
+      graph.dispatchEvent(new Event('graph:start'));
+    } else {
+      graph.dataset.wanted = 'true';
+      const script = document.createElement('script');
+      script.src = graph.dataset.script;
+      script.dataset.notesGraph = '';
+      document.body.append(script);
+    }
+  };
+  const graphButton = (id) => {
+    const b = button(id, 'fas fa-diagram-project', 'Open the note graph');
+    b.addEventListener('click', openGraph);
+    return b;
+  };
+  const search = document.getElementById('search-trigger');
+  if (graph && search && typeof HTMLDialogElement === 'function') search.before(graphButton('topbar-graph'));
+
   // The bar of contents of a post: the hamburger and the theme at its left
   const tocBar = document.getElementById('toc-bar');
   if (!tocBar) return;
@@ -59,4 +108,6 @@
   group.append(side);
   if (hasTheme) group.append(themeButton('toc-bar-mode-toggle'));
   tocBar.prepend(group);
+  const contents = tocBar.querySelector('.toc-trigger');
+  if (graph && contents && typeof HTMLDialogElement === 'function') contents.before(graphButton('toc-bar-graph'));
 })();

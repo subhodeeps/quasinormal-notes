@@ -58,9 +58,13 @@
         .then((data) => start(section, data))
         .catch(() => section.remove()); // no graph is better than a broken one
     };
-    // The panel graph waits for an idle moment, so that its layout does not hold up the page
+    // The panel graph waits for an idle moment, so that its layout does not hold up the page. On a
+    // phone it starts when the reader opens it in the lightbox of assets/js/topbar.js, which sets
+    // data-wanted (before this script has loaded) or sends graph:start (after)
     const idle = window.requestIdleCallback || ((fn) => setTimeout(fn, 300));
-    if (section.classList.contains('notes-graph-page')) load();
+    section.addEventListener('graph:start', load);
+    if (section.dataset.wanted) load();
+    else if (section.classList.contains('notes-graph-page')) load();
     else if (wide.matches) idle(load, { timeout: 2000 });
     else wide.addEventListener?.('change', () => wide.matches && idle(load, { timeout: 2000 }));
   });
