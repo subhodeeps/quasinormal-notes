@@ -9,27 +9,31 @@
 //   _index.scss       loads the three, last in assets/css/jekyll-theme-chirpy.scss so that the
 //                     phone rules win over the partials of the rest of the site
 //
-// Type scale in rem (1 rem is 16 px), with its use (every text on the phone is on it, except code):
+// Type scale in rem (1 rem is 16 px), with its use. It is based on the density of the user's other site
+// (subhodeeps.vercel.app, measured at 390 px: body 12 to 13 px in a monospace, about 50 characters to a
+// line, title 20 to 24 px, section labels 14 px, meta text 10 to 11 px). Literata averages 0.47 em to a
+// letter, so 15 px gives the same 50 characters to a phone line. Every text on the phone is on it,
+// except code:
 //
-//   28 px  titles of posts, pages and category pages
-//   22 px  h2, the years of the Archives tab
-//   19 px  h3, the folders of category lists, the tagline of the home page
-//   17 px  text, h4, descriptions, the titles of notes in lists, the titles of the home tiles
-//   14 px  captions, tables, buttons, the descriptions of the home tiles, dates of the Archives tab
-//   13 px  bylines, tags, dates, counts, the footer, credits
-//   12 px  the smallest text: the labels of the graph's scale
+//   24 px  titles of posts, pages and category pages, the title of the sidebar
+//   20 px  h2, the years of the Archives tab
+//   17 px  h3, the folders of category lists, the tagline of the home page, the standfirst, the top bar
+//   15 px  text, h4, the titles of notes in lists, the titles of the home tiles
+//   13 px  captions, tables, buttons, the descriptions of the home tiles, the intro line of the home page
+//   12 px  bylines, tags, dates, counts, the footer, credits
+//   11 px  the smallest text: the labels of the graph's scale
 
-$title: 1.75rem;
-$h2: 1.375rem;
-$h3: 1.1875rem;
-$text: 1.0625rem;
-$small: 0.875rem;
-$meta: 0.8125rem;
-$foot: 0.75rem;
+$title: 1.5rem;
+$h2: 1.25rem;
+$h3: 1.0625rem;
+$text: 0.9375rem;
+$small: 0.8125rem;
+$meta: 0.75rem;
+$foot: 0.6875rem;
 
-// Fonts. Every text on the phone is set in Literata (prose, titles, headings in its semibold, the
-// interface, the sidebar, the bars, the footer), so that the site reads as one family beside the
-// math; only code is monospace (JetBrains Mono). 'Literata Fallback' is Georgia scaled to the widths
+// Fonts. Every text on the phone is set in Literata (prose, titles, headings in the semibold, categories,
+// tags, the home page, the top bar, the sidebar, search, the footer), so that it reads as one family beside
+// the math; only code is monospace (JetBrains Mono). 'Literata Fallback' is Georgia scaled to the widths
 // of Literata (_fonts.scss), so that the text does not move when Literata arrives.
 $text-font: 'Literata', 'Literata Fallback', Georgia, serif;
 $heading-weight: 600; // Literata semibold; _fonts.scss declares it for 600 and 700

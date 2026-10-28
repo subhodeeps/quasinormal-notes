@@ -22,13 +22,14 @@
   :is(h1, h2, h3, h4, h5, h6),
   #topbar-title,
   header .post-desc,
+  #sidebar,
+  #search-results a,
   #notification.toast .toast-body,
   :is(#toc-bar, #toc-solo-trigger, #toc-popup) :is(.label, .header, #toc-popup-content),
   .pagination,
   #archives .date.day,
   a.tag span,
   .share-mastodon,
-  #search-results a,
   footer.site-footer {
     font-family: $text-font;
   }
@@ -61,7 +62,7 @@
   }
 
   article > header > .post-desc {
-    font-size: $text;
+    font-size: $h3;
     font-weight: 400 !important; // Bootstrap's fw-light is !important
     line-height: 1.5;
   }
@@ -208,7 +209,7 @@
   }
 
   .home-hero-subtext {
-    font-size: $text;
+    font-size: $small;
   }
 
   .home-hero-pocket figcaption {
@@ -217,13 +218,13 @@
 
   // --- The bars and the sidebar
   #topbar-title {
-    font-size: $text;
-    font-weight: $heading-weight;
+    font-size: $h3;
+    font-weight: 600;
   }
 
   #sidebar .site-title {
     font-size: $title;
-    font-weight: 700;
+    font-weight: 700; // Literata's semibold and bold are one face
   }
 
   #sidebar .site-subtitle,
