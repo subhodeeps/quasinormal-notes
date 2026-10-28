@@ -57,7 +57,8 @@
 
   #main-wrapper article > div.content ol.bibliography :is(li, span, em, strong) {
     font-family: $ui-font;
-    font-size: $meta;
+    font-size: $foot;
+    letter-spacing: -0.02em; // a reference is long: the mono's 0.6 em to a letter, a little tighter
     line-height: 1.5;
   }
 

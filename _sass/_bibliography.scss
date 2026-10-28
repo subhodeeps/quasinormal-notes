@@ -29,6 +29,11 @@
   }
 }
 
+// The compact form of a reference (_plugins/jhep.rb, JHEP.short) is for a phone only
+.content .bib-short {
+  display: none;
+}
+
 // \ttfamily for arXiv numbers, \scshape for collaborations
 .content .bib-tt {
   font-family: var(--bs-font-monospace);

@@ -157,6 +157,25 @@
   }
 }
 
+// References on a phone: the compact form of each reference (JHEP.short in _plugins/jhep.rb), which
+// holds the first author, the title, the source with its year and the links, in place of the full
+// one, so that a reference takes two to three lines. The number takes a narrower column.
+@media (max-width: 991.98px) {
+  .content ol.bibliography {
+    .bib-full {
+      display: none;
+    }
+
+    .bib-short {
+      display: inline;
+    }
+
+    .bib-item {
+      grid-template-columns: 1.75rem 1fr;
+    }
+  }
+}
+
 // The bars of a phone (below 850 px, where Chirpy shows the title of its top bar), with the buttons of
 // assets/js/topbar.js. One bar stays at the top while the page scrolls: on a post Chirpy's bar of
 // contents (#toc-bar), which it shows once the head of the post has scrolled away, with the hamburger
@@ -295,23 +314,4 @@
   top: 0.25rem;
   right: 0.25rem;
   z-index: 1;
-}
-
-// References on a phone: a reference takes two lines at most, with an ellipsis after the second (its
-// links are at the end of the entry, so those of a long entry are cut; the reference as a whole is
-// still in the page for a wide screen). The number takes a narrower column so that the entry has the
-// room.
-@media (max-width: 991.98px) {
-  .content ol.bibliography {
-    .bib-text {
-      display: -webkit-box;
-      -webkit-box-orient: vertical;
-      -webkit-line-clamp: 2;
-      overflow: hidden;
-    }
-
-    .bib-item {
-      grid-template-columns: 1.75rem 1fr;
-    }
-  }
 }

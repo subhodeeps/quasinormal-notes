@@ -795,6 +795,63 @@ module JHEP
     " [#{links.join(', ')}]"
   end
 
+  # A compact form of a reference, for a phone, where a line holds about 55 characters of 10 px: the
+  # first author (both if two, "et al." if more), the title, where the work is (a journal with its volume,
+  # year and first page, with the DOI on that text; a book with its publisher and year; a chapter with the
+  # start of the title of its book) and the year, then the arXiv number and the web links. It leaves out
+  # what a reader does not need to find the work (editors, series, places, the pages of a chapter), which
+  # the full form (format) keeps for a wide screen. The note of an entry stays, since it is the author's
+  # comment on the work. Most take two lines, the longest three, and an entry with a note more.
+  # @param fields [Hash] one entry of entries
+  # @return [String] HTML
+  def short(fields)
+    names = split_names((fields['author'] || fields['editor']).to_s)
+    who = case names.length
+          when 0 then ''
+          when 1, 2 then html(names.map { |n| format_name(n) }.join(' and '))
+          else html("#{format_name(names[0])} et~al.")
+          end
+    title = fields['title'].to_s.strip
+    title = title.empty? ? '' : "<em>#{html(sentence_case(title))}</em>"
+    year = fields['year'].to_s.strip
+    doi = fields['doi'].to_s.strip
+    link = ->(text) { doi.empty? ? text : %(<a href="#{CGI.escapeHTML("https://doi.org/#{doi}")}">#{text}</a>) }
+    source =
+      case fields['@type']
+      when 'article'
+        journal = fields['journal'].to_s.strip
+        volume = fields['volume'].to_s.strip
+        page = fields['pages'].to_s.strip[/\A[^-,]*/].to_s
+        text = +(journal.empty? ? '' : "<em>#{html(journal)}</em>")
+        text << " <strong>#{html(volume)}</strong>" unless volume.empty?
+        text << " (#{html(year)})"
+        text << " #{html(page)}" unless page.empty?
+        link.call(text.strip)
+      when 'book'
+        link.call(html([fields['publisher'].to_s.strip, year].reject(&:empty?).join(', ')))
+      when 'incollection', 'inbook', 'inproceedings', 'conference'
+        book = fields['booktitle'].to_s[/\A[^:]+/].to_s.strip
+        link.call([book.empty? ? nil : "in <em>#{html(book)}</em>", "(#{html(year)})"].compact.join(' '))
+      else
+        how = fields['howpublished'].to_s[/\A[^,]+/].to_s.strip
+        link.call(html([how, year].reject(&:empty?).join(', ')))
+      end
+    eprint = fields['eprint'].to_s.strip
+    arxiv = eprint.empty? ? '' : %( [<a href="#{CGI.escapeHTML("https://arxiv.org/abs/#{eprint}")}"><span class="bib-tt">#{CGI.escapeHTML(eprint)}</span></a>])
+    head = [who, title, source].reject(&:empty?).join(', ')
+    note = fields['note'].to_s.strip
+    out = "#{head}#{arxiv}#{web_links(fields)}."
+    note.empty? ? out : "#{out} #{add_period(html(note))}"
+  end
+
+  # Both forms of a reference, for the page: the full one and the compact one, of which the style
+  # sheet shows one (_sass/_bibliography.scss, _sass/mobile/_components.scss).
+  # @param fields [Hash] one entry of entries
+  # @return [String] HTML
+  def dual(fields)
+    %(<span class="bib-full">#{format(fields)}</span><span class="bib-short">#{short(fields)}</span>)
+  end
+
   # @param fields [Hash] one entry of entries
   # @param extras [Boolean] false prints exactly what JHEP.bst prints (tools/bib/check.rb); true
   #   prints the links of `url` and `adsurl` as web_links, in place of the address that
@@ -834,7 +891,7 @@ if defined?(Liquid)
         scholar = site.config['scholar'] || {}
         path = File.join(site.source, scholar['source'] || '_bibliography', scholar['bibliography'] || 'references.bib')
         fields = JHEP.entries(path)[entry['key']]
-        fields ? JHEP.format(fields) : CGI.escapeHTML(entry['key'].to_s)
+        fields ? JHEP.dual(fields) : CGI.escapeHTML(entry['key'].to_s)
       end
     end
   end
@@ -867,7 +924,7 @@ if defined?(Liquid)
             Jekyll.logger.warn 'jhep_list:', "no entry #{key} in #{File.basename(path)}"
             next
           end
-          %(<li><span class="bib-text">#{JHEP.format(fields)}</span></li>)
+          %(<li><span class="bib-text">#{JHEP.dual(fields)}</span></li>)
         end
         %(<ol class="bibliography">#{items.join("\n")}</ol>)
       end
