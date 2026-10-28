@@ -140,6 +140,19 @@
     flex-basis: 100%;
     height: 0;
   }
+
+  // The Contents button closer to the tags and to the text: Chirpy keeps the room of its bar of contents
+  // (#toc-bar, 3rem, invisible until the head scrolls away) between the tags and the button, and 2rem
+  // above the text; the button moves up over that hidden bar, which takes no taps while invisible
+  #toc-solo-trigger {
+    display: block; // as a block it has no line box of its own around it, so the two gaps are exact
+    width: max-content;
+    margin-top: -1.75rem;
+  }
+
+  #toc-solo-trigger + #toc-popup + .content {
+    margin-top: 1.25rem;
+  }
 }
 
 // Text for a touch screen and text for a mouse: a phone or a tablet shows .on-touch, a computer .on-mouse

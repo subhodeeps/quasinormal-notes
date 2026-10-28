@@ -4,7 +4,7 @@
 // About page and the Graph page, which is New Computer Modern, and the alert boxes and references, which are mono. This file is the one
 // place that sets the font and the size of each kind of text on the phone. The home tiles take their
 // scale below 576 px only, where they are one column of short tiles; from 576 to 991 px they are squares
-// of fixed size (_home-tiles.scss). Code blocks are 11.8 px, Chirpy's 13.6 px in proportion to the body. Loaded last in
+// of fixed size (_home-tiles.scss). Code is at the x-height of the text: 10 px inline, 10.5 px in blocks. Loaded last in
 // assets/css/jekyll-theme-chirpy.scss, so that it wins over the partials it overrides and over Chirpy.
 //
 // Depends on Chirpy's markup: article > div.content for the text of a post or page, and
@@ -139,7 +139,40 @@
     font-size: $body-small;
   }
 
-  // code blocks, in proportion to the body (Chirpy's selector and its specificity)
+  // inline code: a small chip at the x-height of the text, whose box stays inside the line (Chirpy's
+  // padding of 3 px 5 px and its line height made it taller than a line); code in a heading keeps the
+  // heading's size (_code-font.scss)
+  // (a code block's table sits in a <code> inside div.highlight, which is not a chip)
+  #main-wrapper article > div.content :not(pre, .highlight) > code:not(:is(h1, h2, h3, h4, h5, h6) code) {
+    padding: 0.1em 0.35em;
+    font-size: $chip;
+    line-height: 1.2;
+    border-radius: 4px;
+  }
+
+  // the contents of a post (Chirpy's popup at 16.8 px), at the size of the other lists of titles
+  #toc-popup {
+    font-size: $h4;
+
+    .node-name--H3 {
+      font-size: $text;
+    }
+  }
+
+  // the bar above a code block (its language and the copy button), lower and with a smaller label
+  .code-header {
+    height: 1.75rem;
+
+    span {
+      line-height: 1.75rem;
+    }
+
+    span::after {
+      font-size: $foot;
+    }
+  }
+
+  // code blocks, at the x-height of the text (Chirpy's selector and its specificity)
   .highlight pre {
     font-size: $code;
     line-height: $code-line;
@@ -188,13 +221,9 @@
       line-height: 1.45;
     }
 
-    :not(pre) > code {
-      font-size: 0.875em;
-    }
-
-    // the labels of folded boxes ("Show the code") are interface
+    // the labels of folded boxes ("Show the code") are interface, as the labels of the alert boxes
     summary {
-      font-size: $h4;
+      font-size: $text;
     }
   }
 

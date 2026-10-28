@@ -29,7 +29,7 @@ $heading-weight: 700; // JetBrains Mono NL is loaded in 400 and 700
 //
 //   Body of a post (serif):     13 px text, 11.5 px captions and tables
 //   Headings of a post:         17 px title, 13.5 px h2, 12 px h3, 11 px h4
-//   Code blocks (mono):         11.8 px
+//   Code (mono):                10 px inline, 10.5 px blocks
 //   Everything else (mono):     20 px titles, the title of the sidebar
 //                               16 px h2, the years of the Archives tab
 //                               14 px h3, the tagline, the top bar, the primary categories
@@ -40,10 +40,13 @@ $heading-weight: 700; // JetBrains Mono NL is loaded in 400 and 700
 $body: 0.8125rem;
 $body-small: 0.71875rem;
 
-// Code blocks keep Chirpy's proportion to the text: its 13.6 px and 1.4 rem line to a 15 px body, scaled by
-// 13 / 15
-$code: 0.7375rem;
-$code-line: 1.2133rem;
+// Code is set at the x-height of the text: JetBrains Mono has an x-height of 0.55 em against 0.43 of New
+// Computer Modern, so 10 px of the mono stands as high as 13 px of the serif (5.5 and 5.6 px). Inline code
+// (a chip) is 10 px wherever it stands, beside the serif or the 10 px mono of a box or a reference; a code
+// block is 10.5 px, on a line of 1.6.
+$chip: 0.625rem;
+$code: 0.65625rem;
+$code-line: 1.05rem;
 
 // Headings of a post or a page, and its title: the scale of the body of 12.5 px, kept in the same order
 $post-title: 1.0625rem;
