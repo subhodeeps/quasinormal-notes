@@ -3,6 +3,7 @@
 title: Note Graph
 icon: fas fa-diagram-project
 order: 3
+description: Every note on the site as a graph, coloured by its category. Two notes are joined by a solid line when one of them links to the other, and each tag is a small circle joined to its notes by dotted lines.
 panel_graph: false # the page shows the whole graph, so the right panel leaves it out
 ---
 

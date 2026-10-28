@@ -1,5 +1,14 @@
 <!-- Chirpy's placeholder for custom <head> content (included from _includes/head.html) -->
 
+<!-- Chirpy's viewport meta forbids zooming (user-scalable=no), so that nobody can enlarge an equation or a
+     block of code on a phone. This puts the zoom back without a copy of Chirpy's head. -->
+<script>
+  (function () {
+    var meta = document.querySelector('meta[name="viewport"]');
+    if (meta) meta.setAttribute('content', 'width=device-width, initial-scale=1, viewport-fit=cover');
+  })();
+</script>
+
 <!-- JetBrains Mono for code (_sass/_code-font.scss), loaded without holding up the first paint:
      the text shows in the fallback monospace font until it arrives. Google Fonts is already
      preconnected by Chirpy. -->
