@@ -1,23 +1,22 @@
-// One scale of type sizes for the whole site on a phone or a tablet (below 992 px), so that the same
-// kind of text has the same size on every page, and one font. Every text is in Literata (see
-// _tokens.scss); only code keeps its monospace. This file is the one place that sets the font and
-// the size of each kind of text on the phone. Only sizes, line heights,
-// spacing and two weights change: the description under a post's title and the label "Explore" take
-// weight 400, since Chirpy loads Lato in 300 and 400 only (300 is thin on a phone, and 600 was faked).
-// The sizes are the values of _tokens.scss, which lists them with their use.
+// The fonts and sizes of every text on a phone or a tablet (below 992 px), so that the same kind of text
+// has the same font and size on every page. The body of a post is in Literata; every other text is in
+// JetBrains Mono NL (see _tokens.scss for the fonts, the scale and the reasons). This file is the one
+// place that sets the font and the size of each kind of text on the phone. The home tiles take their
+// scale below 576 px only, where they are one column of short tiles; from 576 to 991 px they are squares
+// of fixed size (_home-tiles.scss). Code blocks keep Chirpy's 13.6 px. Loaded last in
+// assets/css/jekyll-theme-chirpy.scss, so that it wins over the partials it overrides and over Chirpy.
 //
-// The home tiles take the scale below 576 px only, where they are one column of short tiles; from
-// 576 to 991 px they are squares of fixed size (_home-tiles.scss). Code blocks keep Chirpy's 13.6 px.
-// Loaded last in assets/css/jekyll-theme-chirpy.scss, so that it wins over the partials it overrides
-// (_home-tiles.scss, _category-tree.scss, _tag-groups.scss, _footer.scss, _headings.scss) and over
-// Chirpy. Depends on Chirpy's markup for posts (article > div.content, header .post-desc), the Archives
-// tab (#archives) and the footer; a selector that no longer matches leaves Chirpy's size.
+// Depends on Chirpy's markup: article > div.content for the text of a post or page, and
+// article > header .post-meta, which only a post has, to tell a post from a page (:has); the Archives
+// tab (#archives), the bars and the sidebar, and the footer. A selector that no longer matches leaves
+// Chirpy's own font and size.
 
 @use 'tokens' as *;
 
 @media (max-width: 991.98px) {
-  // --- One font for every text. Chirpy and the site's partials set Lato, Source Sans Pro, sans-serif,
-  // Oswald or the monospace on some elements; they are listed here. Code, kbd and icons keep theirs.
+  // --- JetBrains Mono NL for everything. Chirpy and the site's partials set Lato, Source Sans Pro,
+  // sans-serif, Oswald or the monospace on some elements; they are listed here. Code, kbd and icons
+  // keep theirs.
   body,
   :is(h1, h2, h3, h4, h5, h6),
   #topbar-title,
@@ -31,18 +30,23 @@
   a.tag span,
   .share-mastodon,
   footer.site-footer {
-    font-family: $text-font;
+    font-family: $ui-font;
+    font-variant-ligatures: none;
   }
 
-  // --- Titles and headings: semibold, a little tighter, with the sizes of the scale
+  // --- Literata for the body of a post: paragraphs, lists, quotations, captions and tables
+  article:has(> header .post-meta) > div.content :is(p, li, dd, dt, blockquote, figcaption, td, th) {
+    font-family: $body-font;
+  }
+
+  // --- Titles and headings: bold, with the sizes of the scale
   :is(h1, h2, h3, h4, h5, h6) {
     font-weight: $heading-weight;
   }
 
   #main-wrapper h1:not(.card-title) {
     font-size: $title;
-    letter-spacing: -0.005em;
-    line-height: 1.2;
+    line-height: 1.3;
   }
 
   #main-wrapper h2:not(.panel-heading, .home-list-heading) {
@@ -54,30 +58,47 @@
   }
 
   #main-wrapper :is(h4, h5, h6, .panel-heading) {
-    font-size: $text;
+    font-size: $h4;
   }
 
   #main-wrapper .home-list-heading {
-    font-size: $small;
+    font-size: $text;
   }
 
   article > header > .post-desc {
-    font-size: $h3;
+    font-size: $h4;
     font-weight: 400 !important; // Bootstrap's fw-light is !important
-    line-height: 1.5;
+    line-height: 1.6;
   }
 
   #page-category .category-description {
-    font-size: $text;
-    line-height: 1.5;
+    font-size: $h4;
+    line-height: 1.6;
   }
 
-  // --- The text of posts and pages: a line height of 1.6, which leaves room for inline math with
-  // sub- and superscripts, and more space above a heading than below it
-  article > div.content {
-    font-size: $text;
+  // --- The body of a post: Literata at 15 px on a line height of 1.6, which leaves room for inline
+  // math with sub- and superscripts. A page that is not a post has its prose in the mono, at 13 px.
+  article:has(> header .post-meta) > div.content {
+    font-size: $body;
     line-height: 1.6;
 
+    :is(figcaption, .aps-caption) {
+      font-size: $body-small;
+      line-height: 1.5;
+    }
+  }
+
+  // #main-wrapper outranks the table rule of _aps-table.scss
+  #main-wrapper article:has(> header .post-meta) > div.content :is(table, td, th) {
+    font-size: $body-small;
+  }
+
+  article:not(:has(> header .post-meta)) > div.content {
+    font-size: $h4;
+    line-height: 1.65;
+  }
+
+  article > div.content {
     p {
       margin-bottom: 1rem;
     }
@@ -86,41 +107,33 @@
       margin: 0.25rem 0;
     }
 
-    :is(h2, h3, h4, h5) {
-      letter-spacing: -0.005em;
-    }
-
+    // headings of the text: room above, less below
     h2 {
       margin-top: 2.25rem;
       margin-bottom: 0.75rem;
-      line-height: 1.3;
+      line-height: 1.35;
     }
 
     h3 {
       margin-top: 1.75rem;
       margin-bottom: 0.5rem;
-      line-height: 1.3;
+      line-height: 1.4;
     }
 
     :is(h4, h5) {
       margin-top: 1.5rem;
       margin-bottom: 0.5rem;
-      line-height: 1.35;
-    }
-
-    :is(figcaption, .aps-caption) {
-      font-size: $small;
-      line-height: 1.5;
+      line-height: 1.45;
     }
 
     :not(pre) > code {
       font-size: 0.875em;
     }
-  }
 
-  // #main-wrapper outranks the table rule of _aps-table.scss
-  #main-wrapper article > div.content :is(table, td, th) {
-    font-size: $small;
+    // the labels of folded boxes ("Show the code") are interface
+    summary {
+      font-size: $h4;
+    }
   }
 
   // --- Math, scaled to the x-height of the text (see _tokens.scss)
@@ -128,7 +141,7 @@
     font-size: $math-scale !important;
   }
 
-  // --- Bylines, tags, dates and counts
+  // --- Bylines, dates, counts and credits
   :is(header > .post-meta, .post-topics .post-meta) :is(a, span, em, time),
   header > .post-meta,
   .post-topics .post-meta,
@@ -139,15 +152,16 @@
     font-size: $meta;
   }
 
-  // --- Buttons and small controls
+  // --- Buttons, chips and small controls
   #main-wrapper .btn,
   #notification.toast .btn,
   :is(#toc-bar, #toc-solo-trigger) .label,
   .list-sort button,
   .home-hero-toggle,
   #main-wrapper .pagination :is(span, a),
+  #main-wrapper .notes-graph-legend button,
   #main-wrapper a.tag {
-    font-size: $small;
+    font-size: $text;
   }
 
   // --- The foot of a post (share, licence, older and newer), and the lists of related notes
@@ -157,16 +171,15 @@
   }
 
   .post-navigation .btn p {
-    font-size: $text;
+    font-size: $h4;
   }
 
   :is(#access-lastmod, .backlinks) a,
   #main-wrapper a.post-preview .card-body p {
-    font-size: $small;
+    font-size: $text;
   }
 
-  // --- Category pages and the Categories tab: a step above the notes for folders
-  // (#main-wrapper outranks the rules of _category-tree.scss)
+  // --- Category pages and the Categories tab (#main-wrapper outranks the rules of _category-tree.scss)
   #main-wrapper #page-category .category-row > a,
   #main-wrapper .categories .card-header > span > a {
     font-size: $h3;
@@ -174,7 +187,7 @@
 
   #main-wrapper .categories .list-group-item.category-folder .category-row > a,
   #main-wrapper #page-category li:not(.category-folder) > a {
-    font-size: $text;
+    font-size: $h4;
   }
 
   #main-wrapper .category-row > span.small,
@@ -186,7 +199,7 @@
   // --- The Tags and Archives tabs
   #main-wrapper .tag-groups .tag-group-title,
   #archives li > a {
-    font-size: $text;
+    font-size: $h4;
   }
 
   .tag-groups .tag-group-count,
@@ -200,7 +213,7 @@
   }
 
   #main-wrapper #archives .date {
-    font-size: $small;
+    font-size: $text;
   }
 
   // --- The home page
@@ -209,7 +222,7 @@
   }
 
   .home-hero-subtext {
-    font-size: $small;
+    font-size: $text;
   }
 
   .home-hero-pocket figcaption {
@@ -219,24 +232,27 @@
   // --- The bars and the sidebar
   #topbar-title {
     font-size: $h3;
-    font-weight: 600;
+    font-weight: $heading-weight;
   }
 
   #sidebar .site-title {
     font-size: $title;
-    font-weight: 700; // Literata's semibold and bold are one face
+    font-weight: $heading-weight;
   }
 
-  #sidebar .site-subtitle,
+  #sidebar .site-subtitle {
+    font-size: $meta;
+  }
+
   #sidebar ul li.nav-item a.nav-link span,
   #sidebar .sidebar-bottom #mode-toggle + .dropdown-menu .dropdown-item {
-    font-size: $small;
+    font-size: $text;
   }
 
   // --- The footer
   footer.site-footer,
   footer.site-footer :is(.footer-copyright, .footer-quote, figcaption) {
-    font-size: $meta;
+    font-size: $foot;
   }
 
   // --- The scale of the note graph (colour bar and its labels)
@@ -251,11 +267,11 @@
   #post-list .home-tiles .card .card-body,
   #post-list .home-tiles .tile-wide .card-body {
     .card-title {
-      font-size: $text;
+      font-size: $h4;
     }
 
     .card-text p {
-      font-size: $small;
+      font-size: $text;
     }
 
     .post-meta {

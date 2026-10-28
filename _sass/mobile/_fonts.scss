@@ -1,5 +1,6 @@
-// Literata, the font of prose on a phone or a tablet (assets/fonts/literata/, SIL Open Font License,
-// licence beside the files): a serif designed for reading on screens, by TypeTogether for Google
+// Literata, the font of the body of posts on a phone or a tablet (assets/fonts/literata/, SIL Open
+// Font License, licence beside the files), and JetBrains Mono NL, the font of everything else (below).
+// Literata is a serif designed for reading on screens, by TypeTogether for Google
 // Play Books, https://github.com/googlefonts/literata (3.103). The files are subsets (Latin, the
 // accented letters of names, Greek small letters, punctuation, arrows and a few symbols, without
 // hinting, which a phone does not use) made with pyftsubset; the version is in the file name, so
@@ -42,5 +43,38 @@
   size-adjust: 108.06%;
   ascent-override: 108.92%;
   descent-override: 28.5%;
+  line-gap-override: 0%;
+}
+
+// JetBrains Mono NL (assets/fonts/jetbrains-mono-nl/, SIL Open Font License, licence beside the files),
+// the cut of JetBrains Mono without ligatures, 2.304, from the release archive of
+// github.com/JetBrains/JetBrainsMono: regular and bold, subsets (Latin, Latin Extended-A, Greek,
+// punctuation, arrows, box drawing) without hinting, about 11 KB each. It is preloaded on every page
+// for narrow screens (_includes/metadata-hook.html). Its fallback is the phone's own monospace with
+// the metrics of JetBrains Mono (advance 0.6 em, as Menlo and Courier), so that the lines do not move
+// when it arrives. The name differs from the 'JetBrains Mono' of the Google Fonts link, which sets
+// code, so that the two do not mix.
+
+@font-face {
+  font-family: 'JetBrains Mono NL';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/assets/fonts/jetbrains-mono-nl/jetbrains-mono-nl-400-v2304.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'JetBrains Mono NL';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('/assets/fonts/jetbrains-mono-nl/jetbrains-mono-nl-700-v2304.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'JetBrains Mono NL Fallback';
+  src: local('Menlo'), local('Courier New'), local('Courier');
+  ascent-override: 102%;
+  descent-override: 30%;
   line-gap-override: 0%;
 }
