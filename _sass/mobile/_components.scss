@@ -44,8 +44,7 @@
 
     .home-hero-figure {
       order: 3;
-      width: min(100%, 60vh); // a 4:3 canvas of at most 45vh in height
-      max-width: 28rem;
+      width: min(100%, 15rem); // a 4:3 canvas of 15rem by 11.25rem, a figure beside the tagline and not a banner
     }
 
     .home-hero-subtext {
