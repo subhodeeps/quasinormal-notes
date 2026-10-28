@@ -1,0 +1,136 @@
+// Phones and tablets, below 992 px (the breakpoint of _motion.scss): the folded hero of the home
+// page (assets/js/home-hero-fold.js, _includes/home-hero.html), easier reading, the scroll-to-top
+// button and the category names in the head of a post. Every rule is inside the media query, so
+// that a wide screen looks as before. Math on a phone is in _math.scss.
+//
+// Depends on Chirpy's markup: main > .content for the text of a post, #back-to-top (with the class
+// .show when it appears) and the head of a post (.post-topics, header > .post-meta). A selector
+// that no longer matches only leaves that part as Chirpy renders it.
+
+@media (max-width: 991.98px) {
+  // --- Home hero: the tagline and the button first, then the figure and the intro line, which the
+  // script folds away. The text block gives up its box (display: contents), so that its two
+  // paragraphs can be ordered around the button.
+  #home-hero {
+    flex-direction: column;
+    gap: 1rem;
+    text-align: center;
+
+    > div {
+      display: contents;
+    }
+
+    [hidden] {
+      display: none !important;
+    }
+
+    .home-hero-text {
+      order: 1;
+    }
+
+    .home-hero-toggle {
+      order: 2;
+    }
+
+    .home-hero-figure {
+      order: 3;
+      width: min(100%, 60vh); // a 4:3 canvas of at most 45vh in height
+      max-width: 28rem;
+    }
+
+    .home-hero-subtext {
+      order: 4;
+      margin-top: 0;
+    }
+
+    .home-hero-pocket figcaption {
+      position: static;
+    }
+  }
+
+  #home-hero:has(.home-hero-pocket) {
+    padding-bottom: 1.5rem;
+  }
+
+  #home-hero.is-folded {
+    gap: 0.75rem;
+    margin-top: 1.25rem;
+    padding-bottom: 1.25rem;
+  }
+
+  // The button is a slim pill in the purple accent of the links. Its tap target is still 44 px:
+  // the ::after extends the area that answers a tap beyond the pill.
+  .home-hero-toggle {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    min-height: 2rem;
+    padding: 0 0.85rem;
+    font-size: 0.85rem;
+    color: var(--link-color);
+    background: none;
+    border: 1px solid var(--link-underline-color);
+    border-radius: 1rem;
+    touch-action: manipulation;
+
+    i {
+      font-size: 0.8em;
+    }
+
+    &::after {
+      content: '';
+      position: absolute;
+      inset: -0.5rem -0.4rem;
+    }
+
+    &:hover,
+    &:focus-visible,
+    &[aria-expanded='true'] {
+      border-color: var(--link-color);
+    }
+  }
+
+  // --- Reading: a line height of about 1.55 in place of Chirpy's 1.75, tighter gaps between
+  // paragraphs, and more room above a heading than below it
+  main .content {
+    line-height: 1.55;
+
+    p {
+      margin-bottom: 0.85rem;
+    }
+
+    li {
+      margin: 0.1rem 0;
+    }
+
+    h2 {
+      margin-top: 2rem;
+      margin-bottom: 0.6rem;
+    }
+
+    h3,
+    h4 {
+      margin-top: 1.6rem;
+      margin-bottom: 0.5rem;
+    }
+  }
+
+  // --- Scroll to top: smaller, at the edge, and half transparent while it shows (44 px is
+  // the smallest comfortable touch target)
+  #back-to-top {
+    width: 2.75rem;
+    height: 2.75rem;
+    right: 0.5rem;
+
+    &.show {
+      opacity: 0.5;
+    }
+  }
+
+  // --- Head of a post: a category name or a date does not break inside itself
+  .post-topics .category-path a,
+  header > .post-meta > .d-flex > * {
+    white-space: nowrap;
+  }
+}

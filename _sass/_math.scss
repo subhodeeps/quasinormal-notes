@@ -1,9 +1,23 @@
 // Display equations: a MathJax container wider than the column scrolls inside itself, so that
-// the page does not scroll sideways.
+// the page does not scroll sideways. On a phone or a tablet (below 992 px) the scroll bar is thin
+// and clear of the formula, and on a phone the equations are a tenth smaller.
 
 mjx-container[display='true'] {
   min-width: 0 !important;
   max-width: 100%;
   overflow-x: auto;
   overflow-y: hidden;
+}
+
+@media (max-width: 991.98px) {
+  mjx-container[display='true'] {
+    padding-bottom: 0.4rem;
+    scrollbar-width: thin;
+  }
+}
+
+@media (max-width: 575.98px) {
+  mjx-container[display='true'] {
+    font-size: 90% !important;
+  }
 }

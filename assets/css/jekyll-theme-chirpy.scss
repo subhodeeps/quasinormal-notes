@@ -81,5 +81,8 @@
 /* Enlarged figures (Chirpy's GLightbox popup) on the background of the page */
 @use 'lightbox';
 
+/* Phones and tablets: the folded hero, reading, the scroll-to-top button, the head of a post */
+@use 'mobile';
+
 /* A muted purple box, > text {: .prompt-review }, for the reviews to read first */
 @use 'prompt-review';
