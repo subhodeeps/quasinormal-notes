@@ -1,4 +1,5 @@
-// Footer of every page (_includes/site-footer.html, put in place by _plugins/site-footer.rb).
+// Footer of every page (_includes/site-footer.html, put in place by _plugins/site-footer.rb). The
+// quotation is as wide as its container here; below 768 px it is a column of 28rem (mobile/_layout.scss).
 
 footer.site-footer {
   display: flex;
@@ -21,7 +22,6 @@ footer.site-footer {
   }
 
   .footer-quote {
-    max-width: 28rem;
     margin: 0;
     color: var(--text-muted-color);
     line-height: 1.6;
@@ -52,17 +52,11 @@ footer.site-footer {
     }
   }
 
-  .footer-quote-break {
-    display: none;
+  .footer-quote {
+    max-width: none;
   }
 
-  @media (min-width: 768px) {
-    .footer-quote {
-      max-width: none;
-    }
-
-    .footer-quote-break {
-      display: inline;
-    }
+  .footer-quote-break {
+    display: inline;
   }
 }

@@ -110,37 +110,6 @@
     font-size: 0.85em;
   }
 
-  // The category cards leave out the counts on a phone, and every tile is a short one in a single
-  // column
-  @media (max-width: 575.98px) {
-    grid-template-columns: 1fr;
-    grid-auto-rows: auto;
-
-    .tile-small,
-    .tile-wide {
-      grid-column: auto;
-      grid-row: auto;
-    }
-
-    .card .card-body .card-text p,
-    .tile-wide .card-body .card-text p {
-      -webkit-line-clamp: 2;
-    }
-
-    .tile-wide .card-body {
-      padding-top: 0.8rem;
-      padding-bottom: 0.7rem;
-    }
-
-    .tile-wide .card-body .card-title {
-      -webkit-line-clamp: 2;
-      font-size: 0.98rem;
-    }
-
-    .tile-category .post-meta .me-auto {
-      display: none;
-    }
-  }
 }
 
 // The meta line of every card on the home page: the date and the category as one quiet line of

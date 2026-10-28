@@ -1,48 +1,56 @@
-// Literata, the font of the body of posts on a phone or a tablet (assets/fonts/literata/, SIL Open
-// Font License, licence beside the files), and JetBrains Mono NL, the font of everything else (below).
-// Literata is a serif designed for reading on screens, by TypeTogether for Google
-// Play Books, https://github.com/googlefonts/literata (3.103). The files are subsets (Latin, the
-// accented letters of names, Greek small letters, punctuation, arrows and a few symbols, without
-// hinting, which a phone does not use) made with pyftsubset; the version is in the file name, so
-// vercel.json caches them for a year. Math stays in MathJax's New Computer Modern.
-//
-// The @font-face rules are declared for every width, but only the phone rules in _type.scss use the
-// font, so a wide screen never downloads it; _includes/metadata-hook.html preloads the regular face
-// on posts for narrow screens only. While a file loads, the text is Georgia scaled to the widths of
-// Literata ('Literata Fallback': size-adjust from the advances of a to z and the space weighted by
-// their frequency in English, ascent and descent from the metrics of both fonts), so that a line
-// breaks at the same word before and after the swap.
+// New Computer Modern, the font of the body of posts on a phone or a tablet (assets/fonts/new-computer-modern/,
+// GUST Font License, licence beside the files), the font of the equations (MathJax's own New Computer
+// Modern), so that text and math are one typeface, as in a LaTeX document. It is the Computer Modern of
+// Knuth in a new assembly of the GUST (https://ctan.org/pkg/newcomputermodern, 8.1.1), in the cut
+// NewCM10 Book, the heavier of the two weights of its regular, which holds up better on a screen, with
+// its italic, bold and bold italic. The files are subsets (Latin, the accented letters of names, Greek,
+// punctuation, arrows and a few symbols, with kerning and the fi and fl ligatures, without hinting)
+// made with pyftsubset, 26 to 38 KB each; the version is in the file name, so vercel.json caches them for
+// a year. The @font-face rules are declared for every width, but only the phone rules in _type.scss use
+// the font, so a wide screen never downloads it; _includes/metadata-hook.html preloads the regular face
+// on posts for narrow screens only. While a file loads, the text is Georgia, whose letters have the
+// same average width as those of this font (0.446 em, from the advances of a to z and the space
+// weighted by their frequency in English), with the ascent and descent of the font ('New Computer
+// Modern Fallback'), so that a line breaks at the same word before and after the swap.
 
 @font-face {
-  font-family: 'Literata';
+  font-family: 'New Computer Modern';
   font-style: normal;
   font-weight: 400;
   font-display: swap;
-  src: url('/assets/fonts/literata/literata-400-normal-v3103.woff2') format('woff2');
+  src: url('/assets/fonts/new-computer-modern/ncm10-book-400-normal-v811.woff2') format('woff2');
 }
 
 @font-face {
-  font-family: 'Literata';
+  font-family: 'New Computer Modern';
   font-style: italic;
   font-weight: 400;
   font-display: swap;
-  src: url('/assets/fonts/literata/literata-400-italic-v3103.woff2') format('woff2');
+  src: url('/assets/fonts/new-computer-modern/ncm10-book-400-italic-v811.woff2') format('woff2');
 }
 
 @font-face {
-  font-family: 'Literata';
+  font-family: 'New Computer Modern';
   font-style: normal;
-  font-weight: 600 700; // bold text takes the semibold face, lighter beside a serif than a full bold
+  font-weight: 700;
   font-display: swap;
-  src: url('/assets/fonts/literata/literata-600-normal-v3103.woff2') format('woff2');
+  src: url('/assets/fonts/new-computer-modern/ncm10-bold-700-normal-v811.woff2') format('woff2');
 }
 
 @font-face {
-  font-family: 'Literata Fallback';
+  font-family: 'New Computer Modern';
+  font-style: italic;
+  font-weight: 700;
+  font-display: swap;
+  src: url('/assets/fonts/new-computer-modern/ncm10-bold-700-italic-v811.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'New Computer Modern Fallback';
   src: local('Georgia');
-  size-adjust: 108.06%;
-  ascent-override: 108.92%;
-  descent-override: 28.5%;
+  size-adjust: 100.09%;
+  ascent-override: 112.6%;
+  descent-override: 29%;
   line-gap-override: 0%;
 }
 

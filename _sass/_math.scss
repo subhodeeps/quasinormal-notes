@@ -1,17 +1,10 @@
 // Display equations: a MathJax container wider than the column scrolls inside itself, so that
-// the page does not scroll sideways. On a phone or a tablet (below 992 px) the scroll bar is thin
-// and clear of the formula. The size of math on a phone is in mobile/_type.scss.
+// the page does not scroll sideways. The thin scroll bar of a phone or a tablet is in mobile/_layout.scss,
+// and the size of math on a phone in mobile/_type.scss.
 
 mjx-container[display='true'] {
   min-width: 0 !important;
   max-width: 100%;
   overflow-x: auto;
   overflow-y: hidden;
-}
-
-@media (max-width: 991.98px) {
-  mjx-container[display='true'] {
-    padding-bottom: 0.4rem;
-    scrollbar-width: thin;
-  }
 }

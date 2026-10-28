@@ -1,0 +1,157 @@
+// Layout of the phone that the partials of the features used to hold in their own media queries:
+// the Categories tab and the category pages, the home tiles, the Archives tab, the footer and display
+// math. Each block keeps the selectors and the declarations it had; only the place changed, so that every
+// rule of the phone is in this folder. The widths: below 576 px a phone, below 768 px the footer's
+// narrow form, below 992 px a phone or a tablet (the breakpoint of the rest of the folder).
+//
+// Depends on the markup of the partials they come from (_category-tree.scss, _home-tiles.scss,
+// _tag-groups.scss, _footer.scss, _math.scss) and of Chirpy's tabs; a selector that no longer matches
+// leaves the page as the partial renders it. Loaded with the other files of the folder, last in
+// assets/css/jekyll-theme-chirpy.scss.
+
+// On a phone the counts of the Categories tab ("1 category, 1 post") are left out, so that the
+// names have the room
+@media (max-width: 575.98px) {
+  .categories .font-weight-light {
+    display: none;
+  }
+}
+
+// On a phone a long name wraps under its own first letter and not under the icons, in the folders
+// of the tab and of a category page: a hanging indent as wide as the two icons, the space and the
+// margin of the link (--hang), so that the count ("1 post") follows the last word, whole. The
+// margin, unlike the padding, is not reset by the rows' own spacing below.
+@media (max-width: 575.98px) {
+  .category-row {
+    --hang: 3.25rem;
+
+    margin-left: var(--hang);
+    text-indent: calc(-1 * var(--hang));
+
+    > i {
+      text-indent: 0; // the icons are inline blocks, which would inherit the indent
+    }
+
+    > a {
+      overflow-wrap: anywhere;
+    }
+
+    > span {
+      white-space: nowrap;
+    }
+  }
+
+  // The subfolders inside a card of the Categories tab keep their own spacing
+  .categories .category-tree .category-row {
+    padding: 0.45rem 0 0;
+  }
+
+  // Folder rows of a category page a little closer together; the cards of the Categories tab keep
+  // their padding
+  #page-category .category-explorer .category-row {
+    padding-top: 0.35rem;
+    padding-bottom: 0.35rem;
+  }
+
+  // A note of a category page: the title wraps whole on its own line, with the date under it
+  // (Chirpy cuts the title with an ellipsis and keeps the date on the same line)
+  #page-category ul.content > li,
+  #page-category .category-explorer li:not(.category-folder) {
+    flex-wrap: wrap;
+    justify-content: flex-start !important;
+    column-gap: 0.4rem;
+
+    > a {
+      flex: 1 0 100%;
+      overflow: visible;
+      text-overflow: clip;
+      white-space: normal;
+      line-height: 1.35;
+    }
+
+    > .dash {
+      display: none;
+    }
+
+    // Compact: less space around a row, and no dot, which would stand above a wrapped title
+    padding-top: 0.4rem;
+    padding-bottom: 0.4rem;
+    line-height: 1.35;
+
+    &::before {
+      display: none;
+    }
+
+    > a {
+      margin-bottom: 0.05rem;
+    }
+
+    .date-kind,
+    time {
+      font-size: 0.85rem;
+    }
+  }
+}
+
+// The category cards leave out the counts on a phone, and every tile is a short one in a single
+// column
+@media (max-width: 575.98px) {
+  #post-list .home-tiles {
+    grid-template-columns: 1fr;
+    grid-auto-rows: auto;
+
+    .tile-small,
+    .tile-wide {
+      grid-column: auto;
+      grid-row: auto;
+    }
+
+    .card .card-body .card-text p,
+    .tile-wide .card-body .card-text p {
+      -webkit-line-clamp: 2;
+    }
+
+    .tile-wide .card-body {
+      padding-top: 0.8rem;
+      padding-bottom: 0.7rem;
+    }
+
+    .tile-wide .card-body .card-title {
+      -webkit-line-clamp: 2;
+      font-size: 0.98rem;
+    }
+
+    .tile-category .post-meta .me-auto {
+      display: none;
+    }
+  }
+}
+
+// The muted category path after a title of the Archives tab is left out on a phone
+@media (max-width: 575.98px) {
+  #archives .archive-path {
+    display: none;
+  }
+}
+
+// The quotation of the footer: a column of at most 28rem, without the line break before its author,
+// below 768 px (the partial _footer.scss has the form of a wide screen)
+@media (max-width: 767.98px) {
+  footer.site-footer {
+    .footer-quote {
+      max-width: 28rem;
+    }
+
+    .footer-quote-break {
+      display: none;
+    }
+  }
+}
+
+// Display equations: on a phone or a tablet the scroll bar is thin and clear of the formula
+@media (max-width: 991.98px) {
+  mjx-container[display='true'] {
+    padding-bottom: 0.4rem;
+    scrollbar-width: thin;
+  }
+}
