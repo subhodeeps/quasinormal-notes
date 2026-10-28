@@ -1,8 +1,7 @@
 // Merriweather, the font of the body of posts on a phone or a tablet (assets/fonts/merriweather/, SIL Open
 // Font License, licence beside the files). It is a serif designed for reading on screens, by Eben Sorkin
 // (Merriweather 4, https://github.com/EbenSorkin/Merriweather4), with a large x-height and sturdy, low
-// contrast strokes that stay clear at 13 px, and it sits well beside the math, which is MathJax's Schola
-// (_plugins/mathjax-font.rb). The files are those of the fontsource package @fontsource/merriweather 5.3.0
+// contrast strokes that stay clear at 13 px, and it sits well beside MathJax's math. The files are those of the fontsource package @fontsource/merriweather 5.3.0
 // (regular, italic, bold and bold italic, each in a Latin file and a Latin Extended file that a page
 // fetches only when it has such a letter, by unicode-range); the version is in the file name, so
 // vercel.json caches them for a year. The @font-face rules are declared for every width, but only the
