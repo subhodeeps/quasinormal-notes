@@ -2,7 +2,7 @@
 // holds every rule that applies to it). Change a size or a font here and every page follows.
 //
 //   _tokens.scss      these values
-//   _fonts.scss       the font files (Inter, JetBrains Mono NL) and their fallbacks
+//   _fonts.scss       the font files (Charis SIL, JetBrains Mono NL) and their fallbacks, for every width
 //   _type.scss        the fonts and sizes applied to every kind of text
 //   _components.scss  the folded hero, the bars, the scroll-to-top button, the graph lightbox,
 //                     the head of a post
@@ -11,45 +11,55 @@
 //   _index.scss       loads them, last in assets/css/jekyll-theme-chirpy.scss so that the phone
 //                     rules win over the partials of the rest of the site
 
-// Fonts. The body text of a post (paragraphs, lists, quotations, captions, tables) is set in Inter, a
-// sans-serif designed for reading on screens, which stays clear at 13 px on a phone. Every other text on the phone is set in JetBrains Mono NL, the cut of
+// Fonts. The body text of a post (paragraphs, lists, quotations, captions, tables) is set in Charis SIL,
+// SIL's open version of Bitstream Charter, a serif made for clear reading on screens (_fonts.scss). Every other text on the phone is set in JetBrains Mono NL, the cut of
 // JetBrains Mono without ligatures, as on the author's other site (subhodeeps.vercel.app): titles,
 // headings, the interface, categories, tags, the home page, the bars, the sidebar, the footer, and the
 // prose of pages that are not posts. Code is monospace in its own rules.
-$body-font: 'Inter', 'Inter Fallback', Arial, sans-serif;
+$body-font: 'Charis SIL', 'Charis SIL Fallback', Georgia, serif;
 $ui-font: 'JetBrains Mono NL', 'JetBrains Mono NL Fallback', monospace;
 $heading-weight: 700; // JetBrains Mono NL is loaded in 400 and 700
 
-// Type scale in rem (1 rem is 16 px). The body of a post is 13 px, the size the author chose, in Inter,
-// whose x-height (0.546 em, 7.1 px) makes it read like a larger font. JetBrains Mono is 0.6 em wide to a
-// letter against 0.48 of Inter, so a mono size is worth about 1.25 times its equivalent in the text: the sizes below follow the author's other site (title 20 px, body 12 to 13 px, meta 10 to
-// 11 px) and keep the order of headings above the body.
+// Type scale in rem (1 rem is 16 px). The text of a post is 17 px on a line of 1.6, the size of reading
+// text on a phone held in the hand (iOS sets its body text at 17 pt), which gives about 47 characters to
+// a line at 390 px. An earlier body of 13 px read well in screenshots, which a computer screen magnifies,
+// but not on the phone itself. JetBrains Mono is 0.6 em wide to a letter against 0.45 of Charis, so a
+// mono size reads about 1.3 times larger than the same size of the text: the headings of a post are mono
+// and bold at 22, 18, 16 and 15 px, above a 17 px text. The interface keeps the scale of the author's
+// other site (title 20 px, body 12 to 13 px, meta 10 to 11 px).
 //
-//   Body of a post (Inter):     13 px text, 11.5 px captions and tables
-//   Headings of a post:         17 px title, 13.5 px h2, 12 px h3, 11 px h4
-//   Code (mono):                11 px inline, 11.5 px blocks
-//   Everything else (mono):     20 px titles, the title of the sidebar
+//   Text of a post (Charis):    17 px, captions and tables 15 px
+//   Headings of a post (mono):  22 px title, 18 px h2, 16 px h3, 15 px h4, 14 px standfirst
+//   Alert boxes (mono):         13 px, their labels 14 px; references 10 px (the compact form)
+//   Code (mono):                inline 0.85 em of the text around it, blocks 13 px
+//   Interface (mono):           20 px titles, the title of the sidebar
 //                               16 px h2, the years of the Archives tab
 //                               14 px h3, the tagline, the top bar, the primary categories
-//                               13 px h4, the titles of notes and tiles, the standfirst
+//                               13 px h4, the titles of notes and tiles
 //                               12 px buttons, tags, tile descriptions, the intro line, the sidebar
 //                               11 px bylines, dates, counts, credits
 //                               10 px the footer and the labels of the graph's scale
-$body: 0.8125rem;
-$body-small: 0.71875rem;
+$body: 1.0625rem;
+$body-small: 0.9375rem;
+$body-line: 1.6;
 
-// Code: inline code (a chip) is 11 px wherever it stands, and a code block 11.5 px on a line of 1.6.
-// JetBrains Mono at 11 px has an x-height of 6 px, a little below the 7.1 px of the text, which keeps a
-// chip quieter than the words around it while it stays readable.
-$chip: 0.6875rem;
-$code: 0.71875rem;
-$code-line: 1.15rem;
+// Code: inline code (a chip) is 0.85 em of the text around it, where JetBrains Mono (x-height 0.55 em)
+// stands as high as the text (0.482 em); in a box of mono text a chip takes the size of that text. A
+// code block is 13 px on a line of 1.6.
+$chip: 0.85em;
+$code: 0.8125rem;
+$code-line: 1.3rem;
 
-// Headings of a post or a page, and its title, kept in order above the body
-$post-title: 1.0625rem;
-$post-h2: 0.84375rem;
-$post-h3: 0.75rem;
-$post-h4: 0.6875rem;
+// Alert boxes, their labels (and the labels of folded code), in the mono
+$alert: 0.8125rem;
+$alert-label: 0.875rem;
+
+// The title and headings of a post or a page, and its standfirst
+$post-title: 1.375rem;
+$post-h2: 1.125rem;
+$post-h3: 1rem;
+$post-h4: 0.9375rem;
+$post-desc: 0.875rem;
 $title: 1.25rem;
 $h2: 1rem;
 $h3: 0.875rem;
@@ -58,10 +68,10 @@ $text: 0.75rem;
 $meta: 0.6875rem;
 $foot: 0.625rem;
 
-// Math (MathJax, New Computer Modern) is scaled so that its x-height (0.431 em) matches that of Inter
-// (0.546 em), as MathJax itself would do; the rule needs
-// !important to win over the size that MathJax writes on each equation.
-$math-scale: 127%;
+// Math (MathJax, New Computer Modern) is scaled so that its x-height (0.431 em) matches that of Charis
+// (0.482 em), as MathJax itself would do; the rule needs !important to win over the size that MathJax
+// writes on each equation. _sass/_reading.scss uses the same value on a wide screen.
+$math-scale: 112%;
 
 // The dark theme on a phone: light text on a dark screen reads thinner and softer than dark text on
 // white, and the theme's text (#c2c9d1, 10.9:1 on #12161c) looked dim beside its headings (16.6:1). The

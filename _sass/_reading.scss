@@ -1,0 +1,140 @@
+// The type of a post on a wide screen (992 px and up): the same fonts as on a phone, so that a post
+// reads as the same document on both, at sizes for a reader at a desk. The text is Charis SIL, the
+// headings, the head of the post, the alert boxes and the references are JetBrains Mono NL (bold for
+// headings), code stays in JetBrains Mono, and math is scaled to the x-height of the text. The sizes:
+// text 19 px on a line of 1.7 (about 80 characters to a line in Chirpy's column of 690 px, against about
+// 100 with its Source Sans at 16.5 px), 20 px from 1440 px, where the column widens to 760 to 790 px;
+// captions and tables 17 px; title, h2, h3 and h4 at 30, 22, 19 and 17 px; standfirst 17 px, byline 14
+// px; alert boxes 15 px with labels of 16 px; references 14 px; code blocks 15 px; inline code 0.85 em
+// of its text. The interface around the post (sidebar, top bar, right panel) keeps Chirpy's fonts.
+//
+// The fonts are declared in mobile/_fonts.scss and named in mobile/_tokens.scss, which this file uses
+// for the families only. Depends on Chirpy's markup: article > div.content for the text, article >
+// header and .post-topics for the head of a post, which only a post has (:has(> header .post-meta)),
+// .highlight pre for code blocks, and the classes of its alert boxes; the About and Graph pages are told
+// by .about-ringdown and .notes-graph-page. A selector that no longer matches leaves Chirpy's font and
+// size; #main-wrapper outranks Chirpy's own rules for the same elements.
+
+@use 'mobile/tokens' as t;
+
+@media (min-width: 992px) {
+  // --- The text of a post, and the prose of the About and Graph pages
+  #main-wrapper article:has(> header .post-meta) > div.content :is(p, li, dd, dt, blockquote, figcaption, td, th),
+  #main-wrapper article:is(:has(.about-ringdown), :has(.notes-graph-page)) > div.content :is(p, li, dd, dt, blockquote, figcaption):not(.notes-graph *) {
+    font-family: t.$body-font;
+  }
+
+  #main-wrapper article:is(:has(> header .post-meta), :has(.about-ringdown), :has(.notes-graph-page)) > div.content {
+    font-size: 1.1875rem;
+    line-height: 1.7;
+  }
+
+  #main-wrapper article:has(> header .post-meta) > div.content {
+    :is(figcaption, .aps-caption) {
+      font-size: 1.0625rem;
+      line-height: 1.55;
+    }
+
+    :is(table, td, th) {
+      font-size: 1.0625rem;
+    }
+  }
+
+  // --- Headings and the head of a post, in the mono
+  #main-wrapper article:has(> header .post-meta) :is(h1, h2, h3, h4, h5, h6),
+  #main-wrapper article > header :is(.post-desc, .post-meta, .post-meta *:not(i)),
+  #main-wrapper .post-topics,
+  #main-wrapper .post-topics *:not(i) { // the icons keep Font Awesome
+    font-family: t.$ui-font;
+    font-variant-ligatures: none;
+  }
+
+  #main-wrapper article:has(> header .post-meta) :is(h1, h2, h3, h4, h5, h6) {
+    font-weight: t.$heading-weight;
+  }
+
+  #main-wrapper article > header h1:not(.card-title) {
+    font-size: 1.875rem;
+    line-height: 1.25;
+  }
+
+  #main-wrapper article > div.content {
+    h2 {
+      font-size: 1.375rem;
+      line-height: 1.35;
+    }
+
+    h3 {
+      font-size: 1.1875rem;
+      line-height: 1.4;
+    }
+
+    :is(h4, h5, h6) {
+      font-size: 1.0625rem;
+      line-height: 1.45;
+    }
+  }
+
+  #main-wrapper article > header > .post-desc {
+    font-size: 1.0625rem;
+    font-weight: 400 !important; // Bootstrap's fw-light is !important
+    line-height: 1.6;
+  }
+
+  #main-wrapper article > header .post-meta,
+  #main-wrapper article > header .post-meta :is(a, span, em, time) {
+    font-size: 0.875rem;
+  }
+
+  #main-wrapper .post-topics :is(.post-tag, .category-path, .category-path a) {
+    font-size: 0.8125rem;
+  }
+
+  // --- Alert boxes and references, in the mono
+  #main-wrapper article > div.content :is(blockquote[class^='prompt-'], details.prompt-fold) :is(p, li, dd, dt) {
+    font-family: t.$ui-font;
+    font-size: 0.9375rem;
+    line-height: 1.6;
+  }
+
+  #main-wrapper article > div.content :is(blockquote[class^='prompt-'], details.prompt-fold, details.code-fold) summary {
+    font-family: t.$ui-font;
+    font-size: 1rem;
+  }
+
+  #main-wrapper article > div.content ol.bibliography :is(li, span, em, strong) {
+    font-family: t.$ui-font;
+    font-size: 0.875rem;
+    line-height: 1.6;
+  }
+
+  // --- Code: a chip at 0.85 em of its text (the size of the text in a box of mono text), whose box stays
+  // inside the line; a code block's table sits in a <code> inside div.highlight, which is not a chip
+  #main-wrapper article > div.content :not(pre, .highlight) > code:not(:is(h1, h2, h3, h4, h5, h6) code) {
+    padding: 0.1em 0.35em;
+    font-size: t.$chip;
+    line-height: 1.2;
+    border-radius: 4px;
+  }
+
+  #main-wrapper article > div.content :is(blockquote[class^='prompt-'], details.prompt-fold) :not(pre, .highlight) > code {
+    font-size: 1em;
+  }
+
+  #main-wrapper article .highlight pre {
+    font-size: 0.9375rem;
+    line-height: 1.6;
+  }
+
+  // --- Math, scaled to the x-height of the text (mobile/_tokens.scss)
+  mjx-container {
+    font-size: t.$math-scale !important;
+  }
+}
+
+// From 1440 px Chirpy's column is 760 to 790 px wide, and the text grows to 20 px to keep its measure
+@media (min-width: 1440px) {
+  #main-wrapper article:is(:has(> header .post-meta), :has(.about-ringdown), :has(.notes-graph-page)) > div.content {
+    font-size: 1.25rem;
+  }
+}
