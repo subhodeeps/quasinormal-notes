@@ -1,0 +1,46 @@
+// Literata, the font of prose on a phone or a tablet (assets/fonts/literata/, SIL Open Font License,
+// licence beside the files): a serif designed for reading on screens, by TypeTogether for Google
+// Play Books, https://github.com/googlefonts/literata (3.103). The files are subsets (Latin, the
+// accented letters of names, Greek small letters, punctuation, arrows and a few symbols, without
+// hinting, which a phone does not use) made with pyftsubset; the version is in the file name, so
+// vercel.json caches them for a year. Math stays in MathJax's New Computer Modern.
+//
+// The @font-face rules are declared for every width, but only the phone rules in _type.scss use the
+// font, so a wide screen never downloads it; _includes/metadata-hook.html preloads the regular face
+// on posts for narrow screens only. While a file loads, the text is Georgia scaled to the widths of
+// Literata ('Literata Fallback': size-adjust from the advances of a to z and the space weighted by
+// their frequency in English, ascent and descent from the metrics of both fonts), so that a line
+// breaks at the same word before and after the swap.
+
+@font-face {
+  font-family: 'Literata';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/assets/fonts/literata/literata-400-normal-v3103.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Literata';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/assets/fonts/literata/literata-400-italic-v3103.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Literata';
+  font-style: normal;
+  font-weight: 600 700; // bold text takes the semibold face, lighter beside a serif than a full bold
+  font-display: swap;
+  src: url('/assets/fonts/literata/literata-600-normal-v3103.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Literata Fallback';
+  src: local('Georgia');
+  size-adjust: 108.06%;
+  ascent-override: 108.92%;
+  descent-override: 28.5%;
+  line-gap-override: 0%;
+}

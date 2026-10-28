@@ -1,7 +1,7 @@
 // One scale of type sizes for the whole site on a phone or a tablet (below 992 px), so that the same
-// kind of text has the same size on every page. The fonts stay the site's own: Lato for titles and
-// headings (and for the folders of the category lists, which head the notes under them), Source
-// Sans Pro for text and controls, JetBrains Mono for code and the footer. Only sizes, line heights,
+// kind of text has the same size on every page. Prose is in Literata (see _tokens.scss), Lato is
+// kept for titles and headings (and for the folders of the category lists, which head the notes
+// under them), Source Sans Pro for the interface, JetBrains Mono for code and the footer. Only sizes, line heights,
 // spacing and two weights change: the description under a post's title and the label "Explore" take
 // weight 400, since Chirpy loads Lato in 300 and 400 only (300 is thin on a phone, and 600 was faked).
 // The sizes are the values of _tokens.scss, which lists them with their use.
@@ -31,6 +31,17 @@
   #page-category .category-description {
     font-size: $text;
     line-height: 1.5;
+  }
+
+  // --- Prose in Literata: the text of posts and pages, the lines of the home page, the descriptions
+  // of the tiles and of a category. Headings, titles and the interface keep their fonts.
+  article > div.content :is(p, li, dd, dt, blockquote, figcaption, td, th):not(#{$interface-lists}),
+  .home-hero-text,
+  .home-hero-subtext,
+  .home-hero-pocket figcaption,
+  #post-list .card-text p,
+  #page-category .category-description {
+    font-family: $text-font;
   }
 
   // --- The text of posts and pages: a line height of 1.6, which leaves room for inline math with

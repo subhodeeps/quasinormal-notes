@@ -2,7 +2,8 @@
 // holds every rule that applies to it). Change a size or a font here and every page follows.
 //
 //   _tokens.scss      these values
-//   _type.scss        the type scale applied to every kind of text
+//   _fonts.scss       the Literata files, and Georgia scaled to its widths
+//   _type.scss        the type scale and the fonts applied to every kind of text
 //   _components.scss  the folded hero, the bars, the scroll-to-top button, the graph lightbox,
 //                     the head of a post
 //   _index.scss       loads the three, last in assets/css/jekyll-theme-chirpy.scss so that the
@@ -26,3 +27,13 @@ $small: 0.875rem;
 $meta: 0.8125rem;
 $foot: 0.75rem;
 $heading-font: Lato, 'Microsoft Yahei', sans-serif;
+
+// Fonts. Prose (the text of posts and pages, the lines of the home page, descriptions) is set in
+// Literata; headings stay in Lato, the interface (navigation, buttons, tags, bylines, dates, counts)
+// in Source Sans Pro, code and the footer in JetBrains Mono. 'Literata Fallback' is Georgia scaled to
+// the widths of Literata (_fonts.scss), so that the text does not move when Literata arrives.
+$text-font: 'Literata', 'Literata Fallback', Georgia, serif;
+
+// Lists inside the text of a page that are navigation, not prose: they keep the interface font
+$interface-lists: '.notes-graph *, .list-group *, .category-tree *, .list-unstyled *';
+

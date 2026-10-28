@@ -213,6 +213,17 @@
     padding-right: 0.25rem;
   }
 
+  // Bootstrap's btn-link underlines its line box, which shows as a blue dash under an icon that is
+  // shorter than the line (the theme button)
+  #topbar-mode-toggle,
+  #toc-bar-mode-toggle,
+  #topbar-graph,
+  #toc-bar-graph,
+  #toc-bar-sidebar,
+  #graph-dialog-close {
+    text-decoration: none;
+  }
+
   #sidebar-trigger,
   #toc-bar-sidebar {
     padding-right: 0.25rem;
