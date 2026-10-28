@@ -11,9 +11,21 @@ This graph shows every note on the site, coloured by its category. Two notes are
 
 {% include notes-graph.html page=true %}
 
+<!-- The instructions for a mouse and for a touch screen; _sass/_mobile.scss shows one of them -->
+<div class="on-mouse" markdown="1">
+
 The graph turns slowly by itself, and you are welcome to play with it. You can drag it to move it, hold Shift while you drag to turn it, and scroll to zoom. A first click on a note or a tag selects it and keeps its neighbours lit, and the node under the pointer then lights its own neighbours more softly. A click on that node moves the selection, and a second click on the selected node opens its page.
 
 A click on a category in the legend below the graph shows only the notes of that category, and a click on Tags only shows the tags on their own, joined by a line when they share at least two notes. With the buttons in the corner of the graph, you can zoom, reset the view, pause the turning and clear the filters.
+
+</div>
+<div class="on-touch" markdown="1">
+
+The graph turns slowly by itself, and you are welcome to play with it. You can drag it with one finger to move it, and pinch it with two fingers to zoom. A first tap on a note or a tag selects it and keeps its neighbours lit, a tap on another node moves the selection, and a second tap on the selected node opens its page. A tap on an empty spot clears the selection.
+
+A tap on a category in the legend below the graph shows only the notes of that category, and a tap on Tags only shows the tags on their own, joined by a line when they share at least two notes. With the buttons in the corner of the graph, you can zoom, reset the view, pause the turning and clear the filters.
+
+</div>
 
 ## The idea behind the graph
 
