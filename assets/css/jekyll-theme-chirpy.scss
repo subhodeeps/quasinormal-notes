@@ -42,6 +42,9 @@
 /* References in the style of JHEP.bst (_plugins/jhep.rb) */
 @use 'bibliography';
 
+/* The band that shows a reference under its citation (assets/js/citation-band.js) */
+@use 'citation-band';
+
 /* Wide display equations scroll in place */
 @use 'math';
 

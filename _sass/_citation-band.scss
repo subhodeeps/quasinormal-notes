@@ -1,0 +1,20 @@
+// The band that shows a reference under its citation (assets/js/citation-band.js).
+// The script appends an ol.bibliography.citation-band to the post's div.content and copies the entries
+// of the list into it, so the band takes the type of the list from _bibliography.scss, _reading.scss
+// and mobile/_type.scss, the compact form of an entry on a phone included. This partial adds the box.
+// The script sets its width (the column of the text, at most 40 rem) and its position. Without the
+// script the band does not exist, and a citation links to the list as before.
+
+.content ol.bibliography.citation-band {
+  position: absolute;
+  z-index: 5;
+  max-width: 40rem;
+  padding: 0.5rem 0.75rem;
+  background-color: var(--card-bg);
+  border-radius: 0.5rem;
+  box-shadow: var(--card-shadow);
+
+  &[hidden] {
+    display: none;
+  }
+}
