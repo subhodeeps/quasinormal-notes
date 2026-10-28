@@ -3,7 +3,7 @@
  * dot that separates its items (a ::before of each item, _sass/_post-topics.scss and Chirpy) would
  * then start the new line on its own. This script marks the first item of every line after the first
  * with the class .meta-line-start and puts an empty full-width .meta-break before it, and
- * _sass/_mobile.scss hides the dot of a marked item on a narrow screen. It measures again when the byline changes size (a rotation, a resize, a late font).
+ * _sass/mobile/_components.scss hides the dot of a marked item on a narrow screen. It measures again when the byline changes size (a rotation, a resize, a late font).
  *
  * Markup it depends on: Chirpy's `header > .post-meta`, a flex row whose items are its children and
  * the children of its `.d-flex` blocks (made display: contents in _sass/_post-topics.scss). If the

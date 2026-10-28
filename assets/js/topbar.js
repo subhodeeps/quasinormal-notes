@@ -16,7 +16,7 @@
  * Bars: on a post Chirpy shows its bar of contents (#toc-bar: the title of the post and the button of
  * the table of contents) at the top once the head of the post has scrolled away, so that bar, with
  * the two buttons added at its left, is the one bar a phone keeps while scrolling. A page without it
- * keeps the top bar instead (_sass/_mobile.scss).
+ * keeps the top bar instead (_sass/mobile/_components.scss).
  *
  * Markup it depends on: #sidebar-trigger in the top bar, the items of the theme menu in the sidebar,
  * and on posts #toc-bar. A part whose markup is missing is left out. Loaded on every page from
@@ -41,7 +41,7 @@
   const shown = () =>
     document.documentElement.getAttribute('data-bs-theme') ||
     (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-  // The same three icons as Chirpy's switch in the sidebar; _sass/_mobile.scss shows the one that the
+  // The same three icons as Chirpy's switch in the sidebar; _sass/mobile/_components.scss shows the one that the
   // sidebar shows (the sun, the moon, or the display of the system's own setting)
   const themeButton = (id) => {
     const b = button(id, 'fas fa-circle-half-stroke', '');

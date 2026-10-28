@@ -11,7 +11,7 @@ This graph shows every note on the site, coloured by its category. Two notes are
 
 {% include notes-graph.html page=true %}
 
-<!-- The instructions for a mouse and for a touch screen; _sass/_mobile.scss shows one of them -->
+<!-- The instructions for a mouse and for a touch screen; _sass/mobile/_components.scss shows one of them -->
 <div class="on-mouse" markdown="1">
 
 The graph turns slowly by itself, and you are welcome to play with it. You can drag it to move it, hold Shift while you drag to turn it, and scroll to zoom. A first click on a note or a tag selects it and keeps its neighbours lit, and the node under the pointer then lights its own neighbours more softly. A click on that node moves the selection, and a second click on the selected node opens its page.

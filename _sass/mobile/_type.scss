@@ -4,14 +4,7 @@
 // Sans Pro for text and controls, JetBrains Mono for code and the footer. Only sizes, line heights,
 // spacing and two weights change: the description under a post's title and the label "Explore" take
 // weight 400, since Chirpy loads Lato in 300 and 400 only (300 is thin on a phone, and 600 was faked).
-//
-//   28 px  titles of posts, pages and category pages
-//   22 px  h2, the years of the Archives tab
-//   19 px  h3, the folders of category lists, the tagline of the home page
-//   17 px  text, h4, descriptions, the titles of notes in lists, the titles of the home tiles
-//   14 px  captions, tables, buttons, the descriptions of the home tiles, dates of the Archives tab
-//   13 px  bylines, tags, dates and counts
-//   12 px  the footer
+// The sizes are the values of _tokens.scss, which lists them with their use.
 //
 // The home tiles take the scale below 576 px only, where they are one column of short tiles; from
 // 576 to 991 px they are squares of fixed size (_home-tiles.scss). Code blocks keep Chirpy's 13.6 px.
@@ -20,14 +13,7 @@
 // Chirpy. Depends on Chirpy's markup for posts (article > div.content, header .post-desc), the Archives
 // tab (#archives) and the footer; a selector that no longer matches leaves Chirpy's size.
 
-$title: 1.75rem;
-$h2: 1.375rem;
-$h3: 1.1875rem;
-$text: 1.0625rem;
-$small: 0.875rem;
-$meta: 0.8125rem;
-$foot: 0.75rem;
-$heading-font: Lato, 'Microsoft Yahei', sans-serif;
+@use 'tokens' as *;
 
 @media (max-width: 991.98px) {
   // --- Titles

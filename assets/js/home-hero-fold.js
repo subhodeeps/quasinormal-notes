@@ -1,6 +1,6 @@
 /*
  * Fold of the home hero on a phone or a tablet (max-width 991.98px, the breakpoint of
- * _sass/_motion.scss and _sass/_mobile.scss).
+ * _sass/_motion.scss and _sass/mobile/_components.scss).
  *
  * The hero (_includes/home-hero.html) is a figure, a tagline and an intro line. On a narrow screen
  * the figure and the intro line are folded away behind the button "Know more", so that the posts
@@ -15,7 +15,7 @@
  *
  * Markup it depends on: #home-hero, with .home-hero-toggle (a button), .home-hero-figure and
  * .home-hero-subtext. If the button or the parts are missing, it leaves the hero as it is. It folds
- * only when _sass/_mobile.scss has set --hero-fold: 1 on #home-hero, so that a stale stylesheet in a
+ * only when _sass/mobile/_components.scss has set --hero-fold: 1 on #home-hero, so that a stale stylesheet in a
  * cache never shows an unstyled button.
  * This script must come before home-hero-pocket.js in the page; both are deferred and run in
  * the order of the page.
