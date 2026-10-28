@@ -296,3 +296,22 @@
   right: 0.25rem;
   z-index: 1;
 }
+
+// References on a phone: a reference takes two lines at most, with an ellipsis after the second (its
+// links are at the end of the entry, so those of a long entry are cut; the reference as a whole is
+// still in the page for a wide screen). The number takes a narrower column so that the entry has the
+// room.
+@media (max-width: 991.98px) {
+  .content ol.bibliography {
+    .bib-text {
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 2;
+      overflow: hidden;
+    }
+
+    .bib-item {
+      grid-template-columns: 1.75rem 1fr;
+    }
+  }
+}

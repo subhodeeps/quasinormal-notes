@@ -38,7 +38,9 @@ In [Fig. 1](#fig-1), we show the result of a numerical computation of the ringdo
 The study of linear perturbations to black hole spacetimes has been a remarkably prolific area of research, starting with the groundbreaking work of Regge and Wheeler (and Zerilli, Vishveshwara, Press, Teukolsky, Leaver, Moncrief, Chandrasekhar and Detweiler, and $\ldots$), and it continues to grow practically daily even today. While writing my thesis I gathered all the reviews on quasinormal modes and black hole perturbation theory that I know of in one modest [`bib` file](https://gist.github.com/subhodeeps/e6cb99d86ec2ccea78bb51e4f7fb6d87), along with some lecture notes, books and book chapters. They differ wildly in their style, motivation and pedagogy, but (except for Chandrasekhar's magnum opus) they are all pretty fun to read. I hope that at least a few of them will be interesting to you, or perhaps tempt you to explore this subject (even) further! For lecture notes on black holes and general relativity, see [[2026-07-06-lecture-notes]].
 
 <details class="prompt-fold prompt-review" open markdown="1">
-<summary markdown="span">I would recommend the following resources as a starting point. They are more or less arranged in the order in which I would read them, roughly from introductory to advanced.</summary>
+<summary markdown="span">Recommended reading</summary>
+
+I would recommend the following resources as a starting point. They are more or less arranged in the order in which I would read them, roughly from introductory to advanced.
 
 {% jhep_list Arora:2020 Berti:2016 Maggiore:2018 Thorne:2019 Detweiler:1979jra Berti:2009kk Pani:2013pma Sasaki:2003xr Berti:2025hly %}
 

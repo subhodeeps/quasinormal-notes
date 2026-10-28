@@ -1,6 +1,7 @@
 // The fonts and sizes of every text on a phone or a tablet (below 992 px), so that the same kind of text
 // has the same font and size on every page. The body of a post is in Literata; every other text is in
-// JetBrains Mono NL (see _tokens.scss for the fonts, the scale and the reasons). This file is the one
+// JetBrains Mono NL (see _tokens.scss for the fonts, the scale and the reasons), except the prose of the
+// About page and the Graph page, which is Literata, and the alert boxes and references, which are mono. This file is the one
 // place that sets the font and the size of each kind of text on the phone. The home tiles take their
 // scale below 576 px only, where they are one column of short tiles; from 576 to 991 px they are squares
 // of fixed size (_home-tiles.scss). Code blocks keep Chirpy's 13.6 px. Loaded last in
@@ -37,6 +38,27 @@
   // --- Literata for the body of a post: paragraphs, lists, quotations, captions and tables
   article:has(> header .post-meta) > div.content :is(p, li, dd, dt, blockquote, figcaption, td, th) {
     font-family: $body-font;
+  }
+
+  // --- The prose of the About page and of the Graph page is Literata too, as in a post (the graph's own
+  // legend and credit, inside .notes-graph, stay in the mono)
+  article:is(:has(.about-ringdown), :has(.notes-graph-page)) > div.content :is(p, li, dd, dt, blockquote, figcaption):not(.notes-graph *) {
+    font-family: $body-font;
+  }
+
+  // --- Alert boxes (Chirpy's prompts, the collapsible boxes of the posts, the purple box of the
+  // reviews) and the lists of references are set in the mono, whatever their place: the rules of an
+  // ID outrank the Literata rules above
+  #main-wrapper article > div.content :is(blockquote[class^='prompt-'], details.prompt-fold) :is(p, li, dd, dt, summary) {
+    font-family: $ui-font;
+    font-size: $text;
+    line-height: 1.6;
+  }
+
+  #main-wrapper article > div.content ol.bibliography :is(li, span, em, strong) {
+    font-family: $ui-font;
+    font-size: $meta;
+    line-height: 1.5;
   }
 
   // --- Titles and headings: bold, with the sizes of the scale
@@ -96,6 +118,11 @@
   article:not(:has(> header .post-meta)) > div.content {
     font-size: $h4;
     line-height: 1.65;
+  }
+
+  #main-wrapper article:is(:has(.about-ringdown), :has(.notes-graph-page)) > div.content {
+    font-size: $body; // #main-wrapper: the rule above for a page has a higher specificity than a plain one
+    line-height: 1.6;
   }
 
   article > div.content {
