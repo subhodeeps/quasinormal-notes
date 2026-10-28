@@ -53,6 +53,10 @@
     });
   })();
 </script>
+{% if page.layout == 'post' %}
+<!-- No separating dot at the start of a wrapped line of the byline -->
+<script defer src="{{ '/assets/js/post-meta-lines.js' | relative_url }}"></script>
+{% endif %}
 <!-- Enlarged figures open in the theme the page shows (Chirpy's GLightbox popup) -->
 <script defer src="{{ '/assets/js/lightbox-theme.js' | relative_url }}"></script>
 {% if page.layout == 'category' or page.layout == 'tag' or page.layout == 'home' %}

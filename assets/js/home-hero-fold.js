@@ -14,7 +14,9 @@
  * first opening only, and stops when the hero is folded (its canvas leaves the screen).
  *
  * Markup it depends on: #home-hero, with .home-hero-toggle (a button), .home-hero-figure and
- * .home-hero-subtext. If the button or the parts are missing, it leaves the hero as it is.
+ * .home-hero-subtext. If the button or the parts are missing, it leaves the hero as it is. It folds
+ * only when _sass/_mobile.scss has set --hero-fold: 1 on #home-hero, so that a stale stylesheet in a
+ * cache never shows an unstyled button.
  * This script must come before home-hero-pocket.js in the page; both are deferred and run in
  * the order of the page.
  */
@@ -40,10 +42,15 @@
     hero.dispatchEvent(new CustomEvent('hero:toggle', { detail: { open } }));
   }
 
+  // Fold only when the stylesheet with the styles of the fold has loaded: after a deploy, a phone may
+  // still hold an older stylesheet in its cache, and then the hero stays open as before
+  const styled = () => getComputedStyle(hero).getPropertyValue('--hero-fold').trim() === '1';
+
   function apply() {
-    button.hidden = !phone.matches;
-    hero.classList.toggle('is-folded', phone.matches);
-    show(!phone.matches);
+    const fold = phone.matches && styled();
+    button.hidden = !fold;
+    hero.classList.toggle('is-folded', fold);
+    show(!fold);
   }
 
   button.addEventListener('click', () => show(button.getAttribute('aria-expanded') !== 'true'));
