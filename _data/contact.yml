@@ -1,9 +1,11 @@
 #  The contact options.
 
-# The home of the author, first in the row of the sidebar (on a phone it stands where the theme switch
-# was, which the top bar's theme button replaces: _sass/mobile/_components.scss)
-- type: home
-  icon: "fas fa-house"
+# The personal site of the author (about, research, CV), first in the row of the sidebar. The icon is a
+# globe, the sign of a website, not a house, which would read as the home of this site. On a phone it
+# stands where the theme switch was, which the top bar's theme button replaces
+# (_sass/mobile/_components.scss).
+- type: personal-site
+  icon: "fas fa-globe"
   url: https://subhodeeps.vercel.app/
   noblank: true # open in the current tab
 
