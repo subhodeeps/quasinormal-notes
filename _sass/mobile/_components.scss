@@ -250,6 +250,12 @@
     flex: none;
   }
 
+  // The sidebar's theme switch is redundant here, since the bars have a theme button (assets/js/topbar.js);
+  // the link to the author's home (_data/contact.yml) takes its place, and the dot between them goes
+  #sidebar .sidebar-bottom :is(.btn-group.dropup, .icon-border) {
+    display: none;
+  }
+
   #toc-bar > .label {
     flex: 1;
     min-width: 0;

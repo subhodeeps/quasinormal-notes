@@ -1,5 +1,12 @@
 #  The contact options.
 
+# The home of the author, first in the row of the sidebar (on a phone it stands where the theme switch
+# was, which the top bar's theme button replaces: _sass/mobile/_components.scss)
+- type: home
+  icon: "fas fa-house"
+  url: https://subhodeeps.vercel.app/
+  noblank: true # open in the current tab
+
 - type: github
   icon: "fab fa-github"
 
