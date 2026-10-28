@@ -2,7 +2,6 @@
 // holds every rule that applies to it). Change a size or a font here and every page follows.
 //
 //   _tokens.scss      these values
-//   _fonts.scss       the font files (Charis SIL, JetBrains Mono NL) and their fallbacks, for every width
 //   _type.scss        the fonts and sizes applied to every kind of text
 //   _components.scss  the folded hero, the bars, the scroll-to-top button, the graph lightbox,
 //                     the head of a post
@@ -11,67 +10,58 @@
 //   _index.scss       loads them, last in assets/css/jekyll-theme-chirpy.scss so that the phone
 //                     rules win over the partials of the rest of the site
 
-// Fonts. The body text of a post (paragraphs, lists, quotations, captions, tables) is set in Charis SIL,
-// SIL's open version of Bitstream Charter, a serif made for clear reading on screens (_fonts.scss). Every other text on the phone is set in JetBrains Mono NL, the cut of
-// JetBrains Mono without ligatures, as on the author's other site (subhodeeps.vercel.app): titles,
-// headings, the interface, categories, tags, the home page, the bars, the sidebar, the footer, and the
-// prose of pages that are not posts. Code is monospace in its own rules.
-$body-font: 'Charis SIL', 'Charis SIL Fallback', Georgia, serif;
-$ui-font: 'JetBrains Mono NL', 'JetBrains Mono NL Fallback', monospace;
-$heading-weight: 700; // JetBrains Mono NL is loaded in 400 and 700
+// Fonts: the families of every width are in _sass/_typefaces.scss (Source Serif 4 for reading, Inter for the
+// interface, JetBrains Mono for code); this file holds the sizes of a phone.
 
-// Type scale in rem (1 rem is 16 px). The text of a post is 17 px on a line of 1.6, the size of reading
-// text on a phone held in the hand (iOS sets its body text at 17 pt), which gives about 47 characters to
-// a line at 390 px. An earlier body of 13 px read well in screenshots, which a computer screen magnifies,
-// but not on the phone itself. JetBrains Mono is 0.6 em wide to a letter against 0.45 of Charis, so a
-// mono size reads about 1.3 times larger than the same size of the text: the headings of a post are mono
-// and bold at 22, 18, 16 and 15 px, above a 17 px text. The interface keeps the scale of the author's
-// other site (title 20 px, body 12 to 13 px, meta 10 to 11 px).
+// Type scale in rem (1 rem is 16 px), after the Claude app. The text of a post is 17 px on a line of
+// 1.6, the size of reading text on a phone held in the hand (iOS sets its body text at 17 pt), which
+// gives about 43 characters to a line at 390 px. An earlier body of 13 px read well in screenshots, which
+// a computer screen magnifies, but not on the phone itself. Alert boxes and references are set in the
+// same serif as the text: a proportional serif fits more letters to a line than the mono they had (0.48
+// em a letter against 0.6), so a box is shorter and a reference keeps its two to four lines at a larger,
+// more legible size.
 //
-//   Text of a post (Charis):    17 px, captions and tables 15 px
-//   Headings of a post (mono):  22 px title, 18 px h2, 16 px h3, 15 px h4, 14 px standfirst
-//   Alert boxes (mono):         13 px, their labels 14 px; references 10 px (the compact form)
-//   Code (mono):                inline 0.85 em of the text around it, blocks 13 px
-//   Interface (mono):           20 px titles, the title of the sidebar
-//                               16 px h2, the years of the Archives tab
-//                               14 px h3, the tagline, the top bar, the primary categories
-//                               13 px h4, the titles of notes and tiles
-//                               12 px buttons, tags, tile descriptions, the intro line, the sidebar
-//                               11 px bylines, dates, counts, credits
-//                               10 px the footer and the labels of the graph's scale
+//   Text of a post (serif):     17 px, captions and tables 15 px
+//   Headings of a post (serif): 24 px title, 20 px h2, 18 px h3, 17 px h4 (semibold), 18 px standfirst
+//   Alert boxes (serif):        15 px, their labels 14 px (Inter, semibold)
+//   References (serif):         12.5 px, in the compact form (_plugins/jhep.rb)
+//   Code (mono):                inline 0.875 em of the text around it, blocks 13 px
+//   Interface (Inter):          22 px titles of pages, 17 px h2 and the years of the Archives tab,
+//                               15 px h3, the top bar and the primary categories, 14 px the titles of
+//                               notes in lists, 13 px buttons, tags and descriptions, 12 px bylines,
+//                               dates and counts, 11 px the footer and the labels of the graph's scale
 $body: 1.0625rem;
 $body-small: 0.9375rem;
 $body-line: 1.6;
 
-// Code: inline code (a chip) is 0.85 em of the text around it, where JetBrains Mono (x-height 0.55 em)
-// stands as high as the text (0.482 em); in a box of mono text a chip takes the size of that text. A
-// code block is 13 px on a line of 1.6.
-$chip: 0.85em;
+// Code: inline code (a chip) is 0.875 em of the text around it, where JetBrains Mono (x-height 0.55 em)
+// stands about as high as the text (0.475 em); a code block is 13 px on a line of 1.6.
+$chip: 0.875em;
 $code: 0.8125rem;
 $code-line: 1.3rem;
 
-// Alert boxes, their labels (and the labels of folded code), in the mono
-$alert: 0.8125rem;
+// Alert boxes, their labels (and the labels of folded code), and references
+$alert: 0.9375rem;
 $alert-label: 0.875rem;
+$ref: 0.78125rem;
 
-// The title and headings of a post or a page, and its standfirst
-$post-title: 1.375rem;
-$post-h2: 1.125rem;
-$post-h3: 1rem;
-$post-h4: 0.9375rem;
-$post-desc: 0.875rem;
-$title: 1.25rem;
-$h2: 1rem;
-$h3: 0.875rem;
-$h4: 0.8125rem;
-$text: 0.75rem;
-$meta: 0.6875rem;
-$foot: 0.625rem;
+// The title and headings of a post or a page, its standfirst, the tagline and the titles of cards
+$post-title: 1.5rem;
+$post-h2: 1.25rem;
+$post-h3: 1.125rem;
+$post-h4: 1.0625rem;
+$post-desc: 1.125rem;
+$tagline: 1.125rem;
+$card-title: 0.9375rem;
 
-// Math (MathJax, New Computer Modern) is scaled so that its x-height (0.431 em) matches that of Charis
-// (0.482 em), as MathJax itself would do; the rule needs !important to win over the size that MathJax
-// writes on each equation. _sass/_reading.scss uses the same value on a wide screen.
-$math-scale: 112%;
+// The interface
+$title: 1.375rem;
+$h2: 1.0625rem;
+$h3: 0.9375rem;
+$h4: 0.875rem;
+$text: 0.8125rem;
+$meta: 0.75rem;
+$foot: 0.6875rem;
 
 // The dark theme on a phone: light text on a dark screen reads thinner and softer than dark text on
 // white, and the theme's text (#c2c9d1, 10.9:1 on #12161c) looked dim beside its headings (16.6:1). The

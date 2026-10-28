@@ -1,7 +1,6 @@
 // Everything that applies to a phone or a tablet (below 992 px): see _tokens.scss for the map.
 // Loaded last in assets/css/jekyll-theme-chirpy.scss.
 
-@use 'fonts';
 @use 'components';
 @use 'layout';
 @use 'type';

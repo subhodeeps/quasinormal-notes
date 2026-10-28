@@ -55,14 +55,11 @@
     });
   })();
 </script>
-<!-- JetBrains Mono NL, the font of all text on a phone but the body of a post (_sass/mobile/_fonts.scss) -->
-<link rel="preload" href="{{ '/assets/fonts/jetbrains-mono-nl/jetbrains-mono-nl-400-v2304.woff2' | relative_url }}" as="font" type="font/woff2" crossorigin media="(max-width: 991.98px)">
-<link rel="preload" href="{{ '/assets/fonts/jetbrains-mono-nl/jetbrains-mono-nl-700-v2304.woff2' | relative_url }}" as="font" type="font/woff2" crossorigin media="(max-width: 991.98px)">
+<!-- Inter, the font of the interface on every page (_sass/_typefaces.scss) -->
+<link rel="preload" href="{{ '/assets/fonts/inter/inter-latin-400-normal-v530.woff2' | relative_url }}" as="font" type="font/woff2" crossorigin>
 {% if page.layout == 'post' %}
-<!-- Charis SIL, the text of a post on every width, and on a wide screen also the mono of its headings
-     (_sass/mobile/_fonts.scss, _sass/_reading.scss) -->
-<link rel="preload" href="{{ '/assets/fonts/charis-sil/charis-sil-latin-400-normal-v530.woff2' | relative_url }}" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="{{ '/assets/fonts/jetbrains-mono-nl/jetbrains-mono-nl-700-v2304.woff2' | relative_url }}" as="font" type="font/woff2" crossorigin media="(min-width: 992px)">
+<!-- Source Serif 4, the text of a post (_sass/_typefaces.scss) -->
+<link rel="preload" href="{{ '/assets/fonts/source-serif-4/source-serif-4-latin-400-normal-v531.woff2' | relative_url }}" as="font" type="font/woff2" crossorigin>
 <!-- No separating dot at the start of a wrapped line of the byline -->
 <script defer src="{{ '/assets/js/post-meta-lines.js' | relative_url }}"></script>
 {% endif %}

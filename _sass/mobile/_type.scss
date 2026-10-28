@@ -1,69 +1,34 @@
-// The fonts and sizes of every text on a phone or a tablet (below 992 px), so that the same kind of text
-// has the same font and size on every page. The body of a post is in Charis SIL; every other text is in
-// JetBrains Mono NL (see _tokens.scss for the fonts, the scale and the reasons), except the prose of the
-// About page and the Graph page, which is Charis SIL too, and the alert boxes and references, which are mono. This file is the one
-// place that sets the font and the size of each kind of text on the phone. The home tiles take their
-// scale below 576 px only, where they are one column of short tiles; from 576 to 991 px they are squares
-// of fixed size (_home-tiles.scss). Inline code is 0.85 em of its text and code blocks are 13 px. Loaded last in
-// assets/css/jekyll-theme-chirpy.scss, so that it wins over the partials it overrides and over Chirpy.
+// The sizes of every text on a phone or a tablet (below 992 px), so that the same kind of text has the
+// same size on every page; the families of every width are in _sass/_typefaces.scss, and the values and
+// the reasons in _tokens.scss. The home tiles take their scale below 576 px only, where they are one
+// column of short tiles; from 576 to 991 px they are squares of fixed size (_home-tiles.scss). Loaded
+// last in assets/css/jekyll-theme-chirpy.scss, so that it wins over the partials it overrides and over
+// Chirpy.
 //
 // Depends on Chirpy's markup: article > div.content for the text of a post or page, and
 // article > header .post-meta, which only a post has, to tell a post from a page (:has); the Archives
 // tab (#archives), the bars and the sidebar, and the footer. A selector that no longer matches leaves
-// Chirpy's own font and size.
+// Chirpy's own size.
 
 @use 'tokens' as *;
+@use '../typefaces' as *;
 
 @media (max-width: 991.98px) {
-  // --- JetBrains Mono NL for everything. Chirpy and the site's partials set Lato, Source Sans Pro,
-  // sans-serif, Oswald or the monospace on some elements; they are listed here. Code, kbd and icons
-  // keep theirs.
-  body,
-  :is(h1, h2, h3, h4, h5, h6),
-  #topbar-title,
-  header .post-desc,
-  #sidebar,
-  #search-results a,
-  #notification.toast .toast-body,
-  :is(#toc-bar, #toc-solo-trigger, #toc-popup) :is(.label, .header, #toc-popup-content),
-  .pagination,
-  #archives .date.day,
-  a.tag span,
-  .share-mastodon,
-  footer.site-footer {
-    font-family: $ui-font;
-    font-variant-ligatures: none;
-  }
-
-  // --- Charis SIL for the body of a post: paragraphs, lists, quotations, captions and tables
-  article:has(> header .post-meta) > div.content :is(p, li, dd, dt, blockquote, figcaption, td, th) {
-    font-family: $body-font;
-  }
-
-  // --- The prose of the About page and of the Graph page is in Charis SIL too, as in a post (the graph's own
-  // legend and credit, inside .notes-graph, stay in the mono)
-  article:is(:has(.about-ringdown), :has(.notes-graph-page)) > div.content :is(p, li, dd, dt, blockquote, figcaption):not(.notes-graph *) {
-    font-family: $body-font;
-  }
-
   // --- Alert boxes (Chirpy's prompts, the collapsible boxes of the posts, the purple box of the
-  // reviews) and the lists of references are set in the mono, whatever their place: the rules of an
-  // ID outrank the rules of the text above
+  // reviews), smaller than the text, and their labels; the lists of references, smaller still (the
+  // rules of an ID outrank the size of the text below)
   #main-wrapper article > div.content :is(blockquote[class^='prompt-'], details.prompt-fold) :is(p, li, dd, dt) {
-    font-family: $ui-font;
     font-size: $alert;
-    line-height: 1.6;
+    line-height: 1.55;
   }
 
   #main-wrapper article > div.content :is(blockquote[class^='prompt-'], details.prompt-fold) summary {
-    font-family: $ui-font;
     font-size: $alert-label;
+    font-weight: 600;
   }
 
   #main-wrapper article > div.content ol.bibliography :is(li, span, em, strong) {
-    font-family: $ui-font;
-    font-size: $foot;
-    letter-spacing: -0.02em; // a reference is long: the mono's 0.6 em to a letter, a little tighter
+    font-size: $ref;
     line-height: 1.5;
   }
 
@@ -121,8 +86,8 @@
     line-height: 1.6;
   }
 
-  // --- The body of a post: Charis SIL at 17 px on a line height of 1.6, which leaves room for inline
-  // math with sub- and superscripts. A page that is not a post has its prose in the mono, at 13 px.
+  // --- The body of a post: 17 px on a line height of 1.6, which leaves room for inline math with sub-
+  // and superscripts. A page that is not a post has its prose in the interface font, at 14 px.
   article:has(> header .post-meta) > div.content {
     font-size: $body;
     line-height: $body-line;
@@ -147,11 +112,6 @@
     font-size: $chip;
     line-height: 1.2;
     border-radius: 4px;
-  }
-
-  // in an alert box the text is the mono itself, and a chip takes its size
-  #main-wrapper article > div.content :is(blockquote[class^='prompt-'], details.prompt-fold) :not(pre, .highlight) > code {
-    font-size: 1em;
   }
 
   // the contents of a post (Chirpy's popup at 16.8 px), at the size of the other lists of titles
@@ -231,11 +191,6 @@
     }
   }
 
-  // --- Math, scaled to the x-height of the text (see _tokens.scss)
-  mjx-container {
-    font-size: $math-scale !important;
-  }
-
   // --- Bylines, dates, counts and credits
   :is(header > .post-meta, .post-topics .post-meta) :is(a, span, em, time),
   header > .post-meta,
@@ -313,7 +268,7 @@
 
   // --- The home page
   .home-hero-text {
-    font-size: $h3;
+    font-size: $tagline;
   }
 
   .home-hero-subtext {
@@ -362,7 +317,7 @@
   #post-list .home-tiles .card .card-body,
   #post-list .home-tiles .tile-wide .card-body {
     .card-title {
-      font-size: $h4;
+      font-size: $card-title;
     }
 
     .card-text p {

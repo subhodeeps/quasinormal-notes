@@ -84,7 +84,10 @@
 /* A muted purple box, > text {: .prompt-review }, for the reviews to read first */
 @use 'prompt-review';
 
-/* The type of a post on a wide screen: Charis SIL text, mono headings, scaled math */
+/* The fonts of the site, on every width: Source Serif 4 for reading, Inter for the interface */
+@use 'typefaces';
+
+/* The sizes of a post on a wide screen */
 @use 'reading';
 
 /* Phones and tablets: every phone rule, in _sass/mobile/, loaded last so that it wins */

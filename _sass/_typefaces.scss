@@ -1,0 +1,277 @@
+// The fonts of the site and the family of every kind of text, on every width; the sizes are set apart,
+// for a phone in mobile/_type.scss (below 992 px) and for a wide screen in _reading.scss (from 992 px).
+//
+// The model is the Claude app. Its own fonts, Anthropic Serif, Anthropic Sans and Anthropic Mono, are
+// not licensed for other sites, so open fonts stand in for them, each under the SIL Open Font License
+// with its licence beside the files in assets/fonts/:
+//
+//   Source Serif 4 (Frank Grießhammer, Adobe) for reading: the text of posts and of the About and Graph
+//   pages, captions, tables, alert boxes and references, the titles and headings of posts and pages, the
+//   titles on cards, the site title and the tagline of the home page. A calm serif of medium weight and
+//   generous proportions, close to the serif of Claude's replies. x-height 0.475 em.
+//   Inter (Rasmus Andersson) for the interface: the sidebar and the bars, standfirsts aside, bylines,
+//   categories, tags, lists, buttons, the contents, the footer and the labels of boxes. The sans that
+//   the design tokens of claude.ai name as the substitute for Anthropic Sans.
+//   JetBrains Mono, loaded by _includes/metadata-hook.html from Google Fonts, for code (_code-font.scss).
+//
+// The files are those of the fontsource packages @fontsource/source-serif-4 5.3.1 (regular, italic,
+// semibold, bold, bold italic) and @fontsource/inter 5.3.0 (regular, italic, medium, semibold, bold),
+// each in a Latin file of about 20 KB and a Latin Extended file that a page fetches only when it has such
+// a letter (unicode-range); the version is in the file name, so vercel.json caches them for a year.
+// metadata-hook.html preloads the regular Latin face of Inter on every page and of Source Serif 4 on
+// posts. While a file loads, Georgia and Arial, scaled to the average width of the font (from the
+// advances of a to z and the space weighted by their frequency in English) and given its ascent and
+// descent, stand in ('Source Serif 4 Fallback', 'Inter Fallback'), so that lines break at the same
+// words before and after the swap. Math (MathJax's New Computer Modern) is scaled so that its x-height
+// (0.431 em) matches that of Source Serif 4, as MathJax itself would do.
+//
+// Depends on Chirpy's markup: article > div.content for the text, article > header .post-meta, which only
+// a post has, to tell a post (:has), and the elements on which Chirpy's own rules set Lato, Source Sans
+// Pro or Oswald, listed under the interface below. A selector that no longer matches leaves Chirpy's
+// font. Loaded after the partials whose fonts it replaces (footer, bibliography) and before _reading and
+// mobile, in assets/css/jekyll-theme-chirpy.scss.
+
+$text-font: 'Source Serif 4', 'Source Serif 4 Fallback', Georgia, serif;
+$ui-font: 'Inter', 'Inter Fallback', Arial, sans-serif;
+$heading-weight: 600;
+$math-scale: 110%;
+
+@font-face {
+  font-family: 'Source Serif 4';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/assets/fonts/source-serif-4/source-serif-4-latin-400-normal-v531.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Source Serif 4';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/assets/fonts/source-serif-4/source-serif-4-latin-400-italic-v531.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Source Serif 4';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('/assets/fonts/source-serif-4/source-serif-4-latin-600-normal-v531.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Source Serif 4';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('/assets/fonts/source-serif-4/source-serif-4-latin-700-normal-v531.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Source Serif 4';
+  font-style: italic;
+  font-weight: 700;
+  font-display: swap;
+  src: url('/assets/fonts/source-serif-4/source-serif-4-latin-700-italic-v531.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Source Serif 4';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/assets/fonts/source-serif-4/source-serif-4-latin-ext-400-normal-v531.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+@font-face {
+  font-family: 'Source Serif 4';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/assets/fonts/source-serif-4/source-serif-4-latin-ext-400-italic-v531.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+@font-face {
+  font-family: 'Source Serif 4';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('/assets/fonts/source-serif-4/source-serif-4-latin-ext-600-normal-v531.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+@font-face {
+  font-family: 'Source Serif 4';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('/assets/fonts/source-serif-4/source-serif-4-latin-ext-700-normal-v531.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+@font-face {
+  font-family: 'Source Serif 4';
+  font-style: italic;
+  font-weight: 700;
+  font-display: swap;
+  src: url('/assets/fonts/source-serif-4/source-serif-4-latin-ext-700-italic-v531.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+@font-face {
+  font-family: 'Source Serif 4 Fallback';
+  src: local('Georgia');
+  size-adjust: 108.6%;
+  ascent-override: 95.4%;
+  descent-override: 30.8%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/assets/fonts/inter/inter-latin-400-normal-v530.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Inter';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/assets/fonts/inter/inter-latin-400-italic-v530.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('/assets/fonts/inter/inter-latin-500-normal-v530.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('/assets/fonts/inter/inter-latin-600-normal-v530.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('/assets/fonts/inter/inter-latin-700-normal-v530.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/assets/fonts/inter/inter-latin-ext-400-normal-v530.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+@font-face {
+  font-family: 'Inter';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/assets/fonts/inter/inter-latin-ext-400-italic-v530.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('/assets/fonts/inter/inter-latin-ext-500-normal-v530.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('/assets/fonts/inter/inter-latin-ext-600-normal-v530.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('/assets/fonts/inter/inter-latin-ext-700-normal-v530.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+@font-face {
+  font-family: 'Inter Fallback';
+  src: local('Arial'), local('Roboto'), local('Helvetica');
+  size-adjust: 107.5%;
+  ascent-override: 90.1%;
+  descent-override: 22.4%;
+  line-gap-override: 0%;
+}
+
+// --- Inter for the interface. Chirpy and the site's partials set Lato, Source Sans Pro, Oswald or the
+// monospace on these elements; code, kbd and icons keep their fonts.
+body,
+:is(h1, h2, h3, h4, h5, h6),
+#topbar-title,
+header .post-desc,
+#search-results a,
+#notification.toast .toast-body,
+:is(#toc-bar, #toc-solo-trigger, #toc-popup) :is(.label, .header, #toc-popup-content),
+.pagination,
+#archives .date.day,
+.tag span,
+.share-mastodon,
+footer.site-footer {
+  font-family: $ui-font;
+}
+
+// --- Source Serif 4 for reading: the text of a post, the prose of the About and Graph pages (the graph's
+// own legend and credit stay in the interface font), headings, the standfirst of a post, titles on
+// cards, the site title and the tagline of the home page. Alert boxes and references are part of the
+// text of a post, so they follow it.
+article:has(> header .post-meta) > div.content :is(p, li, dd, dt, blockquote, figcaption, td, th),
+article:is(:has(.about-ringdown), :has(.notes-graph-page)) > div.content :is(p, li, dd, dt, blockquote, figcaption):not(.notes-graph *),
+article :is(h1, h2, h3, h4, h5, h6):not(.panel-heading, .notes-graph *),
+article > header .post-desc,
+.card-title,
+#sidebar .site-title,
+.home-hero-text {
+  font-family: $text-font;
+}
+
+article :is(h1, h2, h3, h4, h5, h6):not(.panel-heading, .notes-graph *),
+.card-title,
+#sidebar .site-title {
+  font-weight: $heading-weight;
+}
+
+// --- Math, scaled to the x-height of the text
+mjx-container {
+  font-size: $math-scale !important;
+}
