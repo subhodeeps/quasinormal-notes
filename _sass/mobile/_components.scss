@@ -33,11 +33,12 @@
       display: none !important;
     }
 
-    .home-hero-text {
+    // The button first, and what it opens below it: the tagline, the figure, the intro line
+    .home-hero-toggle {
       order: 1;
     }
 
-    .home-hero-toggle {
+    .home-hero-text {
       order: 2;
     }
 

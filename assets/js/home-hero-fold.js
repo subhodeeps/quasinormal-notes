@@ -3,8 +3,9 @@
  * _sass/_motion.scss and _sass/mobile/_components.scss).
  *
  * The hero (_includes/home-hero.html) is a figure, a tagline and an intro line. On a narrow screen
- * the figure and the intro line are folded away behind the button "Know more", so that the posts
- * show on the first screen: the script hides them (the `hidden` attribute), shows the button
+ * all three are folded away behind the button "Know more", which alone stands in the place of the
+ * hero, so that the posts show on the first screen: the script hides them (the `hidden` attribute),
+ * shows the button
  * (.home-hero-toggle) and sets aria-expanded and aria-controls. A reload always starts folded: nothing
  * is stored. On a wide screen the button stays hidden and everything shows, as before. Without
  * JavaScript the hero is complete, since the folding is done here and not in the CSS.
@@ -13,7 +14,7 @@
  * assets/js/home-hero-pocket.js waits for it, so that the animation is fetched and started on the
  * first opening only, and stops when the hero is folded (its canvas leaves the screen).
  *
- * Markup it depends on: #home-hero, with .home-hero-toggle (a button), .home-hero-figure and
+ * Markup it depends on: #home-hero, with .home-hero-toggle (a button), .home-hero-text, .home-hero-figure and
  * .home-hero-subtext. If the button or the parts are missing, it leaves the hero as it is. It folds
  * only when _sass/mobile/_components.scss has set --hero-fold: 1 on #home-hero, so that a stale stylesheet in a
  * cache never shows an unstyled button.
@@ -23,7 +24,7 @@
 (() => {
   const hero = document.getElementById('home-hero');
   const button = hero && hero.querySelector('.home-hero-toggle');
-  const parts = hero ? [...hero.querySelectorAll('.home-hero-figure, .home-hero-subtext')] : [];
+  const parts = hero ? [...hero.querySelectorAll('.home-hero-text, .home-hero-figure, .home-hero-subtext')] : [];
   if (!button || !parts.length) return;
 
   const phone = window.matchMedia('(max-width: 991.98px)');
