@@ -156,8 +156,23 @@
 // and the theme added at its left; on a page without that bar, the top bar itself, with the theme
 // beside the hamburger. The title of the top bar stays centred between the buttons.
 #topbar-mode-toggle,
+#topbar-graph,
+#toc-bar-graph,
 .toc-bar-buttons {
   display: none;
+}
+
+// The theme button shows the icon that Chirpy's switch in the sidebar shows (its rules in
+// _sidebar.scss of the theme): the sun in the light theme, the moon in the dark one, and the display
+// until the reader has chosen a theme
+:is(#topbar-mode-toggle, #toc-bar-mode-toggle) > i {
+  display: none;
+}
+
+:root[data-bs-theme='light'][data-theme-persisted] :is(#topbar-mode-toggle, #toc-bar-mode-toggle) > i[data-theme-mode='light'],
+:root[data-bs-theme='dark'][data-theme-persisted] :is(#topbar-mode-toggle, #toc-bar-mode-toggle) > i[data-theme-mode='dark'],
+:root:not([data-theme-persisted]) :is(#topbar-mode-toggle, #toc-bar-mode-toggle) > i[data-theme-mode='system'] {
+  display: block;
 }
 
 @media (max-width: 849.98px) {
@@ -176,6 +191,30 @@
   #topbar-mode-toggle {
     display: block;
     margin-right: auto;
+  }
+
+  #topbar-graph,
+  #toc-bar-graph {
+    display: block;
+  }
+
+  // The hamburger and the theme close together, and the graph and search or contents likewise
+  #topbar-mode-toggle,
+  #toc-bar-mode-toggle,
+  #topbar-graph,
+  #toc-bar-graph {
+    padding-left: 0.25rem;
+    padding-right: 0.25rem;
+  }
+
+  #sidebar-trigger,
+  #toc-bar-sidebar {
+    padding-right: 0.25rem;
+  }
+
+  #search-trigger,
+  #toc-bar .toc-trigger {
+    padding-left: 0.25rem;
   }
 
   #topbar-title {
@@ -198,4 +237,38 @@
     min-width: 0;
     margin-left: 0.25rem;
   }
+}
+
+// The note graph of a post in a lightbox (assets/js/topbar.js moves #notes-graph into it)
+.graph-dialog {
+  position: relative;
+  width: min(94vw, 34rem);
+  max-height: 92vh;
+  padding: 0.75rem 0.75rem 1rem;
+  overflow: auto;
+  color: var(--text-color);
+  background: var(--main-bg);
+  border: 1px solid var(--main-border-color);
+  border-radius: 0.5rem;
+
+  &::backdrop {
+    background: rgb(0 0 0 / 55%);
+  }
+
+  #notes-graph {
+    margin: 0;
+    padding: 0;
+    border: 0;
+
+    .panel-heading {
+      margin: 0.25rem 2.5rem 0.75rem 0;
+    }
+  }
+}
+
+#graph-dialog-close {
+  position: absolute;
+  top: 0.25rem;
+  right: 0.25rem;
+  z-index: 1;
 }
