@@ -806,10 +806,11 @@ module JHEP
   # @return [String] HTML
   def short(fields)
     names = split_names((fields['author'] || fields['editor']).to_s)
-    who = case names.length
-          when 0 then ''
-          when 1, 2 then html(names.map { |n| format_name(n) }.join(' and '))
-          else html("#{format_name(names[0])} et~al.")
+    # INSPIRE ends a long list of authors with "and others", which BibTeX reads as "et al."
+    others = names.length > 1 && names.last.to_s.strip.casecmp?('others')
+    who = if names.empty? then ''
+          elsif others || names.length > 2 then html("#{format_name(names[0])} et~al.")
+          else html(names.map { |n| format_name(n) }.join(' and '))
           end
     title = fields['title'].to_s.strip
     title = title.empty? ? '' : "<em>#{html(sentence_case(title))}</em>"
