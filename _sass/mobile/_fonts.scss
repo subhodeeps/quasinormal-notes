@@ -1,95 +1,96 @@
-// Merriweather, the font of the body of posts on a phone or a tablet (assets/fonts/merriweather/, SIL Open
-// Font License, licence beside the files). It is a serif designed for reading on screens, by Eben Sorkin
-// (Merriweather 4, https://github.com/EbenSorkin/Merriweather4), with a large x-height and sturdy, low
-// contrast strokes that stay clear at 13 px, and it sits well beside MathJax's math. The files are those of the fontsource package @fontsource/merriweather 5.3.0
-// (regular, italic, bold and bold italic, each in a Latin file and a Latin Extended file that a page
-// fetches only when it has such a letter, by unicode-range); the version is in the file name, so
+// Inter, the font of the body of posts on a phone or a tablet (assets/fonts/inter/, SIL Open Font
+// License, licence beside the files). Rasmus Andersson designed it for text on screens
+// (https://github.com/rsms/inter): a tall x-height (0.546 em), open shapes and letters that stay
+// distinct at small sizes, so that a 13 px line reads clearly on a phone. The site ships it, so that
+// every phone shows the same font. The files are those of the fontsource package @fontsource/inter
+// 5.3.0 (regular, italic, bold and bold italic, each in a Latin file and a Latin Extended file that a
+// page fetches only when it has such a letter, by unicode-range); the version is in the file name, so
 // vercel.json caches them for a year. The @font-face rules are declared for every width, but only the
 // phone rules in _type.scss use the font, so a wide screen never downloads it;
 // _includes/metadata-hook.html preloads the regular Latin face on posts for narrow screens only. While
-// a file loads, the text is Georgia scaled to the average width of Merriweather's letters (0.489 em
-// against 0.446, from the advances of a to z and the space weighted by their frequency in English), with
-// the font's ascent and descent ('Merriweather Fallback'), so that a line breaks at the same word before
-// and after the swap.
+// a file loads, the text is Arial scaled to the average width of Inter's letters (0.481 em against
+// 0.447, from the advances of a to z and the space weighted by their frequency in English), with
+// Inter's ascent and descent ('Inter Fallback'), so that a line breaks at the same word before and
+// after the swap.
 
 @font-face {
-  font-family: 'Merriweather';
+  font-family: 'Inter';
   font-style: normal;
   font-weight: 400;
   font-display: swap;
-  src: url('/assets/fonts/merriweather/merriweather-latin-400-normal-v530.woff2') format('woff2');
+  src: url('/assets/fonts/inter/inter-latin-400-normal-v530.woff2') format('woff2');
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
 
 @font-face {
-  font-family: 'Merriweather';
+  font-family: 'Inter';
   font-style: italic;
   font-weight: 400;
   font-display: swap;
-  src: url('/assets/fonts/merriweather/merriweather-latin-400-italic-v530.woff2') format('woff2');
+  src: url('/assets/fonts/inter/inter-latin-400-italic-v530.woff2') format('woff2');
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
 
 @font-face {
-  font-family: 'Merriweather';
+  font-family: 'Inter';
   font-style: normal;
   font-weight: 700;
   font-display: swap;
-  src: url('/assets/fonts/merriweather/merriweather-latin-700-normal-v530.woff2') format('woff2');
+  src: url('/assets/fonts/inter/inter-latin-700-normal-v530.woff2') format('woff2');
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
 
 @font-face {
-  font-family: 'Merriweather';
+  font-family: 'Inter';
   font-style: italic;
   font-weight: 700;
   font-display: swap;
-  src: url('/assets/fonts/merriweather/merriweather-latin-700-italic-v530.woff2') format('woff2');
+  src: url('/assets/fonts/inter/inter-latin-700-italic-v530.woff2') format('woff2');
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
 
 @font-face {
-  font-family: 'Merriweather';
+  font-family: 'Inter';
   font-style: normal;
   font-weight: 400;
   font-display: swap;
-  src: url('/assets/fonts/merriweather/merriweather-latin-ext-400-normal-v530.woff2') format('woff2');
+  src: url('/assets/fonts/inter/inter-latin-ext-400-normal-v530.woff2') format('woff2');
   unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
 }
 
 @font-face {
-  font-family: 'Merriweather';
+  font-family: 'Inter';
   font-style: italic;
   font-weight: 400;
   font-display: swap;
-  src: url('/assets/fonts/merriweather/merriweather-latin-ext-400-italic-v530.woff2') format('woff2');
+  src: url('/assets/fonts/inter/inter-latin-ext-400-italic-v530.woff2') format('woff2');
   unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
 }
 
 @font-face {
-  font-family: 'Merriweather';
+  font-family: 'Inter';
   font-style: normal;
   font-weight: 700;
   font-display: swap;
-  src: url('/assets/fonts/merriweather/merriweather-latin-ext-700-normal-v530.woff2') format('woff2');
+  src: url('/assets/fonts/inter/inter-latin-ext-700-normal-v530.woff2') format('woff2');
   unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
 }
 
 @font-face {
-  font-family: 'Merriweather';
+  font-family: 'Inter';
   font-style: italic;
   font-weight: 700;
   font-display: swap;
-  src: url('/assets/fonts/merriweather/merriweather-latin-ext-700-italic-v530.woff2') format('woff2');
+  src: url('/assets/fonts/inter/inter-latin-ext-700-italic-v530.woff2') format('woff2');
   unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
 }
 
 @font-face {
-  font-family: 'Merriweather Fallback';
-  src: local('Georgia');
-  size-adjust: 109.6%;
-  ascent-override: 89.8%;
-  descent-override: 24.9%;
+  font-family: 'Inter Fallback';
+  src: local('Arial'), local('Roboto'), local('Helvetica');
+  size-adjust: 107.5%;
+  ascent-override: 90.1%;
+  descent-override: 22.4%;
   line-gap-override: 0%;
 }
 
