@@ -237,20 +237,27 @@ details[open] > summary > .category-chevron {
   }
 }
 
-// On a phone a long name wraps in its own column, aligned under the first line and not under the
-// icon, in the folders of the tab and of a category page
+// On a phone a long name wraps under its own first letter and not under the icons, in the folders
+// of the tab and of a category page: a hanging indent as wide as the two icons, the space and the
+// margin of the link (--hang), so that the count ("1 post") follows the last word, whole. The
+// margin, unlike the padding, is not reset by the rows' own spacing below.
 @media (max-width: 575.98px) {
   .category-row {
-    display: flex;
-    align-items: baseline;
+    --hang: 3.25rem;
+
+    margin-left: var(--hang);
+    text-indent: calc(-1 * var(--hang));
 
     > i {
-      flex: none;
+      text-indent: 0; // the icons are inline blocks, which would inherit the indent
     }
 
     > a {
-      min-width: 0;
       overflow-wrap: anywhere;
+    }
+
+    > span {
+      white-space: nowrap;
     }
   }
 
