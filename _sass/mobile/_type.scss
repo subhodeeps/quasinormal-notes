@@ -1,8 +1,7 @@
-// The fonts and sizes of every text on a phone or a tablet (below 992 px), so that the same kind of text
-// has the same font and size on every page. The body of a post is in Literata; every other text is in
-// JetBrains Mono NL (see _tokens.scss for the fonts, the scale and the reasons), except the prose of the
-// About page and the Graph page, which is Literata, and the alert boxes and references, which are mono. This file is the one
-// place that sets the font and the size of each kind of text on the phone. The home tiles take their
+// The sizes of every text on a phone or a tablet (below 992 px), so that the same kind of text has the
+// same size on every page (the values and the reasons are in _tokens.scss). The fonts are in
+// _sass/_typefaces.scss and apply on every width. This file is the one place that sets the size of each
+// kind of text on the phone. The home tiles take their
 // scale below 576 px only, where they are one column of short tiles; from 576 to 991 px they are squares
 // of fixed size (_home-tiles.scss). Code blocks keep Chirpy's 13.6 px. Loaded last in
 // assets/css/jekyll-theme-chirpy.scss, so that it wins over the partials it overrides and over Chirpy.
@@ -10,63 +9,25 @@
 // Depends on Chirpy's markup: article > div.content for the text of a post or page, and
 // article > header .post-meta, which only a post has, to tell a post from a page (:has); the Archives
 // tab (#archives), the bars and the sidebar, and the footer. A selector that no longer matches leaves
-// Chirpy's own font and size.
+// Chirpy's own size.
 
 @use 'tokens' as *;
+@use '../typefaces' as *;
 
 @media (max-width: 991.98px) {
-  // --- JetBrains Mono NL for everything. Chirpy and the site's partials set Lato, Source Sans Pro,
-  // sans-serif, Oswald or the monospace on some elements; they are listed here. Code, kbd and icons
-  // keep theirs.
-  body,
-  :is(h1, h2, h3, h4, h5, h6),
-  #topbar-title,
-  header .post-desc,
-  #sidebar,
-  #search-results a,
-  #notification.toast .toast-body,
-  :is(#toc-bar, #toc-solo-trigger, #toc-popup) :is(.label, .header, #toc-popup-content),
-  .pagination,
-  #archives .date.day,
-  a.tag span,
-  .share-mastodon,
-  footer.site-footer {
-    font-family: $ui-font;
-    font-variant-ligatures: none;
-  }
-
-  // --- Literata for the body of a post: paragraphs, lists, quotations, captions and tables
-  article:has(> header .post-meta) > div.content :is(p, li, dd, dt, blockquote, figcaption, td, th) {
-    font-family: $body-font;
-  }
-
-  // --- The prose of the About page and of the Graph page is Literata too, as in a post (the graph's own
-  // legend and credit, inside .notes-graph, stay in the mono)
-  article:is(:has(.about-ringdown), :has(.notes-graph-page)) > div.content :is(p, li, dd, dt, blockquote, figcaption):not(.notes-graph *) {
-    font-family: $body-font;
-  }
-
-  // --- Alert boxes (Chirpy's prompts, the collapsible boxes of the posts, the purple box of the
-  // reviews) and the lists of references are set in the mono, whatever their place: the rules of an
-  // ID outrank the Literata rules above
+  // --- Alert boxes and references: their font is in _sass/_typefaces.scss
   #main-wrapper article > div.content :is(blockquote[class^='prompt-'], details.prompt-fold) :is(p, li, dd, dt, summary) {
-    font-family: $ui-font;
     font-size: $text;
     line-height: 1.6;
   }
 
   #main-wrapper article > div.content ol.bibliography :is(li, span, em, strong) {
-    font-family: $ui-font;
     font-size: $foot;
     letter-spacing: -0.02em; // a reference is long: the mono's 0.6 em to a letter, a little tighter
     line-height: 1.5;
   }
 
   // --- Titles and headings: bold, with the sizes of the scale
-  :is(h1, h2, h3, h4, h5, h6) {
-    font-weight: $heading-weight;
-  }
-
   #main-wrapper h1:not(.card-title) {
     font-size: $title;
     line-height: 1.3;
@@ -162,11 +123,6 @@
     summary {
       font-size: $h4;
     }
-  }
-
-  // --- Math, scaled to the x-height of the text (see _tokens.scss)
-  mjx-container {
-    font-size: $math-scale !important;
   }
 
   // --- Bylines, dates, counts and credits

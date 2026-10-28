@@ -2,21 +2,12 @@
 // holds every rule that applies to it). Change a size or a font here and every page follows.
 //
 //   _tokens.scss      these values
-//   _fonts.scss       the font files (Literata, JetBrains Mono NL) and their fallbacks
-//   _type.scss        the fonts and sizes applied to every kind of text
+//   _type.scss        the sizes applied to every kind of text (the fonts, on every width, are in
+//                     _sass/_typefaces.scss)
 //   _components.scss  the folded hero, the bars, the scroll-to-top button, the graph lightbox,
 //                     the head of a post
 //   _index.scss       loads them, last in assets/css/jekyll-theme-chirpy.scss so that the phone
 //                     rules win over the partials of the rest of the site
-
-// Fonts. The body text of a post (paragraphs, lists, quotations, captions, tables) is set in Literata,
-// to read beside the math. Every other text on the phone is set in JetBrains Mono NL, the cut of
-// JetBrains Mono without ligatures, as on the author's other site (subhodeeps.vercel.app): titles,
-// headings, the interface, categories, tags, the home page, the bars, the sidebar, the footer, and the
-// prose of pages that are not posts. Code is monospace in its own rules.
-$body-font: 'Literata', 'Literata Fallback', Georgia, serif;
-$ui-font: 'JetBrains Mono NL', 'JetBrains Mono NL Fallback', monospace;
-$heading-weight: 700; // JetBrains Mono NL is loaded in 400 and 700
 
 // Type scale in rem (1 rem is 16 px). The body of a post is 15 px in Literata, which fits about 50
 // characters to a phone line, the density of the author's other site. JetBrains Mono is 0.6 em wide
@@ -41,7 +32,3 @@ $h4: 0.8125rem;
 $text: 0.75rem;
 $meta: 0.6875rem;
 $foot: 0.625rem;
-
-// Math (MathJax, New Computer Modern) is scaled up so that its x-height matches that of Literata,
-// which has a large one: the guideline is to match x-heights, which gives about 1.1 to 1.15.
-$math-scale: 110%;

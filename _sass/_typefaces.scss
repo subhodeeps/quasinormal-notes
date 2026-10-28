@@ -1,0 +1,151 @@
+// The typefaces of the site, on every width: Literata for the body of a post, JetBrains Mono NL for
+// every other text, and the files of both with their fallbacks. The sizes of the text are not set here:
+// Chirpy's own apply on a wide screen, and _sass/mobile/_type.scss sets those of a phone.
+//
+// The body text of a post (paragraphs, lists, quotations, captions, tables) is set in Literata, to read
+// beside the math (MathJax, New Computer Modern, scaled up so that its x-height matches that of Literata,
+// which has a large one: the guideline is 1.1 to 1.15). Every other text is set in JetBrains Mono NL,
+// the cut of JetBrains Mono without ligatures, as on the author's other site (subhodeeps.vercel.app):
+// titles and headings (bold), the interface, categories, tags, the home page, the bars, the sidebar,
+// the footer, alert boxes and lists of references, and the prose of pages that are not posts, except
+// the About page and the Graph page, whose prose is Literata like a post. Code has its own rules
+// (_code-font.scss).
+//
+// Depends on Chirpy's markup: article > div.content for the text of a post or page, and
+// article > header .post-meta, which only a post has, to tell a post from a page (:has); the bars, the
+// sidebar and the footer. A selector that no longer matches leaves Chirpy's own font. Loaded before
+// _sass/mobile, whose rules set the sizes of a phone.
+
+$body-font: 'Literata', 'Literata Fallback', Georgia, serif;
+$ui-font: 'JetBrains Mono NL', 'JetBrains Mono NL Fallback', monospace;
+$heading-weight: 700; // JetBrains Mono NL is loaded in 400 and 700
+$math-scale: 110%;
+
+// Literata, the font of the body of posts (assets/fonts/literata/, SIL Open
+// Font License, licence beside the files), and JetBrains Mono NL, the font of everything else (below).
+// Literata is a serif designed for reading on screens, by TypeTogether for Google
+// Play Books, https://github.com/googlefonts/literata (3.103). The files are subsets (Latin, the
+// accented letters of names, Greek small letters, punctuation, arrows and a few symbols, without
+// hinting, which a phone does not use) made with pyftsubset; the version is in the file name, so
+// vercel.json caches them for a year. Math stays in MathJax's New Computer Modern.
+//
+// The @font-face rules are declared for every width, but only the phone rules in _type.scss use the
+// font, so a wide screen never downloads it; _includes/metadata-hook.html preloads the regular face
+// on posts for narrow screens only. While a file loads, the text is Georgia scaled to the widths of
+// Literata ('Literata Fallback': size-adjust from the advances of a to z and the space weighted by
+// their frequency in English, ascent and descent from the metrics of both fonts), so that a line
+// breaks at the same word before and after the swap.
+
+@font-face {
+  font-family: 'Literata';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/assets/fonts/literata/literata-400-normal-v3103.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Literata';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/assets/fonts/literata/literata-400-italic-v3103.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Literata';
+  font-style: normal;
+  font-weight: 600 700; // bold text takes the semibold face, lighter beside a serif than a full bold
+  font-display: swap;
+  src: url('/assets/fonts/literata/literata-600-normal-v3103.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Literata Fallback';
+  src: local('Georgia');
+  size-adjust: 108.06%;
+  ascent-override: 108.92%;
+  descent-override: 28.5%;
+  line-gap-override: 0%;
+}
+
+// JetBrains Mono NL (assets/fonts/jetbrains-mono-nl/, SIL Open Font License, licence beside the files),
+// the cut of JetBrains Mono without ligatures, 2.304, from the release archive of
+// github.com/JetBrains/JetBrainsMono: regular and bold, subsets (Latin, Latin Extended-A, Greek,
+// punctuation, arrows, box drawing) without hinting, about 11 KB each. It is preloaded on every page
+// (_includes/metadata-hook.html). Its fallback is the phone's own monospace with
+// the metrics of JetBrains Mono (advance 0.6 em, as Menlo and Courier), so that the lines do not move
+// when it arrives. The name differs from the 'JetBrains Mono' of the Google Fonts link, which sets
+// code, so that the two do not mix.
+
+@font-face {
+  font-family: 'JetBrains Mono NL';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/assets/fonts/jetbrains-mono-nl/jetbrains-mono-nl-400-v2304.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'JetBrains Mono NL';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('/assets/fonts/jetbrains-mono-nl/jetbrains-mono-nl-700-v2304.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'JetBrains Mono NL Fallback';
+  src: local('Menlo'), local('Courier New'), local('Courier');
+  ascent-override: 102%;
+  descent-override: 30%;
+  line-gap-override: 0%;
+}
+
+// --- JetBrains Mono NL for everything. Chirpy and the site's partials set Lato, Source Sans Pro,
+// sans-serif, Oswald or the monospace on some elements; they are listed here. Code, kbd and icons
+// keep theirs.
+body,
+:is(h1, h2, h3, h4, h5, h6),
+#topbar-title,
+header .post-desc,
+#sidebar,
+#search-results a,
+#notification.toast .toast-body,
+:is(#toc-bar, #toc-solo-trigger, #toc-popup) :is(.label, .header, #toc-popup-content),
+.pagination,
+#archives .date.day,
+a.tag span,
+.share-mastodon,
+footer.site-footer {
+  font-family: $ui-font;
+  font-variant-ligatures: none;
+}
+
+:is(h1, h2, h3, h4, h5, h6) {
+  font-weight: $heading-weight;
+}
+
+// --- Literata for the body of a post: paragraphs, lists, quotations, captions and tables
+article:has(> header .post-meta) > div.content :is(p, li, dd, dt, blockquote, figcaption, td, th) {
+  font-family: $body-font;
+}
+
+// --- The prose of the About page and of the Graph page is Literata too, as in a post (the graph's own
+// legend and credit, inside .notes-graph, stay in the mono)
+article:is(:has(.about-ringdown), :has(.notes-graph-page)) > div.content :is(p, li, dd, dt, blockquote, figcaption):not(.notes-graph *) {
+  font-family: $body-font;
+}
+
+// --- Alert boxes (Chirpy's prompts, the collapsible boxes of the posts, the purple box of the
+// reviews) and the lists of references are set in the mono, whatever their place: the rules of an
+// ID outrank the Literata rules above
+#main-wrapper article > div.content :is(blockquote[class^='prompt-'], details.prompt-fold) :is(p, li, dd, dt, summary),
+#main-wrapper article > div.content ol.bibliography :is(li, span, em, strong) {
+  font-family: $ui-font;
+}
+
+// --- Math, scaled to the x-height of the text
+mjx-container {
+  font-size: $math-scale !important;
+}
