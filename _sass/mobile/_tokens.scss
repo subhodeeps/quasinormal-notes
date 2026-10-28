@@ -9,15 +9,15 @@
 //   _index.scss       loads the three, last in assets/css/jekyll-theme-chirpy.scss so that the
 //                     phone rules win over the partials of the rest of the site
 //
-// Type scale in rem (1 rem is 16 px), with its use:
+// Type scale in rem (1 rem is 16 px), with its use (every text on the phone is on it, except code):
 //
 //   28 px  titles of posts, pages and category pages
 //   22 px  h2, the years of the Archives tab
 //   19 px  h3, the folders of category lists, the tagline of the home page
 //   17 px  text, h4, descriptions, the titles of notes in lists, the titles of the home tiles
 //   14 px  captions, tables, buttons, the descriptions of the home tiles, dates of the Archives tab
-//   13 px  bylines, tags, dates and counts
-//   12 px  the footer
+//   13 px  bylines, tags, dates, counts, the footer, credits
+//   12 px  the smallest text: the labels of the graph's scale
 
 $title: 1.75rem;
 $h2: 1.375rem;
@@ -26,14 +26,14 @@ $text: 1.0625rem;
 $small: 0.875rem;
 $meta: 0.8125rem;
 $foot: 0.75rem;
-$heading-font: Lato, 'Microsoft Yahei', sans-serif;
 
-// Fonts. Prose (the text of posts and pages, the lines of the home page, descriptions) is set in
-// Literata; headings stay in Lato, the interface (navigation, buttons, tags, bylines, dates, counts)
-// in Source Sans Pro, code and the footer in JetBrains Mono. 'Literata Fallback' is Georgia scaled to
-// the widths of Literata (_fonts.scss), so that the text does not move when Literata arrives.
+// Fonts. Every text on the phone is set in Literata (prose, titles, headings in its semibold, the
+// interface, the sidebar, the bars, the footer), so that the site reads as one family beside the
+// math; only code is monospace (JetBrains Mono). 'Literata Fallback' is Georgia scaled to the widths
+// of Literata (_fonts.scss), so that the text does not move when Literata arrives.
 $text-font: 'Literata', 'Literata Fallback', Georgia, serif;
+$heading-weight: 600; // Literata semibold; _fonts.scss declares it for 600 and 700
 
-// Lists inside the text of a page that are navigation, not prose: they keep the interface font
-$interface-lists: '.notes-graph *, .list-group *, .category-tree *, .list-unstyled *';
-
+// Math (MathJax, New Computer Modern) is scaled up so that its x-height matches that of Literata,
+// which has a large one: the guideline is to match x-heights, which gives about 1.1 to 1.15.
+$math-scale: 110%;
