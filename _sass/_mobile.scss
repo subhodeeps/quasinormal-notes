@@ -10,6 +10,12 @@
 // that no longer matches only leaves that part as Chirpy renders it.
 
 @media (max-width: 991.98px) {
+  // --- No pinch-zoom of the page: a finger may pan, never scale (a canvas that sets its own
+  // touch-action, as the note graph does, still handles its pinch itself)
+  html {
+    touch-action: pan-x pan-y;
+  }
+
   // --- Home hero: the tagline and the button first, then the figure and the intro line, which the
   // script folds away. The text block gives up its box (display: contents), so that its two
   // paragraphs can be ordered around the button.

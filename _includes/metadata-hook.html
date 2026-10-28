@@ -1,11 +1,13 @@
 <!-- Chirpy's placeholder for custom <head> content (included from _includes/head.html) -->
 
-<!-- Chirpy's viewport meta forbids zooming (user-scalable=no), so that nobody can enlarge an equation or a
-     block of code on a phone. This puts the zoom back without a copy of Chirpy's head. -->
+<!-- No pinch-zoom of the page on a phone, so that the pinch of the note graph and the scroll of a wide
+     equation or code block are not mistaken for it. Chirpy's viewport meta already says
+     user-scalable=no, but without a comma before initial-scale; this writes it in full. _sass/_mobile.scss
+     adds touch-action for the browsers that ignore the meta (iOS). -->
 <script>
   (function () {
     var meta = document.querySelector('meta[name="viewport"]');
-    if (meta) meta.setAttribute('content', 'width=device-width, initial-scale=1, viewport-fit=cover');
+    if (meta) meta.setAttribute('content', 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover');
   })();
 </script>
 
