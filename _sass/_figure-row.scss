@@ -1,4 +1,7 @@
-// .figure-row: two or more linked figures side by side, in one column below 576 px.
+// .figure-row: two or more linked figures side by side, in one column below 576 px. Chirpy centres each
+// linked image of a paragraph (`.content p > a.popup:not(.normal):not(.left):not(.right)` in its
+// _typography.scss) with left: 50% and a translateX(-50%), which would push the figures of a row to
+// the right, so the last rule resets both with a selector that is one class more specific.
 
 .figure-row {
   display: flex;
@@ -18,4 +21,9 @@
   @media (max-width: 576px) {
     flex-direction: column;
   }
+}
+
+.content p.figure-row > a.popup:not(.normal):not(.left):not(.right) {
+  position: static;
+  transform: none;
 }
